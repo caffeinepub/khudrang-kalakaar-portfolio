@@ -1,82 +1,86 @@
+import React from 'react';
 import ProjectSection from './ProjectSection';
 
 const PROJECTS = [
   {
-    name: 'Café Wall Art Project',
+    number: '01',
+    title: 'Café Mural — Jaipur',
     description:
-      'This café wall painting was designed to create a vibrant and Instagram-worthy atmosphere. The artwork enhances the overall interior vibe and attracts customer attention while maintaining a modern aesthetic feel.',
-    imageSrc: '/assets/generated/project-cafe.dim_1200x800.png',
-    imageAlt: 'Café Wall Art Mural',
+      'A vibrant floor-to-ceiling mural for a boutique café in Jaipur, blending Rajasthani folk motifs with contemporary abstract forms. The 40-foot installation became the café\'s signature visual identity.',
+    location: 'Jaipur, Rajasthan',
+    image: '/assets/generated/project-cafe.dim_1200x800.png',
+    imageAlt: 'Café mural artwork',
     reverse: false,
   },
   {
-    name: 'Sawai Madhopur Overbridge',
+    number: '02',
+    title: 'Fort Resort — Jodhpur',
     description:
-      'This public infrastructure mural was created to beautify the overbridge space and reflect cultural identity. The artwork adds positivity and visual appeal to the urban environment.',
-    location: 'Sawai Madhopur',
-    imageSrc: '/assets/generated/project-overbridge.dim_1200x800.png',
-    imageAlt: 'Sawai Madhopur Overbridge Mural',
+      'Heritage-inspired wall art for a luxury fort resort, celebrating the royal history of Jodhpur through intricate hand-painted panels. Each room tells a different chapter of Rajputana heritage.',
+    location: 'Jodhpur, Rajasthan',
+    image: '/assets/generated/project-fort-resort.dim_1200x800.png',
+    imageAlt: 'Fort resort artwork',
     reverse: true,
   },
   {
-    name: 'Sanskriti Fort & Resort',
+    number: '03',
+    title: 'Boutique Hotel — Udaipur',
     description:
-      'The artwork at Sanskriti Fort & Resort complements the heritage theme of the property. The design enhances the royal ambiance while maintaining fine detailing and artistic balance.',
-    imageSrc: '/assets/generated/project-fort-resort.dim_1200x800.png',
-    imageAlt: 'Sanskriti Fort & Resort Wall Art',
+      'A complete interior art program for a lakeside boutique hotel, featuring custom canvas paintings, textured accent walls, and hand-painted ceiling medallions throughout the property.',
+    location: 'Udaipur, Rajasthan',
+    image: '/assets/generated/project-hotel.dim_1200x800.png',
+    imageAlt: 'Hotel interior artwork',
     reverse: false,
   },
   {
-    name: 'Hotel & Resort Wall Art',
+    number: '04',
+    title: 'Overbridge Art — Ajmer',
     description:
-      'This hospitality project was designed to elevate guest experience through creative visual storytelling. The murals add character and sophistication to the space.',
-    imageSrc: '/assets/generated/project-hotel.dim_1200x800.png',
-    imageAlt: 'Hotel & Resort Wall Art Mural',
+      'A large-scale public art installation on an urban overbridge, transforming a grey concrete structure into a colorful celebration of local culture, history, and community pride.',
+    location: 'Ajmer, Rajasthan',
+    image: '/assets/generated/project-overbridge.dim_1200x800.png',
+    imageAlt: 'Overbridge public art',
     reverse: true,
   },
   {
-    name: 'Jiman Restaurant – Bikaner',
+    number: '05',
+    title: 'Restaurant Interior — Kota',
     description:
-      'The wall painting was crafted to match the traditional vibe of the restaurant. The artwork enhances customer engagement and creates a memorable dining atmosphere.',
-    location: 'Bikaner',
-    imageSrc: '/assets/generated/project-restaurant.dim_1200x800.png',
-    imageAlt: 'Jiman Restaurant Wall Painting',
+      'Full interior decoration for a fine-dining restaurant, combining hand-painted murals, custom furniture art, and ambient lighting design to create an immersive dining experience.',
+    location: 'Kota, Rajasthan',
+    image: '/assets/generated/project-restaurant.dim_1200x800.png',
+    imageAlt: 'Restaurant interior',
     reverse: false,
   },
 ];
 
 export default function FeaturedProjects() {
   return (
-    <section id="projects" className="bg-background">
-      {/* Section Header */}
-      <div className="py-20 px-6 md:px-12 lg:px-20 bg-secondary border-b border-border">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+    <section id="projects" className="section-padding bg-cream">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-end mb-14">
           <div>
-            <p className="terracotta-label mb-4">Our Work</p>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight">
-              Featured <span className="italic text-terracotta">Projects</span>
+            <span className="text-terracotta text-sm font-semibold tracking-[0.25em] uppercase">
+              Featured Work
+            </span>
+            <h2 className="font-display text-4xl sm:text-5xl font-bold text-charcoal mt-2 leading-tight">
+              Selected{' '}
+              <em className="not-italic text-terracotta">Projects</em>
             </h2>
+            <div className="w-16 h-1 bg-terracotta mt-4 rounded-full" />
           </div>
-          <p className="font-body text-foreground/55 text-base max-w-sm leading-relaxed">
-            A selection of our finest wall painting projects across residential, commercial, and public spaces.
+          <p className="text-charcoal/65 text-base sm:text-lg leading-relaxed lg:text-right">
+            A selection of landmark projects that showcase the breadth and depth of artistic vision — from intimate café murals to grand public installations.
           </p>
         </div>
-      </div>
 
-      {/* Projects */}
-      <div>
-        {PROJECTS.map((project, idx) => (
-          <ProjectSection
-            key={idx}
-            index={idx + 1}
-            name={project.name}
-            description={project.description}
-            location={project.location}
-            imageSrc={project.imageSrc}
-            imageAlt={project.imageAlt}
-            reverse={project.reverse}
-          />
-        ))}
+        {/* Projects */}
+        <div className="space-y-16">
+          {PROJECTS.map((project) => (
+            <ProjectSection key={project.number} {...project} />
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -8,9 +8,6 @@ import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-
-// Migrate to new system that stores blob directly in each artwork record
-
 actor {
   type UserProfile = {
     name : Text;
@@ -54,30 +51,33 @@ actor {
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  // ── User profile functions ──────────────────────────────────────────────────
+  // ── User profile functions ───────────────────────────────────────
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view their own profile");
+      Runtime.trap(
+        "Unauthorized: Only users can view their own profile");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
+      Runtime.trap(
+        "Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+      Runtime.trap(
+        "Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
-  // ── Artwork functions ───────────────────────────────────────────────────────
+  // ── Artwork functions ───────────────────────────────────────────
 
   public shared ({ caller }) func uploadArtwork(
     title : Text,
@@ -86,7 +86,7 @@ actor {
     format : ?Text,
     fileName : ?Text,
   ) : async Nat {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
@@ -101,6 +101,7 @@ actor {
 
     artworks.add(nextArtworkId, artwork);
     nextArtworkId += 1;
+
     artwork.id;
   };
 
@@ -112,7 +113,7 @@ actor {
     format : ?Text,
     fileName : ?Text,
   ) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
@@ -129,9 +130,9 @@ actor {
           imageFormat = if (imageBytes.size() > 0) { format } else {
             existing.imageFormat;
           };
-          imageFileName = if (imageBytes.size() > 0) {
-            fileName;
-          } else { existing.imageFileName };
+          imageFileName = if (imageBytes.size() > 0) { fileName } else {
+            existing.imageFileName;
+          };
         };
         artworks.add(id, updated);
       };
@@ -139,7 +140,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteArtwork(id : Nat) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     artworks.remove(id);
@@ -154,11 +155,11 @@ actor {
     artworks.toArray().map(func((_, v)) { v });
   };
 
-  // ── Logo, Cover Image, Artist Portrait ─────────────────────────────────────
+  // ── Logo, Cover Image, Artist Portrait ──────────────────────────
   include MixinStorage();
 
   public shared ({ caller }) func uploadLogo(blob : Storage.ExternalBlob) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     logo := ?blob;
@@ -169,7 +170,7 @@ actor {
   };
 
   public shared ({ caller }) func uploadCoverImage(blob : Storage.ExternalBlob) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     coverImage := ?blob;
@@ -180,7 +181,7 @@ actor {
   };
 
   public shared ({ caller }) func uploadArtistPortrait(blob : Storage.ExternalBlob) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     artistPortrait := ?blob;
@@ -190,13 +191,13 @@ actor {
     artistPortrait;
   };
 
-  // ── Media contacts ──────────────────────────────────────────────────────────
+  // ── Media contacts ──────────────────────────────────────────────
 
   public shared ({ caller }) func updateMediaContacts(
     whatsappNumber : Text,
     instagramProfile : Text,
   ) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     mediaContacts := ?{
@@ -210,10 +211,14 @@ actor {
     mediaContacts;
   };
 
-  // ── Text content ────────────────────────────────────────────────────────────
+  // ── Text content ────────────────────────────────────────────────
 
-  public shared ({ caller }) func updateTextContent(artistName : Text, tagline : Text, bio : Text) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
+  public shared ({ caller }) func updateTextContent(
+    artistName : Text,
+    tagline : Text,
+    bio : Text,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     textContent := {
@@ -228,4 +233,3 @@ actor {
     textContent;
   };
 };
-

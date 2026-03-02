@@ -1,54 +1,32 @@
+import React from 'react';
+import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
-import Navigation from './components/Navigation';
-import HeroSection from './components/HeroSection';
-import AboutSection from './components/AboutSection';
-import ServicesSection from './components/ServicesSection';
-import WhyChooseSection from './components/WhyChooseSection';
-import FeaturedProjects from './components/FeaturedProjects';
-import ArtworkGallery from './components/ArtworkGallery';
-import ContactSection from './components/ContactSection';
-import QRSection from './components/QRSection';
-import Footer from './components/Footer';
-import AdminPanel from './pages/AdminPanel';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from 'next-themes';
+
+// Pages
+import PortfolioPage from './pages/PortfolioPage';
 import AdminLogin from './pages/AdminLogin';
+import AdminPanel from './pages/AdminPanel';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-// ─── Layout ───────────────────────────────────────────────────────────────────
-
-function Layout() {
-  return (
-    <QueryClientProvider client={queryClient}>
+// Root layout
+const rootRoute = createRootRoute({
+  component: () => (
+    <>
       <Outlet />
-    </QueryClientProvider>
-  );
-}
-
-// ─── Portfolio Page ───────────────────────────────────────────────────────────
-
-function PortfolioPage() {
-  return (
-    <div className="min-h-screen font-poppins">
-      <Navigation />
-      <main>
-        <HeroSection />
-        <AboutSection />
-        <ServicesSection />
-        <WhyChooseSection />
-        <FeaturedProjects />
-        <ArtworkGallery />
-        <QRSection />
-        <ContactSection />
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-// ─── Routes ───────────────────────────────────────────────────────────────────
-
-const rootRoute = createRootRoute({ component: Layout });
+      <Toaster richColors position="top-right" />
+    </>
+  ),
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -78,8 +56,12 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
-
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
 }

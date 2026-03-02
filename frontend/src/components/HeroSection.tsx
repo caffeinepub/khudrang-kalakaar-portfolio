@@ -1,107 +1,127 @@
-import { useTextContent, useCoverImage, useMediaContacts } from '../hooks/useQueries';
-import { ArrowDown, MessageCircle } from 'lucide-react';
-
-const DEFAULT_WHATSAPP = '917665854193';
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?"
-);
+import React from 'react';
+import { MessageCircle, ChevronDown } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useMediaContacts, useTextContent, useGetCoverImage } from '../hooks/useQueries';
 
 export default function HeroSection() {
-  const { data: textContent } = useTextContent();
-  const { data: coverImage } = useCoverImage();
-  const { data: mediaContacts } = useMediaContacts();
+  const { data: mediaContacts, isLoading: contactsLoading } = useMediaContacts();
+  const { data: textContent, isLoading: textLoading } = useTextContent();
+  const { data: coverImageBlob, isLoading: coverLoading } = useGetCoverImage();
 
-  const whatsappNumber = mediaContacts?.whatsappNumber || DEFAULT_WHATSAPP;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${WHATSAPP_MESSAGE}`;
+  const whatsappNumber = mediaContacts?.whatsappNumber || '';
+  const artistName = textContent?.artistName || '';
+  const tagline = textContent?.tagline || '';
 
-  const artistName = textContent?.artistName || 'Mudit Sharma';
-  const tagline = textContent?.tagline || 'Transforming Blank Walls into Meaningful Art.';
+  const coverImageUrl = coverImageBlob ? coverImageBlob.getDirectURL() : '/assets/generated/cover-hero.dim_1920x1080.png';
 
-  const bgImage = coverImage
-    ? coverImage.getDirectURL()
-    : '/assets/generated/cover-hero.dim_1920x1080.png';
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`
+    : '#';
+
+  const scrollToAbout = () => {
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-end justify-start overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${bgImage})` }}
-      />
-      {/* Layered gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
-
-      {/* Decorative top-right accent */}
-      <div className="absolute top-24 right-8 md:right-16 hidden md:flex flex-col items-end gap-2 opacity-60">
-        <div className="w-px h-16 bg-white/40" />
-        <p className="font-body text-[10px] text-white/60 tracking-[0.3em] uppercase rotate-90 origin-right translate-x-6">
-          Mural Artist
-        </p>
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        {coverLoading ? (
+          <div className="w-full h-full bg-charcoal" />
+        ) : (
+          <img
+            src={coverImageUrl}
+            alt="Hero background"
+            className="w-full h-full object-cover"
+          />
+        )}
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 hero-overlay" />
+        <div className="absolute inset-0 bg-charcoal/30" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pb-20 md:pb-28">
-        {/* Label */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-px bg-terracotta" />
-          <span className="font-body text-terracotta text-xs font-semibold tracking-[0.3em] uppercase">
-            Bikaner, Rajasthan
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
+        {/* Decorative line */}
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="h-px w-16 bg-gold/70" />
+          <span className="text-gold text-xs font-medium tracking-[0.3em] uppercase">
+            Portfolio
           </span>
+          <div className="h-px w-16 bg-gold/70" />
         </div>
 
         {/* Artist Name */}
-        <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-[0.9] mb-6 tracking-tight">
-          {artistName}
-        </h1>
+        {textLoading ? (
+          <Skeleton className="h-16 w-80 mx-auto mb-4 bg-white/20" />
+        ) : (
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-cream mb-4 leading-tight drop-shadow-lg">
+            {artistName || 'Artist Name'}
+          </h1>
+        )}
 
         {/* Tagline */}
-        <p className="font-body text-lg sm:text-xl md:text-2xl text-white/75 mb-10 max-w-xl leading-relaxed font-light">
-          {tagline}
-        </p>
+        {textLoading ? (
+          <Skeleton className="h-8 w-64 mx-auto mb-8 bg-white/20" />
+        ) : (
+          <p className="text-xl sm:text-2xl text-cream/90 font-light mb-8 leading-relaxed drop-shadow-md">
+            {tagline || 'Art is life'}
+          </p>
+        )}
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2.5 bg-terracotta hover:bg-terracotta-dark text-white font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:-translate-y-0.5 shadow-warm-lg"
-          >
-            <MessageCircle size={16} />
-            Hire Me on WhatsApp
-          </a>
-          <a
-            href="#gallery"
-            className="inline-flex items-center justify-center gap-2.5 border border-white/40 hover:border-white/80 text-white font-body font-medium text-sm px-8 py-4 rounded-full transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
-          >
-            View Gallery
-          </a>
-        </div>
-
-        {/* Stats strip */}
-        <div className="flex items-center gap-8 mt-14 pt-8 border-t border-white/15">
+        {/* Stats */}
+        <div className="flex items-center justify-center gap-8 sm:gap-12 mb-10">
           {[
-            { value: '5+', label: 'Years Experience' },
-            { value: '50+', label: 'Projects Completed' },
-            { value: '100%', label: 'Client Satisfaction' },
+            { value: '10+', label: 'Years Experience' },
+            { value: '200+', label: 'Projects Done' },
+            { value: '50+', label: 'Happy Clients' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="font-display text-2xl md:text-3xl font-bold text-terracotta leading-none">{stat.value}</p>
-              <p className="font-body text-[10px] text-white/50 tracking-widest uppercase mt-1">{stat.label}</p>
+              <div className="font-display text-3xl sm:text-4xl font-bold text-gold drop-shadow-md">
+                {stat.value}
+              </div>
+              <div className="text-cream/80 text-xs sm:text-sm mt-1 font-medium tracking-wide">
+                {stat.label}
+              </div>
             </div>
           ))}
+        </div>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {contactsLoading ? (
+            <Skeleton className="h-12 w-44 rounded-full bg-white/20" />
+          ) : (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-semibold px-8 py-3 rounded-full transition-all shadow-warm hover:shadow-warm-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Get in Touch
+            </a>
+          )}
+          <button
+            onClick={scrollToAbout}
+            className="flex items-center gap-2 border-2 border-cream/60 hover:border-cream text-cream font-semibold px-8 py-3 rounded-full transition-all hover:bg-white/10"
+          >
+            View Work
+          </button>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 right-8 md:right-16 flex flex-col items-center gap-2 opacity-50">
-        <p className="font-body text-[9px] text-white tracking-[0.3em] uppercase">Scroll</p>
-        <ArrowDown size={14} className="text-white animate-bounce" />
-      </div>
+      <button
+        onClick={scrollToAbout}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-cream/60 hover:text-cream transition-colors animate-bounce"
+        aria-label="Scroll down"
+      >
+        <ChevronDown className="w-8 h-8" />
+      </button>
     </section>
   );
 }

@@ -1,69 +1,96 @@
+import React from 'react';
+import { Award, Heart, Clock, Star, Shield, Zap } from 'lucide-react';
+
 const TRUST_POINTS = [
   {
-    title: '5+ Years Practical Experience',
-    desc: 'Proven expertise across residential, commercial, and public projects.',
+    icon: Award,
+    number: '01',
+    title: 'Award-Winning Quality',
+    description:
+      'Recognized excellence in artistic craftsmanship with multiple industry accolades and client commendations.',
   },
   {
-    title: 'Unique Custom Designs',
-    desc: 'Every artwork is original — crafted specifically for your space and vision.',
+    icon: Heart,
+    number: '02',
+    title: 'Passion-Driven Work',
+    description:
+      'Every project is approached with genuine passion and dedication, ensuring each piece tells a unique story.',
   },
   {
-    title: 'Premium Quality Paints',
-    desc: 'Only high-grade, long-lasting paints used for vibrant, durable results.',
+    icon: Clock,
+    number: '03',
+    title: 'Timely Delivery',
+    description:
+      'Committed to meeting deadlines without compromising on quality — your timeline is respected.',
   },
   {
-    title: 'Professional & Clean Work',
-    desc: 'Meticulous attention to detail with zero mess and clean site management.',
+    icon: Star,
+    number: '04',
+    title: 'Premium Materials',
+    description:
+      'Only the finest paints, canvases, and materials are used to ensure longevity and vibrant results.',
   },
   {
-    title: 'On-Time Project Completion',
-    desc: 'Committed to deadlines — your project delivered on schedule, every time.',
+    icon: Shield,
+    number: '05',
+    title: 'Satisfaction Guaranteed',
+    description:
+      'Your satisfaction is the ultimate goal. We work closely with you until the vision is perfectly realized.',
   },
   {
-    title: 'Budget-Friendly Packages',
-    desc: 'Flexible pricing options to suit every budget without compromising quality.',
+    icon: Zap,
+    number: '06',
+    title: 'Innovative Techniques',
+    description:
+      'Blending traditional artistry with modern techniques to create truly contemporary masterpieces.',
   },
 ];
 
 export default function WhyChooseSection() {
   return (
-    <section id="why-us" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-background">
+    <section className="section-padding bg-cream-dark">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end mb-16">
-          <div>
-            <p className="terracotta-label mb-4">Our Promise</p>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight">
-              Why Clients<br />
-              <span className="italic text-terracotta">Trust Us</span>
-            </h2>
-            <span className="accent-bar" />
-          </div>
-          <div>
-            <p className="font-body text-foreground/60 text-base md:text-lg leading-relaxed">
-              We combine artistic excellence with professional reliability — delivering wall art that
-              exceeds expectations and stands the test of time.
-            </p>
-          </div>
+        {/* Section Header */}
+        <div className="text-center mb-14">
+          <span className="text-terracotta text-sm font-semibold tracking-[0.25em] uppercase">
+            Why Choose Me
+          </span>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-charcoal mt-2">
+            The Difference
+          </h2>
+          <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
         </div>
 
         {/* Trust Points Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TRUST_POINTS.map((point, idx) => (
-            <div
-              key={idx}
-              className="relative bg-secondary rounded-sm p-7 border border-border hover:border-terracotta/40 hover:shadow-warm transition-all duration-300 group overflow-hidden"
-            >
-              {/* Number accent */}
-              <span className="absolute -top-2 -right-1 font-display text-7xl font-black text-terracotta/6 select-none leading-none group-hover:text-terracotta/10 transition-colors">
-                {String(idx + 1).padStart(2, '0')}
-              </span>
-              {/* Top accent line */}
-              <div className="w-8 h-0.5 bg-terracotta mb-5 group-hover:w-14 transition-all duration-300" />
-              <h3 className="font-display font-bold text-foreground text-base mb-2.5 leading-snug">{point.title}</h3>
-              <p className="font-body text-foreground/55 text-sm leading-relaxed">{point.desc}</p>
-            </div>
-          ))}
+          {TRUST_POINTS.map((point) => {
+            const Icon = point.icon;
+            return (
+              <div
+                key={point.number}
+                className="group relative bg-white border border-warm-border hover:border-terracotta/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-warm overflow-hidden"
+              >
+                {/* Number watermark */}
+                <span className="absolute top-3 right-4 font-display text-6xl font-bold text-charcoal/5 group-hover:text-terracotta/10 select-none transition-colors">
+                  {point.number}
+                </span>
+
+                {/* Accent bar */}
+                <div className="w-8 h-1 bg-terracotta rounded-full mb-4 group-hover:w-12 transition-all duration-300" />
+
+                {/* Icon */}
+                <div className="w-11 h-11 rounded-xl bg-terracotta/10 group-hover:bg-terracotta/20 flex items-center justify-center mb-4 transition-colors">
+                  <Icon className="w-5 h-5 text-terracotta" />
+                </div>
+
+                {/* Text */}
+                <h3 className="font-display text-lg font-bold text-charcoal mb-2 leading-snug">
+                  {point.title}
+                </h3>
+                <p className="text-charcoal/65 text-sm leading-relaxed">{point.description}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

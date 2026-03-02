@@ -1,69 +1,56 @@
-import { useMediaContacts } from '../hooks/useQueries';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
 import { Instagram } from 'lucide-react';
-
-const DEFAULT_INSTAGRAM = 'https://instagram.com/khudrangkalakaar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useMediaContacts } from '../hooks/useQueries';
 
 export default function QRSection() {
   const { data: mediaContacts, isLoading } = useMediaContacts();
-
-  const instagramProfile = mediaContacts?.instagramProfile || DEFAULT_INSTAGRAM;
-  const instagramHandle = instagramProfile
-    .replace(/.*instagram\.com\//, '')
-    .replace(/\/$/, '');
-
-  const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(instagramProfile)}&choe=UTF-8`;
+  const instagramProfile = mediaContacts?.instagramProfile || '';
 
   return (
-    <section className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-foreground">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center gap-14 md:gap-20">
-          {/* QR Code */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-4">
-            <div className="bg-background p-4 rounded-sm shadow-warm-lg border border-white/10">
-              {isLoading ? (
-                <Skeleton className="w-[180px] h-[180px] rounded-sm" />
-              ) : (
-                <img
-                  src={qrUrl}
-                  alt={`QR code for Instagram @${instagramHandle}`}
-                  className="w-[180px] h-[180px] rounded-sm"
-                />
-              )}
-            </div>
-            <p className="font-body text-xs text-background/40 text-center tracking-wide">
-              Scan to follow on Instagram
-            </p>
-          </div>
+    <section className="section-padding bg-charcoal">
+      <div className="max-w-2xl mx-auto text-center">
+        {/* Section Header */}
+        <span className="text-gold text-sm font-semibold tracking-[0.25em] uppercase">
+          Follow Along
+        </span>
+        <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream mt-2 mb-4">
+          On Instagram
+        </h2>
+        <div className="w-16 h-1 bg-terracotta mx-auto mb-8 rounded-full" />
 
-          {/* Text */}
-          <div className="text-center md:text-left">
-            <p className="font-body text-terracotta text-xs font-semibold tracking-[0.25em] uppercase mb-4">
-              Follow Along
-            </p>
-            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-black text-background leading-tight mb-4">
-              See My Work on<br />
-              <span className="italic text-terracotta">Instagram</span>
-            </h2>
-            <span className="block w-10 h-0.5 bg-terracotta mb-6 mx-auto md:mx-0" />
-            <p className="font-body text-background/50 text-base mb-8 max-w-sm leading-relaxed">
-              Follow my journey and get inspired by the latest murals, paintings, and art installations.
-            </p>
-            {isLoading ? (
-              <Skeleton className="h-12 w-44 rounded-full" />
-            ) : (
-              <a
-                href={instagramProfile}
-                target="_blank"
-                rel="noopener noreferrer external"
-                className="inline-flex items-center gap-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-body font-semibold text-sm px-7 py-3.5 rounded-full hover:opacity-90 transition-opacity shadow-warm"
-              >
-                <Instagram size={16} />
-                @{instagramHandle}
-              </a>
+        <p className="text-cream/70 text-base sm:text-lg leading-relaxed mb-10">
+          Scan the QR code or tap the button below to follow for daily art updates, behind-the-scenes, and new project reveals.
+        </p>
+
+        {/* QR Code */}
+        <div className="inline-block bg-white p-4 rounded-2xl shadow-warm-lg mb-8">
+          <img
+            src="/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png"
+            alt="Instagram QR Code"
+            className="w-48 h-48 sm:w-56 sm:h-56 object-contain"
+          />
+        </div>
+
+        {/* Follow Button */}
+        {isLoading ? (
+          <Skeleton className="h-12 w-48 mx-auto rounded-full bg-white/10" />
+        ) : (
+          <div>
+            <a
+              href={instagramProfile || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-semibold px-8 py-3 rounded-full transition-all shadow-warm hover:shadow-warm-lg"
+            >
+              <Instagram className="w-5 h-5" />
+              Follow on Instagram
+            </a>
+            {instagramProfile && (
+              <p className="text-cream/50 text-xs mt-3 break-all">{instagramProfile}</p>
             )}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

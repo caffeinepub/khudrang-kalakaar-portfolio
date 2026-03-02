@@ -1,140 +1,124 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Shield, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
-
-const ADMIN_USERNAME = 'DeepakKumawat';
-const ADMIN_PASSWORD = 'Kinnu*0613';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useActor } from '../hooks/useActor';
+import { Shield, Loader2, AlertCircle } from 'lucide-react';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const { login, clear, loginStatus, identity, isInitializing } = useInternetIdentity();
+  const { actor, isFetching: actorFetching } = useActor();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isLoggingIn = loginStatus === 'logging-in';
+  const isAuthenticated = !!identity;
+
+  // Once authenticated and actor is ready, check if caller is admin
+  useEffect(() => {
+    if (!isAuthenticated || actorFetching || !actor) return;
+
+    const checkAdmin = async () => {
+      setCheckingAdmin(true);
+      setError(null);
+      try {
+        const isAdmin = await actor.isCallerAdmin();
+        if (isAdmin) {
+          navigate({ to: '/admin' });
+        } else {
+          setError('Access denied. Your account does not have admin privileges.');
+          await clear();
+        }
+      } catch (err: any) {
+        setError('Failed to verify admin status. Please try again.');
+        await clear();
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+
+    checkAdmin();
+  }, [isAuthenticated, actorFetching, actor]);
+
+  const handleLogin = async () => {
     setError(null);
-    setIsLoading(true);
-
-    // Small delay for UX feedback
-    await new Promise(res => setTimeout(res, 400));
-
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      sessionStorage.setItem('adminAuthenticated', 'true');
-      navigate({ to: '/admin' });
-    } else {
-      setError('Invalid username or password.');
-      setIsLoading(false);
+    try {
+      await login();
+    } catch (err: any) {
+      if (err?.message === 'User is already authenticated') {
+        await clear();
+        setTimeout(() => login(), 300);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     }
   };
 
-  const handleBack = () => {
-    navigate({ to: '/' });
-  };
+  const isLoading = isLoggingIn || checkingAdmin || actorFetching || isInitializing;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="bg-card rounded-2xl shadow-card-custom border border-border p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-terracotta/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-terracotta" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
-            <p className="text-muted-foreground mt-1">Khudrang Kalakaar Portfolio</p>
+        {/* Logo / Brand */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-terracotta mb-4">
+            <Shield className="w-8 h-8 text-cream" />
           </div>
+          <h1 className="font-display text-3xl font-bold text-charcoal tracking-tight">
+            Admin Access
+          </h1>
+          <p className="mt-2 text-charcoal/70 text-sm">
+            Sign in with your Internet Identity to manage the portfolio
+          </p>
+        </div>
 
-          {/* Error message */}
+        {/* Card */}
+        <div className="bg-white border border-warm-border rounded-2xl shadow-warm p-8">
           {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm text-center">
-              {error}
+            <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-red-700 text-sm leading-relaxed">{error}</p>
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1.5">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                autoComplete="username"
-                required
-                disabled={isLoading}
-                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-colors disabled:opacity-60"
-                placeholder="Enter username"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 pr-12 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-colors disabled:opacity-60"
-                  placeholder="Enter password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  tabIndex={-1}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+          <div className="space-y-4">
+            <p className="text-charcoal/80 text-sm text-center leading-relaxed">
+              This panel is restricted to authorized administrators only. Click below to authenticate with Internet Identity.
+            </p>
 
             <button
-              type="submit"
-              disabled={isLoading || !username || !password}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-terracotta text-white rounded-xl font-semibold text-base hover:bg-terracotta-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm mt-2"
+              onClick={handleLogin}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-3 bg-terracotta hover:bg-terracotta/90 disabled:opacity-60 disabled:cursor-not-allowed text-cream font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Verifying...
+                  <span>
+                    {isLoggingIn ? 'Opening Internet Identity…' : 'Verifying admin access…'}
+                  </span>
                 </>
               ) : (
                 <>
                   <Shield className="w-5 h-5" />
-                  Login
+                  <span>Login with Internet Identity</span>
                 </>
               )}
             </button>
-          </form>
+          </div>
 
-          {/* Back link */}
-          <button
-            onClick={handleBack}
-            className="w-full mt-4 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm py-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Portfolio
-          </button>
+          <div className="mt-6 pt-6 border-t border-warm-border text-center">
+            <a
+              href="/"
+              className="text-sm text-charcoal/60 hover:text-terracotta transition-colors"
+            >
+              ← Back to Portfolio
+            </a>
+          </div>
         </div>
 
-        {/* Hint */}
-        <p className="text-center text-muted-foreground text-xs mt-4">
-          Double-tap the logo on the portfolio page to access this panel
+        <p className="mt-6 text-center text-xs text-charcoal/50">
+          Only registered admin principals can access this panel.
         </p>
       </div>
     </div>

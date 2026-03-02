@@ -1,139 +1,110 @@
-import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import React, { useState } from 'react';
 import { X, ZoomIn } from 'lucide-react';
-import { useAllArtworks } from '../hooks/useQueries';
-import type { Artwork } from '../backend';
-
-function ArtworkImage({
-  artwork,
-  className,
-  alt,
-}: {
-  artwork: Artwork;
-  className?: string;
-  alt: string;
-}) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-  const prevUrlRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (artwork.image && artwork.image.length > 0) {
-      const mimeType = artwork.imageFormat || 'image/jpeg';
-      const blob = new Blob([new Uint8Array(artwork.image)], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      setObjectUrl(url);
-      prevUrlRef.current = url;
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    } else {
-      setObjectUrl(null);
-    }
-  }, [artwork.image, artwork.imageFormat]);
-
-  if (!objectUrl) {
-    return (
-      <div className={`bg-muted flex items-center justify-center ${className}`}>
-        <span className="font-body text-muted-foreground text-sm">No image</span>
-      </div>
-    );
-  }
-
-  return <img src={objectUrl} alt={alt} className={className} />;
-}
+import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useGetAllArtworks } from '../hooks/useQueries';
 
 export default function ArtworkGallery() {
-  const { data: artworks, isLoading } = useAllArtworks();
-  const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+  const { data: artworks = [], isLoading } = useGetAllArtworks();
+  const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
 
-  if (isLoading) {
-    return (
-      <section id="gallery" className="py-24 md:py-32 bg-secondary">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-14">
-            <p className="terracotta-label mb-4">Portfolio</p>
-            <h2 className="font-display text-4xl md:text-5xl font-black text-foreground">Art Gallery</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-muted animate-pulse rounded-sm" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!artworks || artworks.length === 0) {
-    return null;
-  }
+  const getImageUrl = (artwork: any) => {
+    if (!artwork.image || artwork.image.length === 0) return null;
+    const blob = new Blob([new Uint8Array(artwork.image)], {
+      type: artwork.imageFormat || 'image/jpeg',
+    });
+    return URL.createObjectURL(blob);
+  };
 
   return (
-    <section id="gallery" className="py-24 md:py-32 bg-secondary">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
-          <div>
-            <p className="terracotta-label mb-4">Portfolio</p>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight">
-              Art <span className="italic text-terracotta">Gallery</span>
-            </h2>
-          </div>
-          <p className="font-body text-foreground/55 text-base max-w-xs leading-relaxed">
-            Click any artwork to view it in full detail.
+    <section id="gallery" className="section-padding bg-cream">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-14">
+          <span className="text-terracotta text-sm font-semibold tracking-[0.25em] uppercase">
+            My Work
+          </span>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-charcoal mt-2">
+            Gallery
+          </h2>
+          <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
+          <p className="text-charcoal/65 text-base sm:text-lg mt-4 max-w-xl mx-auto leading-relaxed">
+            A curated collection of artworks spanning murals, canvases, and interior transformations.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {artworks.map((artwork) => (
-            <div
-              key={Number(artwork.id)}
-              className="group relative aspect-square overflow-hidden rounded-sm cursor-pointer shadow-card hover:shadow-warm-lg transition-all duration-400"
-              onClick={() => setSelectedArtwork(artwork)}
-            >
-              <ArtworkImage
-                artwork={artwork}
-                alt={artwork.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/55 transition-all duration-300 flex flex-col items-center justify-center">
-                <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 mb-2" size={24} />
-                <div className="px-3 text-white translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 text-center">
-                  <p className="font-display font-bold text-sm leading-tight">{artwork.title}</p>
-                  {artwork.description && (
-                    <p className="font-body text-xs text-white/75 mt-1 line-clamp-2">{artwork.description}</p>
+        {/* Gallery Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="aspect-square rounded-2xl" />
+            ))}
+          </div>
+        ) : artworks.length === 0 ? (
+          <div className="text-center py-20 bg-white border border-warm-border rounded-2xl">
+            <p className="text-charcoal/40 font-medium text-lg">No artworks yet</p>
+            <p className="text-charcoal/30 text-sm mt-2">Check back soon for new additions</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {artworks.map((artwork) => {
+              const imageUrl = getImageUrl(artwork);
+              return (
+                <button
+                  key={artwork.id.toString()}
+                  onClick={() => setSelectedArtwork(artwork)}
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-cream-dark border border-warm-border hover:border-terracotta/40 hover:shadow-warm transition-all"
+                >
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-charcoal/30 text-sm">No image</span>
+                    </div>
                   )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/50 transition-all duration-300 flex items-center justify-center">
+                    <ZoomIn className="w-8 h-8 text-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  {/* Title overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-charcoal/80 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <p className="text-cream font-semibold text-sm truncate">{artwork.title}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      <Dialog open={!!selectedArtwork} onOpenChange={(open) => !open && setSelectedArtwork(null)}>
-        <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-foreground border-0">
+      {/* Lightbox Dialog */}
+      <Dialog open={!!selectedArtwork} onOpenChange={() => setSelectedArtwork(null)}>
+        <DialogContent className="max-w-3xl bg-charcoal border-white/10 p-0 overflow-hidden">
           <DialogTitle className="sr-only">{selectedArtwork?.title}</DialogTitle>
-          <button
-            onClick={() => setSelectedArtwork(null)}
-            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
-          >
-            <X size={18} />
-          </button>
           {selectedArtwork && (
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-2/3 bg-black flex items-center justify-center min-h-64">
-                <ArtworkImage
-                  artwork={selectedArtwork}
-                  alt={selectedArtwork.title}
-                  className="max-h-[70vh] w-full object-contain"
-                />
-              </div>
-              <div className="md:w-1/3 p-8 flex flex-col justify-center bg-foreground">
-                <span className="terracotta-label mb-3 text-terracotta">Artwork</span>
-                <h3 className="font-display text-2xl font-bold text-background mb-4 leading-tight">{selectedArtwork.title}</h3>
-                <div className="w-8 h-0.5 bg-terracotta mb-4" />
+            <div>
+              {(() => {
+                const url = getImageUrl(selectedArtwork);
+                return url ? (
+                  <img
+                    src={url}
+                    alt={selectedArtwork.title}
+                    className="w-full max-h-[70vh] object-contain"
+                  />
+                ) : null;
+              })()}
+              <div className="p-6">
+                <h3 className="font-display text-xl font-bold text-cream">
+                  {selectedArtwork.title}
+                </h3>
                 {selectedArtwork.description && (
-                  <p className="font-body text-background/60 text-sm leading-relaxed">{selectedArtwork.description}</p>
+                  <p className="text-cream/70 text-sm mt-2 leading-relaxed">
+                    {selectedArtwork.description}
+                  </p>
                 )}
               </div>
             </div>

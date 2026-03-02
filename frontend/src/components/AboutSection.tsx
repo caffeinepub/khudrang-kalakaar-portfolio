@@ -1,60 +1,88 @@
-export default function AboutSection() {
-  return (
-    <section id="about" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-background">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTextContent, useGetArtistPortrait } from '../hooks/useQueries';
 
-          {/* Portrait Image */}
-          <div className="relative order-2 lg:order-1">
-            {/* Decorative background block */}
-            <div className="absolute -top-4 -left-4 w-full h-full bg-terracotta-muted rounded-sm -z-10" />
-            <div className="relative overflow-hidden rounded-sm shadow-warm-lg">
-              <img
-                src="/assets/generated/artist-portrait.dim_800x900.png"
-                alt="Mudit Sharma – Wall Painting Artist"
-                className="w-full h-auto object-cover aspect-[4/5]"
-              />
-              {/* Corner accents */}
-              <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-terracotta" />
-              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-terracotta" />
-            </div>
-            {/* Floating badge */}
-            <div className="absolute -bottom-6 -right-4 md:-right-8 bg-foreground text-background px-6 py-5 rounded-sm shadow-warm-lg">
-              <p className="font-display text-4xl font-black leading-none text-terracotta">5+</p>
-              <p className="font-body text-xs font-medium tracking-wide mt-1 text-background/70">Years of<br />Experience</p>
-            </div>
+const STATS = [
+  { value: '10+', label: 'Years of Experience' },
+  { value: '200+', label: 'Projects Completed' },
+  { value: '50+', label: 'Happy Clients' },
+  { value: '15+', label: 'Awards Won' },
+];
+
+export default function AboutSection() {
+  const { data: textContent, isLoading: textLoading } = useTextContent();
+  const { data: portraitBlob, isLoading: portraitLoading } = useGetArtistPortrait();
+
+  const artistName = textContent?.artistName || '';
+  const bio = textContent?.bio || '';
+  const portraitUrl = portraitBlob
+    ? portraitBlob.getDirectURL()
+    : '/assets/generated/artist-portrait.dim_800x900.png';
+
+  return (
+    <section id="about" className="section-padding bg-white">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-14">
+          <span className="text-terracotta text-sm font-semibold tracking-[0.25em] uppercase">
+            About Me
+          </span>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-charcoal mt-2">
+            The Artist Behind the Work
+          </h2>
+          <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Portrait */}
+          <div className="relative">
+            {portraitLoading ? (
+              <Skeleton className="w-full aspect-[4/5] rounded-2xl" />
+            ) : (
+              <div className="relative">
+                <div className="absolute -top-4 -left-4 w-full h-full border-2 border-terracotta/30 rounded-2xl" />
+                <img
+                  src={portraitUrl}
+                  alt={artistName || 'Artist portrait'}
+                  className="relative w-full aspect-[4/5] object-cover rounded-2xl shadow-warm-lg"
+                />
+                {/* Gold accent */}
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gold/20 rounded-2xl -z-10" />
+              </div>
+            )}
           </div>
 
-          {/* Text Content */}
-          <div className="order-1 lg:order-2">
-            <p className="terracotta-label mb-4">Meet the Artist</p>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-2">
-              About Mudit<br />
-              <span className="italic text-terracotta">Sharma</span>
-            </h2>
-            <span className="accent-bar" />
+          {/* Content */}
+          <div className="space-y-6">
+            {textLoading ? (
+              <>
+                <Skeleton className="h-10 w-3/4 rounded-lg" />
+                <Skeleton className="h-5 w-full rounded-lg" />
+                <Skeleton className="h-5 w-full rounded-lg" />
+                <Skeleton className="h-5 w-4/5 rounded-lg" />
+              </>
+            ) : (
+              <>
+                <h3 className="font-display text-3xl sm:text-4xl font-bold text-charcoal leading-tight">
+                  {artistName || 'Artist Name'}
+                </h3>
+                <p className="text-charcoal/75 text-base sm:text-lg leading-relaxed">
+                  {bio || 'Artist bio goes here.'}
+                </p>
+              </>
+            )}
 
-            <p className="font-body text-foreground/70 text-base md:text-lg leading-relaxed mb-5">
-              Mudit Sharma is a professional wall painting artist based in{' '}
-              <strong className="text-foreground font-semibold">Bikaner, Rajasthan</strong>, with over{' '}
-              <strong className="text-foreground font-semibold">5 years of experience</strong> in residential,
-              commercial, and public mural projects.
-            </p>
-            <p className="font-body text-foreground/70 text-base md:text-lg leading-relaxed mb-10">
-              He specializes in customized wall art that enhances spaces and creates strong visual impact.
-              His focus is on clean finishing, creative concepts, and complete client satisfaction.
-            </p>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-4 pt-8 border-t border-border">
-              {[
-                { value: '5+', label: 'Years Active' },
-                { value: '50+', label: 'Projects Done' },
-                { value: '100%', label: 'Satisfaction' },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center py-4 bg-secondary rounded-sm">
-                  <p className="font-display text-2xl md:text-3xl font-black text-terracotta leading-none">{stat.value}</p>
-                  <p className="font-body text-xs text-foreground/55 font-medium mt-1.5 leading-tight">{stat.label}</p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              {STATS.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-cream rounded-xl p-4 border border-warm-border hover:border-terracotta/40 hover:shadow-warm-sm transition-all"
+                >
+                  <div className="font-display text-2xl font-bold text-terracotta">
+                    {stat.value}
+                  </div>
+                  <div className="text-charcoal/70 text-sm mt-1 font-medium">{stat.label}</div>
                 </div>
               ))}
             </div>

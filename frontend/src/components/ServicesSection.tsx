@@ -1,61 +1,95 @@
-import { Brush, Home, Coffee, Building2, Landmark, Layers, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Paintbrush, Home, Building2, Palette, Layers, Sparkles } from 'lucide-react';
 
 const SERVICES = [
-  { icon: Home, title: 'Home Wall Murals', desc: 'Transform your living spaces with custom hand-crafted murals tailored to your personality.' },
-  { icon: Sparkles, title: 'Kids Room Theme Painting', desc: 'Magical, vibrant themes that spark imagination and bring joy to every corner.' },
-  { icon: Coffee, title: 'Café & Restaurant Concept Walls', desc: 'Instagram-worthy walls that elevate your brand identity and attract customers.' },
-  { icon: Building2, title: 'Hotel & Resort Artwork', desc: 'Sophisticated murals that enhance guest experience and create lasting impressions.' },
-  { icon: Landmark, title: 'Public Infrastructure Art', desc: 'Beautifying urban spaces with culturally rich, community-inspired murals.' },
-  { icon: Layers, title: '3D Illusion Wall Designs', desc: 'Mind-bending optical illusions that wow every visitor and create viral moments.' },
-  { icon: Brush, title: 'Custom Hand-Painted Designs', desc: 'Fully bespoke artwork tailored to your unique vision, space, and brand story.' },
+  {
+    icon: Paintbrush,
+    number: '01',
+    title: 'Wall Art & Murals',
+    description:
+      'Custom hand-painted murals and wall art that transform any space into a visual masterpiece.',
+  },
+  {
+    icon: Home,
+    number: '02',
+    title: 'Interior Decoration',
+    description:
+      'Comprehensive interior decoration services blending aesthetics with functionality for homes and offices.',
+  },
+  {
+    icon: Building2,
+    number: '03',
+    title: 'Commercial Spaces',
+    description:
+      'Artistic solutions for restaurants, hotels, and commercial establishments that leave lasting impressions.',
+  },
+  {
+    icon: Palette,
+    number: '04',
+    title: 'Canvas Paintings',
+    description:
+      'Original canvas paintings crafted with passion — available as commissions or ready-to-hang pieces.',
+  },
+  {
+    icon: Layers,
+    number: '05',
+    title: 'Texture & Finish',
+    description:
+      'Specialty texture work and decorative finishes that add depth and character to any surface.',
+  },
+  {
+    icon: Sparkles,
+    number: '06',
+    title: 'Custom Commissions',
+    description:
+      'Bespoke artwork created to your vision — from concept to completion with your unique story.',
+  },
 ];
 
 export default function ServicesSection() {
   return (
-    <section id="services" className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-foreground">
+    <section id="services" className="section-padding bg-charcoal">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
-          <div>
-            <p className="font-body text-terracotta text-xs font-semibold tracking-[0.25em] uppercase mb-4">
-              What We Offer
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-background leading-tight">
-              Our <span className="italic text-terracotta">Services</span>
-            </h2>
-          </div>
-          <p className="font-body text-background/50 text-base max-w-xs leading-relaxed">
-            From intimate home murals to large-scale public installations — we do it all.
-          </p>
+        {/* Section Header */}
+        <div className="text-center mb-14">
+          <span className="text-gold text-sm font-semibold tracking-[0.25em] uppercase">
+            What I Offer
+          </span>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream mt-2">
+            Services
+          </h2>
+          <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-background/10">
-          {SERVICES.map((service, idx) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {SERVICES.map((service) => {
             const Icon = service.icon;
             return (
               <div
-                key={idx}
-                className="group bg-foreground hover:bg-terracotta-dark p-8 transition-all duration-300 cursor-default relative overflow-hidden"
+                key={service.number}
+                className="group relative bg-white/5 hover:bg-terracotta/90 border border-white/10 hover:border-terracotta rounded-2xl p-6 transition-all duration-300 cursor-default overflow-hidden"
               >
                 {/* Number watermark */}
-                <span className="absolute top-4 right-5 font-display text-6xl font-black text-background/5 select-none leading-none group-hover:text-white/5">
-                  {String(idx + 1).padStart(2, '0')}
+                <span className="absolute top-3 right-4 font-display text-6xl font-bold text-white/5 group-hover:text-white/10 select-none transition-colors">
+                  {service.number}
                 </span>
-                <div className="w-10 h-10 rounded-sm bg-terracotta/20 group-hover:bg-white/15 flex items-center justify-center mb-5 transition-colors duration-300">
-                  <Icon className="w-5 h-5 text-terracotta group-hover:text-white transition-colors duration-300" />
+
+                {/* Icon */}
+                <div className="w-12 h-12 rounded-xl bg-terracotta/20 group-hover:bg-white/20 flex items-center justify-center mb-4 transition-colors">
+                  <Icon className="w-6 h-6 text-terracotta group-hover:text-cream transition-colors" />
                 </div>
-                <h3 className="font-display font-bold text-background text-lg mb-2.5 leading-snug group-hover:text-white">
+
+                {/* Text */}
+                <h3 className="font-display text-lg font-bold text-cream mb-2 leading-snug">
                   {service.title}
                 </h3>
-                <p className="font-body text-background/50 text-sm leading-relaxed group-hover:text-white/70">
-                  {service.desc}
+                <p className="text-cream/70 group-hover:text-cream/90 text-sm leading-relaxed transition-colors">
+                  {service.description}
                 </p>
               </div>
             );
           })}
-          {/* Filler cell to complete the grid visually */}
-          <div className="hidden lg:block bg-terracotta/10 p-8" />
         </div>
       </div>
     </section>

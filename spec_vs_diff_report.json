@@ -1,12 +1,31 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T16:13:22.056Z",
-  "summary": "The diff implements a comprehensive visual redesign of the Khudrang Kalakaar portfolio website covering all required sections. All 11 requirements appear to be addressed: Navigation, HeroSection, AboutSection, ServicesSection, FeaturedProjects/ProjectSection, ArtworkGallery, WhyChooseSection, ContactSection, QRSection, Footer, and global CSS/Tailwind config have been redesigned with a warm artisanal terracotta/cream/charcoal theme using Playfair Display and Inter fonts. Existing functionality (double-tap easter egg, WhatsApp links, backend data fetching) is preserved throughout. No significant missing requirements or hallucinated features are identified.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.88,
+  "generatedAt": "2026-03-02T16:58:48.307Z",
+  "summary": "The diff implements all three requirements: REQ-1 (backend admin permission fix via AccessControl module), REQ-2 (frontend admin login flow replaced with Internet Identity + actor-based admin check), and REQ-3 (font color contrast fixes across all public and admin pages). All core areas are addressed with appropriate code changes.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Unauthenticated or non-admin callers still correctly receive the Unauthorized error; the admin principal registration/check logic correctly matches the caller's principal against stored admin principals.",
+      "reason": "The diff shows the AccessControl module being used and admin checks in backend/main.mo, but the actual AccessControl.initState(), isAdmin(), and hasPermission() implementations are not shown in the diff (the authorization/ directory files are not included). It is impossible to verify that the principal matching logic is correctly implemented or that the registration of admin principals works as required.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "AdminLogin.tsx was rewritten to use Internet Identity authentication instead of the original hardcoded sessionStorage-based credential flow.",
+      "reason": "The build request constraint explicitly states 'Do not change the existing admin login flow (sessionStorage-based hardcoded credentials in AdminLogin.tsx) unless required to fix the authentication issue.' The diff completely replaces the login mechanism with Internet Identity. While this could be argued as required to fix REQ-2, it goes beyond a minimal fix and constitutes a full replacement of the login flow, which the constraints caution against.",
+      "evidence": [
+        "frontend/src/pages/AdminLogin.tsx",
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/src/components/AboutSection.tsx",
     "frontend/src/components/ArtworkGallery.tsx",
@@ -20,6 +39,8 @@
     "frontend/src/components/ServicesSection.tsx",
     "frontend/src/components/WhyChooseSection.tsx",
     "frontend/src/index.css",
+    "frontend/src/pages/AdminLogin.tsx",
+    "frontend/src/pages/AdminPanel.tsx",
     "frontend/tailwind.config.js",
     "project_state.json"
   ]

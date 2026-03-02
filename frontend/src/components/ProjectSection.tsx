@@ -1,63 +1,68 @@
+import React from 'react';
 import { MapPin } from 'lucide-react';
 
 interface ProjectSectionProps {
-  name: string;
+  number: string;
+  title: string;
   description: string;
-  location?: string;
-  imageSrc: string;
+  location: string;
+  image: string;
   imageAlt: string;
   reverse?: boolean;
-  index: number;
 }
 
 export default function ProjectSection({
-  name,
+  number,
+  title,
   description,
   location,
-  imageSrc,
+  image,
   imageAlt,
   reverse = false,
-  index,
 }: ProjectSectionProps) {
   return (
-    <article
-      className={`flex flex-col ${reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} min-h-[520px] border-b border-border last:border-b-0`}
+    <div
+      className={`grid grid-cols-1 lg:grid-cols-[65%_35%] gap-0 rounded-2xl overflow-hidden shadow-warm border border-warm-border ${
+        reverse ? 'lg:grid-cols-[35%_65%]' : ''
+      }`}
     >
-      {/* Image — 65% */}
-      <div className="w-full lg:w-[65%] relative overflow-hidden bg-muted group">
+      {/* Image */}
+      <div className={`relative overflow-hidden ${reverse ? 'lg:order-2' : ''}`}>
         <img
-          src={imageSrc}
+          src={image}
           alt={imageAlt}
-          className="w-full h-full object-cover min-h-[300px] lg:min-h-[520px] transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-64 lg:h-full object-cover hover:scale-105 transition-transform duration-700"
         />
-        {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        {/* Project number badge */}
-        <div className="absolute top-6 left-6 flex items-center gap-2">
-          <div className="bg-terracotta text-white font-body text-xs font-bold px-3 py-1.5 tracking-[0.2em] uppercase">
-            {String(index).padStart(2, '0')}
-          </div>
-        </div>
       </div>
 
-      {/* Text Panel — 35% */}
+      {/* Text Panel */}
       <div
-        className={`w-full lg:w-[35%] flex flex-col justify-center px-8 py-14 lg:py-20 bg-background ${
-          reverse ? 'lg:pr-14 lg:pl-10' : 'lg:pl-14 lg:pr-10'
+        className={`bg-white p-8 lg:p-10 flex flex-col justify-center ${
+          reverse ? 'lg:order-1' : ''
         }`}
       >
-        {location && (
-          <div className="flex items-center gap-1.5 text-terracotta font-body text-xs font-semibold tracking-[0.2em] uppercase mb-5">
-            <MapPin className="w-3.5 h-3.5" />
-            <span>{location}</span>
+        {/* Project number badge */}
+        <div className="inline-flex items-center gap-2 mb-4">
+          <span className="bg-terracotta text-cream text-xs font-bold px-3 py-1 rounded-full">
+            {number}
+          </span>
+          <div className="flex items-center gap-1 text-charcoal/50 text-xs">
+            <MapPin className="w-3 h-3" />
+            {location}
           </div>
-        )}
-        <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-black text-foreground leading-tight mb-4">
-          {name}
+        </div>
+
+        {/* Accent bar */}
+        <div className="w-8 h-1 bg-terracotta rounded-full mb-3" />
+
+        {/* Title */}
+        <h3 className="font-display text-2xl sm:text-3xl font-bold text-charcoal mb-4 leading-tight">
+          {title}
         </h3>
-        <span className="block w-10 h-0.5 bg-terracotta mb-6" />
-        <p className="font-body text-foreground/60 text-sm md:text-base leading-relaxed">{description}</p>
+
+        {/* Description */}
+        <p className="text-charcoal/65 text-sm sm:text-base leading-relaxed">{description}</p>
       </div>
-    </article>
+    </div>
   );
 }

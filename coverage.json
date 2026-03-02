@@ -1,144 +1,78 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T16:13:22.059Z",
+  "generatedAt": "2026-03-02T16:58:48.310Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 11,
-    "implemented": 11,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Redesign the overall visual theme of the portfolio website with a bold, artisanal aesthetic that reflects the identity of a mural artist. Use a rich, warm color palette (deep earthy tones, terracotta, warm cream, charcoal) with strong typography contrasts. Apply the theme consistently across all sections: Navigation, HeroSection, AboutSection, ServicesSection, FeaturedProjects, ArtworkGallery, WhyChooseSection, ContactSection, QRSection, and Footer.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/index.css"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
-        ]
-      },
-      {
-        "id": "REQ-10",
-        "summary": "Redesign the Footer with a refined layout covering brand info, quick nav links, and contact details. Improve typography, spacing, and visual hierarchy to match the new theme. Preserve existing double-tap logo easter egg and WhatsApp/Instagram links.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/Footer.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Footer.tsx"
-        ]
-      },
-      {
-        "id": "REQ-11",
-        "summary": "Update the global CSS (frontend/src/index.css and frontend/index.css) and Tailwind configuration (frontend/tailwind.config.js) to reflect the new design system: revised color tokens, font choices, and spacing/shadow utilities aligned with the artisanal mural artist theme.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/QRSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/QRSection.tsx"
-        ]
+        "summary": "Resolve the admin authentication and permission check in the backend so that users who have successfully logged in via the admin login flow are recognized as admins and can perform admin-only actions (saving social media links, editing content, managing artworks, etc.) without receiving 'Unauthorized: Only admins can perform this action' errors.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Redesign the Navigation component with a visually refined layout: improved logo presentation, cleaner link styling, refined mobile menu, and a high-contrast 'Hire Me' CTA button that matches the new theme. Preserve existing functionality (scroll-aware styling, double-tap easter egg to admin login, WhatsApp link).",
+        "summary": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel. Ensure the actor used in admin mutations is the authenticated actor (not anonymous), so backend permission checks succeed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Navigation.tsx"
+          "frontend/src/pages/AdminLogin.tsx",
+          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/Navigation.tsx"
+          "frontend/src/pages/AdminLogin.tsx",
+          "frontend/src/pages/AdminPanel.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Redesign the HeroSection with a full-screen, immersive layout: large dramatic typography for the artist name and tagline, refined CTA button styling, and a well-composed overlay on the background cover image. Preserve existing dynamic content fetching from the backend CMS.",
+        "summary": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel. Ensure all body text, headings, labels, captions, card content, section descriptions, navigation items, footer text, and form fields use color values that meet readable contrast standards against their respective backgrounds. Replace any near-invisible or low-contrast text colors with clearly legible alternatives consistent with the warm cream/terracotta design palette defined in the project's CSS and Tailwind config.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/HeroSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/HeroSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Redesign the AboutSection with an improved two-column layout featuring the artist portrait, bio text, floating experience badge, and stats row. Enhance decorative accents to align with the new artisanal theme. Preserve all existing static content.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/AboutSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/AboutSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Redesign the ServicesSection with improved card layouts for the seven service offerings. Cards should have refined styling (borders, shadows, icon treatment, hover effects) consistent with the new theme. Preserve all existing service data.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ServicesSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ServicesSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Redesign the FeaturedProjects and ProjectSection components with a more visually impactful layout. Improve the image/text split presentation, numbered overlay badge styling, and section heading. Preserve existing project data and alternating layout direction logic.",
-        "status": "implemented",
-        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/components/ServicesSection.tsx",
+          "frontend/src/components/ArtworkGallery.tsx",
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/WhyChooseSection.tsx",
+          "frontend/src/components/QRSection.tsx",
           "frontend/src/components/FeaturedProjects.tsx",
-          "frontend/src/components/ProjectSection.tsx"
+          "frontend/src/components/ProjectSection.tsx",
+          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/pages/PortfolioPage.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/components/ServicesSection.tsx",
+          "frontend/src/components/ArtworkGallery.tsx",
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/WhyChooseSection.tsx",
+          "frontend/src/components/QRSection.tsx",
           "frontend/src/components/FeaturedProjects.tsx",
-          "frontend/src/components/ProjectSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Redesign the ArtworkGallery section with an improved grid layout, refined card hover effects, and a polished lightbox dialog. Preserve existing backend data fetching and Uint8Array-to-object-URL conversion logic.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ArtworkGallery.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ArtworkGallery.tsx"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Redesign the WhyChooseSection with improved card styling for the six trust-point cards. Enhance numbered accents, card layout, and section heading to match the new artisanal theme. Preserve all existing content.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/WhyChooseSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/WhyChooseSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Redesign the ContactSection with improved card layouts for Location, WhatsApp, and Instagram contact cards. Apply refined iconography, card styling, and section heading consistent with the new theme. Preserve existing dynamic contact detail fetching and fallback defaults.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ContactSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ContactSection.tsx"
+          "frontend/src/components/ProjectSection.tsx",
+          "frontend/src/pages/AdminPanel.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
@@ -155,6 +89,8 @@
     "frontend/src/components/ServicesSection.tsx",
     "frontend/src/components/WhyChooseSection.tsx",
     "frontend/src/index.css",
+    "frontend/src/pages/AdminLogin.tsx",
+    "frontend/src/pages/AdminPanel.tsx",
     "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
