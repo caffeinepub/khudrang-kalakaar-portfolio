@@ -19,7 +19,6 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -28,10 +27,17 @@ export const UserRole = IDL.Variant({
 export const Artwork = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
+  'imageFileName' : IDL.Opt(IDL.Text),
+  'imageFormat' : IDL.Opt(IDL.Text),
   'description' : IDL.Text,
-  'image' : ExternalBlob,
+  'image' : IDL.Vec(IDL.Nat8),
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const MediaContacts = IDL.Record({
+  'instagramProfile' : IDL.Text,
+  'whatsappNumber' : IDL.Text,
+});
 export const TextContent = IDL.Record({
   'bio' : IDL.Text,
   'tagline' : IDL.Text,
@@ -66,22 +72,28 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addArtwork' : IDL.Func([IDL.Text, IDL.Text, ExternalBlob], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
+  'editArtwork' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        IDL.Text,
+        IDL.Vec(IDL.Nat8),
+        IDL.Opt(IDL.Text),
+        IDL.Opt(IDL.Text),
+      ],
+      [],
+      [],
+    ),
   'getAllArtworks' : IDL.Func([], [IDL.Vec(Artwork)], ['query']),
   'getArtistPortrait' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
   'getArtwork' : IDL.Func([IDL.Nat], [IDL.Opt(Artwork)], ['query']),
-  'getArtworksByDescription' : IDL.Func(
-      [IDL.Text],
-      [IDL.Vec(Artwork)],
-      ['query'],
-    ),
-  'getArtworksByTitle' : IDL.Func([IDL.Text], [IDL.Vec(Artwork)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCoverImage' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
   'getLogo' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
+  'getMediaContacts' : IDL.Func([], [IDL.Opt(MediaContacts)], ['query']),
   'getTextContent' : IDL.Func([], [TextContent], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -90,13 +102,20 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'updateArtwork' : IDL.Func(
-      [IDL.Nat, IDL.Text, IDL.Text, ExternalBlob],
-      [],
-      [],
-    ),
+  'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'updateTextContent' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
+  'uploadArtwork' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Vec(IDL.Nat8),
+        IDL.Opt(IDL.Text),
+        IDL.Opt(IDL.Text),
+      ],
+      [IDL.Nat],
+      [],
+    ),
   'uploadCoverImage' : IDL.Func([ExternalBlob], [], []),
   'uploadLogo' : IDL.Func([ExternalBlob], [], []),
 });
@@ -115,7 +134,6 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -124,10 +142,17 @@ export const idlFactory = ({ IDL }) => {
   const Artwork = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
+    'imageFileName' : IDL.Opt(IDL.Text),
+    'imageFormat' : IDL.Opt(IDL.Text),
     'description' : IDL.Text,
-    'image' : ExternalBlob,
+    'image' : IDL.Vec(IDL.Nat8),
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const MediaContacts = IDL.Record({
+    'instagramProfile' : IDL.Text,
+    'whatsappNumber' : IDL.Text,
+  });
   const TextContent = IDL.Record({
     'bio' : IDL.Text,
     'tagline' : IDL.Text,
@@ -162,22 +187,28 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addArtwork' : IDL.Func([IDL.Text, IDL.Text, ExternalBlob], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
+    'editArtwork' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          IDL.Text,
+          IDL.Vec(IDL.Nat8),
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+        ],
+        [],
+        [],
+      ),
     'getAllArtworks' : IDL.Func([], [IDL.Vec(Artwork)], ['query']),
     'getArtistPortrait' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
     'getArtwork' : IDL.Func([IDL.Nat], [IDL.Opt(Artwork)], ['query']),
-    'getArtworksByDescription' : IDL.Func(
-        [IDL.Text],
-        [IDL.Vec(Artwork)],
-        ['query'],
-      ),
-    'getArtworksByTitle' : IDL.Func([IDL.Text], [IDL.Vec(Artwork)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCoverImage' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
     'getLogo' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
+    'getMediaContacts' : IDL.Func([], [IDL.Opt(MediaContacts)], ['query']),
     'getTextContent' : IDL.Func([], [TextContent], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -186,13 +217,20 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'updateArtwork' : IDL.Func(
-        [IDL.Nat, IDL.Text, IDL.Text, ExternalBlob],
-        [],
-        [],
-      ),
+    'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'updateTextContent' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
+    'uploadArtwork' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Vec(IDL.Nat8),
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+        ],
+        [IDL.Nat],
+        [],
+      ),
     'uploadCoverImage' : IDL.Func([ExternalBlob], [], []),
     'uploadLogo' : IDL.Func([ExternalBlob], [], []),
   });

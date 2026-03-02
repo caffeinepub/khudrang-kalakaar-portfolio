@@ -1,525 +1,785 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useActor } from '../hooks/useActor';
-import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  useGetAllArtworks,
-  useGetLogo,
-  useGetCoverImage,
-  useGetArtistPortrait,
-  useGetTextContent,
-  useIsCallerAdmin,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  LogOut,
+  Upload,
+  Trash2,
+  Edit,
+  Plus,
+  Image as ImageIcon,
+  Type,
+  Phone,
+  Instagram,
+  Loader2,
+} from 'lucide-react';
+import {
+  useAllArtworks,
+  useUploadArtwork,
+  useEditArtwork,
+  useDeleteArtwork,
+  useLogo,
+  useUploadLogo,
+  useCoverImage,
+  useUploadCoverImage,
+  useArtistPortrait,
+  useUploadArtistPortrait,
+  useTextContent,
+  useUpdateTextContent,
+  useMediaContacts,
+  useUpdateMediaContacts,
 } from '../hooks/useQueries';
 import { ExternalBlob } from '../backend';
+import type { Artwork } from '../backend';
 
-export default function AdminPanel() {
-  const navigate = useNavigate();
-  const { identity, clear } = useInternetIdentity();
-  const { actor, isFetching: actorFetching } = useActor();
-  const queryClient = useQueryClient();
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-  const { data: isAdmin, isLoading: adminLoading } = useIsCallerAdmin();
-  const { data: artworks = [], refetch: refetchArtworks } = useGetAllArtworks();
-  const { data: logo } = useGetLogo();
-  const { data: coverImage } = useGetCoverImage();
-  const { data: artistPortrait } = useGetArtistPortrait();
-  const { data: textContent } = useGetTextContent();
+async function readFileAsUint8Array(file: File): Promise<Uint8Array<ArrayBuffer>> {
+  const arrayBuffer = await file.arrayBuffer();
+  return new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+}
 
-  const [activeTab, setActiveTab] = useState<'gallery' | 'images' | 'text'>('gallery');
+function ArtworkThumb({ artwork }: { artwork: Artwork }) {
+  const [url, setUrl] = useState<string | null>(null);
 
-  // Artwork form
-  const [artworkTitle, setArtworkTitle] = useState('');
-  const [artworkDesc, setArtworkDesc] = useState('');
-  const [artworkFile, setArtworkFile] = useState<File | null>(null);
-  const [artworkLoading, setArtworkLoading] = useState(false);
-  const [artworkError, setArtworkError] = useState('');
-  const [artworkSuccess, setArtworkSuccess] = useState('');
-  const [uploadProgress, setUploadProgress] = useState(0);
+  useState(() => {
+    if (artwork.image && artwork.image.length > 0) {
+      const mime = artwork.imageFormat || 'image/jpeg';
+      const blob = new Blob([new Uint8Array(artwork.image)], { type: mime });
+      const objectUrl = URL.createObjectURL(blob);
+      setUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  });
 
-  // Edit artwork
-  const [editingId, setEditingId] = useState<bigint | null>(null);
+  if (!url) {
+    return (
+      <div className="w-16 h-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
+        <ImageIcon size={20} className="text-muted-foreground" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={url}
+      alt={artwork.title}
+      className="w-16 h-16 rounded object-cover flex-shrink-0"
+    />
+  );
+}
+
+// ── Gallery Tab ───────────────────────────────────────────────────────────────
+
+function GalleryTab() {
+  const { data: artworks, isLoading } = useAllArtworks();
+  const uploadArtwork = useUploadArtwork();
+  const editArtwork = useEditArtwork();
+  const deleteArtwork = useDeleteArtwork();
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null);
+
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
+
   const [editTitle, setEditTitle] = useState('');
-  const [editDesc, setEditDesc] = useState('');
-  const [editFile, setEditFile] = useState<File | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
+  const [editDescription, setEditDescription] = useState('');
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
-  // Image uploads
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [portraitFile, setPortraitFile] = useState<File | null>(null);
-  const [imageLoading, setImageLoading] = useState<string | null>(null);
-  const [imageSuccess, setImageSuccess] = useState('');
+  const addFileRef = useRef<HTMLInputElement>(null);
+  const editFileRef = useRef<HTMLInputElement>(null);
 
-  // Text content
-  const [artistName, setArtistName] = useState('');
-  const [tagline, setTagline] = useState('');
-  const [bio, setBio] = useState('');
-  const [textLoading, setTextLoading] = useState(false);
-  const [textSuccess, setTextSuccess] = useState('');
-
-  const isAuthenticated = !!identity;
-  const isLoading = actorFetching || adminLoading;
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated && !actorFetching) {
-      navigate({ to: '/admin-login' });
-    }
-  }, [isAuthenticated, actorFetching]);
-
-  // Redirect if not admin (only after loading is complete)
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && isAdmin === false) {
-      // Not admin - redirect back to login
-      navigate({ to: '/admin-login' });
-    }
-  }, [isLoading, isAuthenticated, isAdmin]);
-
-  // Populate text content form
-  useEffect(() => {
-    if (textContent) {
-      setArtistName(textContent.artistName);
-      setTagline(textContent.tagline);
-      setBio(textContent.bio);
-    }
-  }, [textContent]);
-
-  const handleLogout = async () => {
-    await clear();
-    queryClient.clear();
-    navigate({ to: '/' });
-  };
-
-  const handleAddArtwork = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!actor || !artworkFile) return;
-    setArtworkLoading(true);
-    setArtworkError('');
-    setArtworkSuccess('');
-    setUploadProgress(0);
-    try {
-      const bytes = new Uint8Array(await artworkFile.arrayBuffer());
-      const blob = ExternalBlob.fromBytes(bytes).withUploadProgress((p) => setUploadProgress(p));
-      await actor.addArtwork(artworkTitle, artworkDesc, blob);
-      setArtworkTitle('');
-      setArtworkDesc('');
-      setArtworkFile(null);
-      setArtworkSuccess('Artwork added successfully!');
-      refetchArtworks();
-      queryClient.invalidateQueries({ queryKey: ['artworks'] });
-    } catch (err: any) {
-      setArtworkError(err?.message || 'Failed to add artwork');
-    } finally {
-      setArtworkLoading(false);
-      setUploadProgress(0);
+  const handleNewImageChange = (file: File | null) => {
+    setNewImageFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setNewImagePreview(url);
+    } else {
+      setNewImagePreview(null);
     }
   };
 
-  const handleDeleteArtwork = async (id: bigint) => {
-    if (!actor) return;
-    if (!confirm('Delete this artwork?')) return;
-    try {
-      await actor.deleteArtwork(id);
-      refetchArtworks();
-      queryClient.invalidateQueries({ queryKey: ['artworks'] });
-    } catch (err: any) {
-      alert(err?.message || 'Failed to delete artwork');
+  const handleEditImageChange = (file: File | null) => {
+    setEditImageFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setEditImagePreview(url);
+    } else {
+      setEditImagePreview(null);
     }
   };
 
-  const handleEditArtwork = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!actor || editingId === null) return;
-    setEditLoading(true);
+  const handleAdd = async () => {
+    if (!newTitle.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+    if (!newImageFile) {
+      toast.error('Please select an image');
+      return;
+    }
     try {
-      let blob: ExternalBlob;
-      if (editFile) {
-        const bytes = new Uint8Array(await editFile.arrayBuffer());
-        blob = ExternalBlob.fromBytes(bytes);
-      } else {
-        const artwork = artworks.find((a) => a.id === editingId);
-        if (!artwork) return;
-        blob = artwork.image;
+      const bytes = await readFileAsUint8Array(newImageFile);
+      await uploadArtwork.mutateAsync({
+        title: newTitle.trim(),
+        description: newDescription.trim(),
+        imageBytes: bytes,
+        format: newImageFile.type || null,
+        fileName: newImageFile.name || null,
+      });
+      toast.success('Artwork uploaded successfully!');
+      setNewTitle('');
+      setNewDescription('');
+      setNewImageFile(null);
+      setNewImagePreview(null);
+      setShowAddForm(false);
+    } catch {
+      toast.error('Failed to upload artwork');
+    }
+  };
+
+  const startEdit = (artwork: Artwork) => {
+    setEditingArtwork(artwork);
+    setEditTitle(artwork.title);
+    setEditDescription(artwork.description);
+    setEditImageFile(null);
+    setEditImagePreview(null);
+  };
+
+  const handleEdit = async () => {
+    if (!editingArtwork) return;
+    if (!editTitle.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+    try {
+      let bytes: Uint8Array<ArrayBuffer> = new Uint8Array(new ArrayBuffer(0));
+      let format: string | null = null;
+      let fileName: string | null = null;
+      if (editImageFile) {
+        bytes = await readFileAsUint8Array(editImageFile);
+        format = editImageFile.type || null;
+        fileName = editImageFile.name || null;
       }
-      await actor.updateArtwork(editingId, editTitle, editDesc, blob);
-      setEditingId(null);
-      refetchArtworks();
-      queryClient.invalidateQueries({ queryKey: ['artworks'] });
-    } catch (err: any) {
-      alert(err?.message || 'Failed to update artwork');
-    } finally {
-      setEditLoading(false);
+      await editArtwork.mutateAsync({
+        id: editingArtwork.id,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        imageBytes: bytes,
+        format,
+        fileName,
+      });
+      toast.success('Artwork updated successfully!');
+      setEditingArtwork(null);
+      setEditImageFile(null);
+      setEditImagePreview(null);
+    } catch {
+      toast.error('Failed to update artwork');
     }
   };
 
-  const handleImageUpload = async (type: 'logo' | 'cover' | 'portrait', file: File) => {
-    if (!actor) return;
-    setImageLoading(type);
-    setImageSuccess('');
+  const handleDelete = async (id: bigint) => {
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      const blob = ExternalBlob.fromBytes(bytes);
-      if (type === 'logo') {
-        await actor.uploadLogo(blob);
-        queryClient.invalidateQueries({ queryKey: ['logo'] });
-      } else if (type === 'cover') {
-        await actor.uploadCoverImage(blob);
-        queryClient.invalidateQueries({ queryKey: ['coverImage'] });
-      } else {
-        await actor.uploadArtistPortrait(blob);
-        queryClient.invalidateQueries({ queryKey: ['artistPortrait'] });
-      }
-      setImageSuccess(`${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully!`);
-    } catch (err: any) {
-      alert(err?.message || `Failed to upload ${type}`);
-    } finally {
-      setImageLoading(null);
+      await deleteArtwork.mutateAsync(id);
+      toast.success('Artwork deleted');
+    } catch {
+      toast.error('Failed to delete artwork');
     }
   };
-
-  const handleUpdateText = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!actor) return;
-    setTextLoading(true);
-    setTextSuccess('');
-    try {
-      await actor.updateTextContent(artistName, tagline, bio);
-      queryClient.invalidateQueries({ queryKey: ['textContent'] });
-      setTextSuccess('Text content updated successfully!');
-    } catch (err: any) {
-      alert(err?.message || 'Failed to update text content');
-    } finally {
-      setTextLoading(false);
-    }
-  };
-
-  // Show loading while checking auth/admin status
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying admin access...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show access denied only when fully loaded and confirmed not admin
-  if (!isLoading && isAuthenticated && isAdmin === false) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">Access Denied</h2>
-          <p className="text-red-500 mb-6">Your account does not have admin privileges.</p>
-          <button
-            onClick={handleLogout}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors mb-3"
-          >
-            Logout
-          </button>
-          <button
-            onClick={() => navigate({ to: '/' })}
-            className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-lg transition-colors"
-          >
-            ← Back to Portfolio
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
-            <p className="text-xs text-gray-500">Khudrang Kalakaar Portfolio</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 hidden sm:block">
-              {identity?.getPrincipal().toString().slice(0, 12)}...
-            </span>
-            <button
-              onClick={handleLogout}
-              className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-foreground">Artwork Gallery</h2>
+        <Button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="gap-2"
+          size="sm"
+        >
+          <Plus size={16} />
+          Add Artwork
+        </Button>
+      </div>
 
-      {/* Tabs */}
-      <div className="max-w-6xl mx-auto px-4 pt-6">
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
-          {(['gallery', 'images', 'text'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
-                activeTab === tab
-                  ? 'border-orange-500 text-orange-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab === 'gallery' ? 'Gallery' : tab === 'images' ? 'Site Images' : 'Text Content'}
-            </button>
-          ))}
-        </div>
-
-        {/* Gallery Tab */}
-        {activeTab === 'gallery' && (
-          <div className="space-y-6 pb-12">
-            {/* Add Artwork Form */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Add New Artwork</h2>
-              <form onSubmit={handleAddArtwork} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={artworkTitle}
-                  onChange={(e) => setArtworkTitle(e.target.value)}
-                  required
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-                <textarea
-                  placeholder="Description"
-                  value={artworkDesc}
-                  onChange={(e) => setArtworkDesc(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setArtworkFile(e.target.files?.[0] || null)}
-                  required
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
-                />
-                {artworkLoading && uploadProgress > 0 && (
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-orange-500 h-2 rounded-full transition-all"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
-                  </div>
-                )}
-                {artworkError && <p className="text-red-500 text-sm">{artworkError}</p>}
-                {artworkSuccess && <p className="text-green-600 text-sm">{artworkSuccess}</p>}
-                <button
-                  type="submit"
-                  disabled={artworkLoading}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-2"
-                >
-                  {artworkLoading && (
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {artworkLoading ? 'Uploading...' : 'Add Artwork'}
-                </button>
-              </form>
+      {showAddForm && (
+        <div className="border border-border rounded-lg p-5 bg-card space-y-4">
+          <h3 className="font-semibold text-foreground">New Artwork</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-title">Title *</Label>
+              <Input
+                id="new-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Artwork title"
+              />
             </div>
-
-            {/* Artworks List */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Artworks ({artworks.length})
-              </h2>
-              {artworks.length === 0 ? (
-                <p className="text-gray-500 text-sm">No artworks yet.</p>
+            <div className="space-y-2">
+              <Label htmlFor="new-desc">Description</Label>
+              <Input
+                id="new-desc"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Short description"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Image *</Label>
+            <div
+              className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors"
+              onClick={() => addFileRef.current?.click()}
+            >
+              {newImagePreview ? (
+                <img src={newImagePreview} alt="Preview" className="max-h-40 mx-auto rounded object-contain" />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {artworks.map((artwork) => (
-                    <div key={String(artwork.id)} className="border border-gray-200 rounded-lg overflow-hidden">
-                      {editingId === artwork.id ? (
-                        <form onSubmit={handleEditArtwork} className="p-4 space-y-3">
-                          <input
-                            type="text"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                            required
-                          />
-                          <textarea
-                            value={editDesc}
-                            onChange={(e) => setEditDesc(e.target.value)}
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                          />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setEditFile(e.target.files?.[0] || null)}
-                            className="w-full text-xs text-gray-500"
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              type="submit"
-                              disabled={editLoading}
-                              className="flex-1 bg-orange-500 text-white text-sm py-1.5 rounded-lg disabled:opacity-60"
-                            >
-                              {editLoading ? 'Saving...' : 'Save'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingId(null)}
-                              className="flex-1 border border-gray-300 text-gray-600 text-sm py-1.5 rounded-lg"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <>
-                          <img
-                            src={artwork.image.getDirectURL()}
-                            alt={artwork.title}
-                            className="w-full h-40 object-cover"
-                          />
-                          <div className="p-3">
-                            <p className="font-medium text-gray-900 text-sm truncate">{artwork.title}</p>
-                            <p className="text-gray-500 text-xs mt-1 line-clamp-2">{artwork.description}</p>
-                            <div className="flex gap-2 mt-3">
-                              <button
-                                onClick={() => {
-                                  setEditingId(artwork.id);
-                                  setEditTitle(artwork.title);
-                                  setEditDesc(artwork.description);
-                                  setEditFile(null);
-                                }}
-                                className="flex-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 py-1.5 rounded-lg transition-colors"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteArtwork(artwork.id)}
-                                className="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-1.5 rounded-lg transition-colors"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <ImageIcon size={32} />
+                  <span className="text-sm">Click to select image</span>
                 </div>
               )}
             </div>
+            <input
+              ref={addFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleNewImageChange(e.target.files?.[0] || null)}
+            />
           </div>
-        )}
-
-        {/* Site Images Tab */}
-        {activeTab === 'images' && (
-          <div className="space-y-6 pb-12">
-            {imageSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-                {imageSuccess}
-              </div>
-            )}
-            {[
-              { key: 'logo' as const, label: 'Logo', current: logo, file: logoFile, setFile: setLogoFile },
-              { key: 'cover' as const, label: 'Cover Image', current: coverImage, file: coverFile, setFile: setCoverFile },
-              { key: 'portrait' as const, label: 'Artist Portrait', current: artistPortrait, file: portraitFile, setFile: setPortraitFile },
-            ].map(({ key, label, current, file, setFile }) => (
-              <div key={key} className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">{label}</h2>
-                {current && (
-                  <img
-                    src={current.getDirectURL()}
-                    alt={label}
-                    className="w-full max-h-48 object-cover rounded-lg mb-4"
-                  />
-                )}
-                <div className="flex gap-3 items-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    className="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
-                  />
-                  <button
-                    onClick={() => file && handleImageUpload(key, file)}
-                    disabled={!file || imageLoading === key}
-                    className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap flex items-center gap-2"
-                  >
-                    {imageLoading === key && (
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    )}
-                    {imageLoading === key ? 'Uploading...' : 'Upload'}
-                  </button>
-                </div>
-              </div>
-            ))}
+          <div className="flex gap-3">
+            <Button onClick={handleAdd} disabled={uploadArtwork.isPending} className="gap-2">
+              {uploadArtwork.isPending && <Loader2 size={16} className="animate-spin" />}
+              Upload Artwork
+            </Button>
+            <Button variant="outline" onClick={() => { setShowAddForm(false); setNewImagePreview(null); }}>
+              Cancel
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Text Content Tab */}
-        {activeTab === 'text' && (
-          <div className="pb-12">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Text Content</h2>
-              <form onSubmit={handleUpdateText} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Artist Name</label>
-                  <input
-                    type="text"
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
-                  <input
-                    type="text"
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={6}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                    required
-                  />
-                </div>
-                {textSuccess && <p className="text-green-600 text-sm">{textSuccess}</p>}
-                <button
-                  type="submit"
-                  disabled={textLoading}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-2"
-                >
-                  {textLoading && (
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {textLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </form>
+      {editingArtwork && (
+        <div className="border border-accent rounded-lg p-5 bg-card space-y-4">
+          <h3 className="font-semibold text-foreground">Edit Artwork</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title *</Label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Artwork title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-desc">Description</Label>
+              <Input
+                id="edit-desc"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Short description"
+              />
             </div>
           </div>
-        )}
+          <div className="space-y-2">
+            <Label>Image (leave empty to keep current)</Label>
+            <div
+              className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors"
+              onClick={() => editFileRef.current?.click()}
+            >
+              {editImagePreview ? (
+                <img src={editImagePreview} alt="Preview" className="max-h-40 mx-auto rounded object-contain" />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <ImageIcon size={32} />
+                  <span className="text-sm">Click to replace image (optional)</span>
+                </div>
+              )}
+            </div>
+            <input
+              ref={editFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleEditImageChange(e.target.files?.[0] || null)}
+            />
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={handleEdit} disabled={editArtwork.isPending} className="gap-2">
+              {editArtwork.isPending && <Loader2 size={16} className="animate-spin" />}
+              Save Changes
+            </Button>
+            <Button variant="outline" onClick={() => { setEditingArtwork(null); setEditImagePreview(null); }}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : !artworks || artworks.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <ImageIcon size={48} className="mx-auto mb-3 opacity-30" />
+          <p>No artworks yet. Add your first artwork above.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {artworks.map((artwork) => (
+            <div
+              key={Number(artwork.id)}
+              className="flex items-center gap-4 p-4 border border-border rounded-lg bg-card hover:bg-muted/30 transition-colors"
+            >
+              <ArtworkThumb artwork={artwork} />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground truncate">{artwork.title}</p>
+                {artwork.description && (
+                  <p className="text-sm text-muted-foreground truncate">{artwork.description}</p>
+                )}
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => startEdit(artwork)}
+                  title="Edit"
+                >
+                  <Edit size={16} />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="icon" className="text-destructive hover:text-destructive" title="Delete">
+                      <Trash2 size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Artwork</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{artwork.title}"? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(artwork.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Site Images Tab ───────────────────────────────────────────────────────────
+
+interface ImageUploadCardProps {
+  label: string;
+  blob: ExternalBlob | null | undefined;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  isPending: boolean;
+  onFileChange: (file: File) => void;
+}
+
+function ImageUploadCard({ label, blob, inputRef, isPending, onFileChange }: ImageUploadCardProps) {
+  return (
+    <div className="border border-border rounded-lg p-5 bg-card space-y-3">
+      <h3 className="font-semibold text-foreground">{label}</h3>
+      {blob ? (
+        <img
+          src={blob.getDirectURL()}
+          alt={label}
+          className="w-full max-h-48 object-contain rounded bg-muted"
+        />
+      ) : (
+        <div className="w-full h-32 bg-muted rounded flex items-center justify-center">
+          <ImageIcon size={32} className="text-muted-foreground" />
+        </div>
+      )}
+      <Button
+        variant="outline"
+        className="w-full gap-2"
+        onClick={() => inputRef.current?.click()}
+        disabled={isPending}
+      >
+        {isPending ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+        {isPending ? 'Uploading...' : 'Upload New'}
+      </Button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onFileChange(file);
+        }}
+      />
+    </div>
+  );
+}
+
+function SiteImagesTab() {
+  const { data: logo } = useLogo();
+  const { data: coverImage } = useCoverImage();
+  const { data: artistPortrait } = useArtistPortrait();
+
+  const uploadLogo = useUploadLogo();
+  const uploadCoverImage = useUploadCoverImage();
+  const uploadArtistPortrait = useUploadArtistPortrait();
+
+  const logoRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (
+    file: File,
+    mutate: (blob: ExternalBlob) => Promise<void>,
+    label: string
+  ) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer) as Uint8Array<ArrayBuffer>;
+      const blob = ExternalBlob.fromBytes(bytes);
+      await mutate(blob);
+      toast.success(`${label} updated successfully!`);
+    } catch {
+      toast.error(`Failed to update ${label}`);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-foreground">Site Images</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <ImageUploadCard
+          label="Logo"
+          blob={logo}
+          inputRef={logoRef}
+          isPending={uploadLogo.isPending}
+          onFileChange={(file) => handleUpload(file, (b) => uploadLogo.mutateAsync(b), 'Logo')}
+        />
+        <ImageUploadCard
+          label="Cover / Hero Image"
+          blob={coverImage}
+          inputRef={coverRef}
+          isPending={uploadCoverImage.isPending}
+          onFileChange={(file) => handleUpload(file, (b) => uploadCoverImage.mutateAsync(b), 'Cover Image')}
+        />
+        <ImageUploadCard
+          label="Artist Portrait"
+          blob={artistPortrait}
+          inputRef={portraitRef}
+          isPending={uploadArtistPortrait.isPending}
+          onFileChange={(file) => handleUpload(file, (b) => uploadArtistPortrait.mutateAsync(b), 'Artist Portrait')}
+        />
       </div>
+    </div>
+  );
+}
+
+// ── Text Content Tab ──────────────────────────────────────────────────────────
+
+function TextContentTab() {
+  const { data: textContent, isLoading } = useTextContent();
+  const updateTextContent = useUpdateTextContent();
+
+  const [artistName, setArtistName] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [bio, setBio] = useState('');
+  const [initialized, setInitialized] = useState(false);
+
+  if (textContent && !initialized) {
+    setArtistName(textContent.artistName);
+    setTagline(textContent.tagline);
+    setBio(textContent.bio);
+    setInitialized(true);
+  }
+
+  const handleSave = async () => {
+    try {
+      await updateTextContent.mutateAsync({ artistName, tagline, bio });
+      toast.success('Text content updated successfully!');
+    } catch {
+      toast.error('Failed to update text content');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-foreground">Text Content</h2>
+      <div className="border border-border rounded-lg p-5 bg-card space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="artist-name">Artist Name</Label>
+          <Input
+            id="artist-name"
+            value={artistName}
+            onChange={(e) => setArtistName(e.target.value)}
+            placeholder="Artist name"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tagline">Tagline</Label>
+          <Input
+            id="tagline"
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+            placeholder="Your tagline"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="bio">Bio</Label>
+          <Textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Artist bio"
+            rows={6}
+          />
+        </div>
+        <Button onClick={handleSave} disabled={updateTextContent.isPending} className="gap-2">
+          {updateTextContent.isPending && <Loader2 size={16} className="animate-spin" />}
+          Save Changes
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Social Links Tab ──────────────────────────────────────────────────────────
+
+function SocialLinksTab() {
+  const { data: mediaContacts, isLoading } = useMediaContacts();
+  const updateMediaContacts = useUpdateMediaContacts();
+
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [instagramProfile, setInstagramProfile] = useState('');
+  const [initialized, setInitialized] = useState(false);
+
+  if (mediaContacts && !initialized) {
+    setWhatsappNumber(mediaContacts.whatsappNumber);
+    setInstagramProfile(mediaContacts.instagramProfile);
+    setInitialized(true);
+  }
+
+  const handleSave = async () => {
+    if (!whatsappNumber.trim()) {
+      toast.error('Please enter a WhatsApp number');
+      return;
+    }
+    if (!instagramProfile.trim()) {
+      toast.error('Please enter an Instagram profile URL');
+      return;
+    }
+    try {
+      await updateMediaContacts.mutateAsync({
+        whatsappNumber: whatsappNumber.trim(),
+        instagramProfile: instagramProfile.trim(),
+      });
+      toast.success('Social links updated successfully!');
+    } catch {
+      toast.error('Failed to update social links');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold text-foreground">Social Links</h2>
+      <div className="border border-border rounded-lg p-5 bg-card space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="whatsapp" className="flex items-center gap-2">
+            <Phone size={16} className="text-green-600" />
+            WhatsApp Number
+          </Label>
+          <Input
+            id="whatsapp"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            placeholder="e.g. 917665854193 (with country code, no + or spaces)"
+          />
+          <p className="text-xs text-muted-foreground">
+            Enter the number with country code (e.g. 917665854193 for India +91 76658 54193). Used to generate the WhatsApp link.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="instagram" className="flex items-center gap-2">
+            <Instagram size={16} className="text-pink-600" />
+            Instagram Profile URL
+          </Label>
+          <Input
+            id="instagram"
+            value={instagramProfile}
+            onChange={(e) => setInstagramProfile(e.target.value)}
+            placeholder="e.g. https://instagram.com/yourusername"
+          />
+          <p className="text-xs text-muted-foreground">
+            Full Instagram profile URL. Used for the QR code and contact links.
+          </p>
+        </div>
+
+        {(whatsappNumber || instagramProfile) && (
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <p className="text-sm font-medium text-foreground">Preview</p>
+            {whatsappNumber && (
+              <p className="text-sm text-muted-foreground">
+                WhatsApp link:{' '}
+                <a
+                  href={`https://wa.me/${whatsappNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline"
+                >
+                  https://wa.me/{whatsappNumber}
+                </a>
+              </p>
+            )}
+            {instagramProfile && (
+              <p className="text-sm text-muted-foreground">
+                Instagram:{' '}
+                <a
+                  href={instagramProfile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline"
+                >
+                  {instagramProfile}
+                </a>
+              </p>
+            )}
+          </div>
+        )}
+
+        <Button onClick={handleSave} disabled={updateMediaContacts.isPending} className="gap-2">
+          {updateMediaContacts.isPending && <Loader2 size={16} className="animate-spin" />}
+          Save Social Links
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Admin Panel ──────────────────────────────────────────────────────────
+
+export default function AdminPanel() {
+  const navigate = useNavigate();
+
+  const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+  if (!isAuthenticated) {
+    navigate({ to: '/admin-login' });
+    return null;
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuthenticated');
+    navigate({ to: '/admin-login' });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-bold text-foreground">Admin Panel</h1>
+            <p className="text-xs text-muted-foreground">Khudrang Kalakaar</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
+            <LogOut size={16} />
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="gallery">
+          <TabsList className="mb-8 flex flex-wrap gap-1 h-auto">
+            <TabsTrigger value="gallery" className="gap-2">
+              <ImageIcon size={16} />
+              Gallery
+            </TabsTrigger>
+            <TabsTrigger value="site-images" className="gap-2">
+              <Upload size={16} />
+              Site Images
+            </TabsTrigger>
+            <TabsTrigger value="text-content" className="gap-2">
+              <Type size={16} />
+              Text Content
+            </TabsTrigger>
+            <TabsTrigger value="social-links" className="gap-2">
+              <Phone size={16} />
+              Social Links
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="gallery">
+            <GalleryTab />
+          </TabsContent>
+          <TabsContent value="site-images">
+            <SiteImagesTab />
+          </TabsContent>
+          <TabsContent value="text-content">
+            <TextContentTab />
+          </TabsContent>
+          <TabsContent value="social-links">
+            <SocialLinksTab />
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 }

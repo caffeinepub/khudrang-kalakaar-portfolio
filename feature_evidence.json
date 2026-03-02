@@ -2,10 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-admin-panel-login-flow-in-adminlogin-tsx-the-login-button-currently-gets-stuck-in-initializing-state-and-shows-please-complete-authentication-in-the-popup-without-proceeding-the-login-should-validate-the-hardcoded-credentials-and-then-trigger-internet-identity-authentication-cleanly-allowing-the-admin-to-successfully-reach-the-admin-panel-ensure-the-button-state-resets-properly-if-authentication-fails-or-is-cancelled",
-      "featureTitle": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
+      "featureId": "feature-replace-all-occurrences-of-the-whatsapp-pre-filled-message-text-hello-mudit-sharma-used-in-whatsapp-href-link-parameters-across-navigation-herosection-contactsection-and-footer-components-with-a-proper-artwork-inquiry-message-such-as-hello-i-came-across-your-artwork-portfolio-and-i-m-interested-in-discussing-a-potential-project-could-you-please-share-more-details-about-your-services-and-availability",
+      "featureTitle": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' (used in WhatsApp href/link parameters across Navigation, HeroSection, ContactSection, and Footer components) with a proper artwork inquiry message such as: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?'",
       "files": [
-        "frontend/src/pages/AdminLogin.tsx"
+        "frontend/src/components/ContactSection.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/HeroSection.tsx",
+        "frontend/src/components/Navigation.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -14,50 +17,12 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "authorization@4.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-hero-cover-page-tagline-in-herosection-tsx-to-read-transforming-blank-walls-into-meaningful-art-replacing-the-current-tagline-text",
-      "featureTitle": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
-      "files": [
-        "frontend/src/components/HeroSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-replace-the-dynamically-generated-qr-code-in-qrsection-tsx-with-a-static-image-of-the-official-khudrangkalakaar-instagram-qr-code-the-orange-pink-gradient-qr-code-with-the-instagram-logo-in-the-center-and-khudrangkalakaar-label-as-provided-in-the-uploaded-second-image-display-this-static-image-asset-instead-of-the-programmatically-generated-qr-code",
-      "featureTitle": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
-      "files": [
-        "frontend/src/components/QRSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

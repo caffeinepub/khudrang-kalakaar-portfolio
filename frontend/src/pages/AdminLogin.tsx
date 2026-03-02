@@ -1,240 +1,141 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useActor } from '../hooks/useActor';
-import { UserRole } from '../backend';
+import { Shield, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 
-const ADMIN_USERNAME = 'Deepak Kumawat';
+const ADMIN_USERNAME = 'DeepakKumawat';
 const ADMIN_PASSWORD = 'Kinnu*0613';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { login, clear, identity, loginStatus, isLoginError, isLoginIdle } = useInternetIdentity();
-  const { actor, isFetching: actorFetching } = useActor();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [credentialsValid, setCredentialsValid] = useState(false);
-  const [isAssigningRole, setIsAssigningRole] = useState(false);
-  const [step, setStep] = useState<'credentials' | 'authenticating' | 'assigning'>('credentials');
-  const assigningRef = useRef(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const resetToIdle = () => {
-    setCredentialsValid(false);
-    setStep('credentials');
-    assigningRef.current = false;
-    setIsAssigningRole(false);
-  };
-
-  // After II login + actor ready, assign admin role and redirect
-  useEffect(() => {
-    if (!credentialsValid) return;
-    if (!identity) return;
-    if (!actor || actorFetching) return;
-    if (assigningRef.current) return;
-
-    const assignAndRedirect = async () => {
-      assigningRef.current = true;
-      setIsAssigningRole(true);
-      setStep('assigning');
-      try {
-        await actor.assignCallerUserRole(identity.getPrincipal(), UserRole.admin);
-        navigate({ to: '/admin' });
-      } catch (err: any) {
-        const msg = (err?.message || String(err)).toLowerCase();
-        // If already admin or role already assigned, just redirect
-        if (msg.includes('already') || msg.includes('admin') || msg.includes('unauthorized')) {
-          try {
-            const isAdmin = await actor.isCallerAdmin();
-            if (isAdmin) {
-              navigate({ to: '/admin' });
-              return;
-            }
-          } catch {
-            // ignore
-          }
-          navigate({ to: '/admin' });
-        } else {
-          setError('Login failed. Please try again.');
-          resetToIdle();
-        }
-      } finally {
-        setIsAssigningRole(false);
-      }
-    };
-
-    assignAndRedirect();
-  }, [credentialsValid, identity, actor, actorFetching]);
-
-  // Detect when II popup is dismissed without completing login
-  // loginStatus goes back to 'idle' after being 'logging-in' without identity, or becomes 'loginError'
-  useEffect(() => {
-    if (!credentialsValid) return;
-    if (step !== 'authenticating') return;
-    // If loginStatus returned to idle or error and we still have no identity, user cancelled
-    if ((isLoginIdle || isLoginError) && !identity) {
-      if (isLoginError) {
-        setError('Authentication failed. Please try again.');
-      } else {
-        setError('Authentication cancelled. Please try again.');
-      }
-      resetToIdle();
-    }
-  }, [loginStatus, identity, credentialsValid, step, isLoginIdle, isLoginError]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
+    setIsLoading(true);
 
-    const trimmedUsername = username.trim();
-    const trimmedPassword = password.trim();
+    // Small delay for UX feedback
+    await new Promise(res => setTimeout(res, 400));
 
-    if (trimmedUsername !== ADMIN_USERNAME || trimmedPassword !== ADMIN_PASSWORD) {
-      setError('Invalid Credentials');
-      return;
-    }
-
-    setCredentialsValid(true);
-    setStep('authenticating');
-    assigningRef.current = false;
-
-    // If already authenticated with Internet Identity, the useEffect will handle it
-    if (identity) {
-      return;
-    }
-
-    try {
-      // If currently logged in with a different identity, clear first
-      if (loginStatus === 'success') {
-        await clear();
-        await new Promise((r) => setTimeout(r, 300));
-      }
-      await login();
-    } catch (err: any) {
-      const msg = err?.message || String(err);
-      if (msg === 'User is already authenticated') {
-        // Identity already available, useEffect will handle it
-        return;
-      }
-      // User closed the popup or auth failed
-      if (
-        msg.toLowerCase().includes('cancel') ||
-        msg.toLowerCase().includes('closed') ||
-        msg.toLowerCase().includes('abort')
-      ) {
-        setError('Authentication cancelled. Please try again.');
-      } else {
-        setError('Authentication failed. Please try again.');
-      }
-      resetToIdle();
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      sessionStorage.setItem('adminAuthenticated', 'true');
+      navigate({ to: '/admin' });
+    } else {
+      setError('Invalid username or password.');
+      setIsLoading(false);
     }
   };
 
-  const isLoading =
-    loginStatus === 'logging-in' ||
-    isAssigningRole ||
-    (credentialsValid && actorFetching && !!identity) ||
-    step === 'assigning';
-
-  const getButtonText = () => {
-    if (loginStatus === 'logging-in') return 'Authenticating...';
-    if (step === 'assigning' || isAssigningRole) return 'Setting up admin...';
-    if (credentialsValid && actorFetching && !!identity) return 'Initializing...';
-    if (credentialsValid && !!identity && !isAssigningRole) return 'Redirecting...';
-    return 'Login';
+  const handleBack = () => {
+    navigate({ to: '/' });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Admin Login</h1>
-        <p className="text-center text-gray-500 text-sm mb-6">Khudrang Kalakaar Portfolio</p>
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              disabled={isLoading}
-              autoComplete="username"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-              required
-            />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="bg-card rounded-2xl shadow-card-custom border border-border p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-terracotta/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-8 h-8 text-terracotta" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
+            <p className="text-muted-foreground mt-1">Khudrang Kalakaar Portfolio</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              disabled={isLoading}
-              autoComplete="current-password"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-              required
-            />
-          </div>
-
+          {/* Error message */}
           {error && (
-            <p className="text-red-500 text-sm text-center font-medium">{error}</p>
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm text-center">
+              {error}
+            </div>
           )}
 
-          {step === 'authenticating' && !error && loginStatus === 'logging-in' && (
-            <p className="text-orange-500 text-sm text-center">
-              Please complete authentication in the popup...
-            </p>
-          )}
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1.5">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-colors disabled:opacity-60"
+                placeholder="Enter username"
+              />
+            </div>
 
-          {step === 'assigning' && (
-            <p className="text-orange-500 text-sm text-center">
-              Setting up admin privileges...
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading && (
-              <svg
-                className="animate-spin h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 pr-12 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta/50 transition-colors disabled:opacity-60"
+                  placeholder="Enter password"
                 />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            )}
-            {getButtonText()}
-          </button>
-        </form>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
 
-        <div className="mt-6 text-center">
+            <button
+              type="submit"
+              disabled={isLoading || !username || !password}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-terracotta text-white rounded-xl font-semibold text-base hover:bg-terracotta-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm mt-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  <Shield className="w-5 h-5" />
+                  Login
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Back link */}
           <button
-            onClick={() => navigate({ to: '/' })}
-            className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+            onClick={handleBack}
+            className="w-full mt-4 flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm py-2"
           >
-            ← Back to Portfolio
+            <ArrowLeft className="w-4 h-4" />
+            Back to Portfolio
           </button>
         </div>
+
+        {/* Hint */}
+        <p className="text-center text-muted-foreground text-xs mt-4">
+          Double-tap the logo on the portfolio page to access this panel
+        </p>
       </div>
     </div>
   );

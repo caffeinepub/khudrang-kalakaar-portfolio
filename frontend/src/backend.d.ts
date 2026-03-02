@@ -22,8 +22,14 @@ export interface TextContent {
 export interface Artwork {
     id: bigint;
     title: string;
+    imageFileName?: string;
+    imageFormat?: string;
     description: string;
-    image: ExternalBlob;
+    image: Uint8Array;
+}
+export interface MediaContacts {
+    instagramProfile: string;
+    whatsappNumber: string;
 }
 export interface UserProfile {
     name: string;
@@ -34,25 +40,25 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    addArtwork(title: string, description: string, image: ExternalBlob): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteArtwork(id: bigint): Promise<void>;
+    editArtwork(id: bigint, title: string, description: string, imageBytes: Uint8Array, format: string | null, fileName: string | null): Promise<void>;
     getAllArtworks(): Promise<Array<Artwork>>;
     getArtistPortrait(): Promise<ExternalBlob | null>;
     getArtwork(id: bigint): Promise<Artwork | null>;
-    getArtworksByDescription(description: string): Promise<Array<Artwork>>;
-    getArtworksByTitle(title: string): Promise<Array<Artwork>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCoverImage(): Promise<ExternalBlob | null>;
     getLogo(): Promise<ExternalBlob | null>;
+    getMediaContacts(): Promise<MediaContacts | null>;
     getTextContent(): Promise<TextContent>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateArtwork(id: bigint, title: string, description: string, image: ExternalBlob): Promise<void>;
+    updateMediaContacts(whatsappNumber: string, instagramProfile: string): Promise<void>;
     updateTextContent(artistName: string, tagline: string, bio: string): Promise<void>;
     uploadArtistPortrait(blob: ExternalBlob): Promise<void>;
+    uploadArtwork(title: string, description: string, imageBytes: Uint8Array, format: string | null, fileName: string | null): Promise<bigint>;
     uploadCoverImage(blob: ExternalBlob): Promise<void>;
     uploadLogo(blob: ExternalBlob): Promise<void>;
 }

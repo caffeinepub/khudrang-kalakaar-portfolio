@@ -1,116 +1,119 @@
-import React from 'react';
-import { SiInstagram, SiWhatsapp } from 'react-icons/si';
-import { MapPin, Phone } from 'lucide-react';
+import { MessageCircle, Instagram, MapPin, Loader2 } from 'lucide-react';
+import { useMediaContacts } from '../hooks/useQueries';
 
-const WHATSAPP_NUMBER = '917665854193';
+const DEFAULT_WHATSAPP = '917665854193';
+const DEFAULT_INSTAGRAM = 'https://instagram.com/khudrangkalakaar';
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  'Hello! I am interested in your artwork and would like to discuss a custom art project or commission. Could you please share more details about your services, pricing, and availability? Thank you!'
+  "Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?"
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
-const INSTAGRAM_URL = 'https://www.instagram.com/khudrangkalakaar';
 
 export default function ContactSection() {
+  const { data: mediaContacts, isLoading } = useMediaContacts();
+
+  const whatsappNumber = mediaContacts?.whatsappNumber || DEFAULT_WHATSAPP;
+  const instagramProfile = mediaContacts?.instagramProfile || DEFAULT_INSTAGRAM;
+
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${WHATSAPP_MESSAGE}`;
+  const whatsappDisplay = whatsappNumber.startsWith('91')
+    ? `+91 ${whatsappNumber.slice(2, 7)} ${whatsappNumber.slice(7)}`
+    : `+${whatsappNumber}`;
+
   return (
-    <section id="contact" className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section id="contact" className="py-20 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
-          <span className="text-terracotta text-sm font-semibold uppercase tracking-widest">Get In Touch</span>
-          <h2 className="text-4xl font-bold text-gray-900 mt-2">Let's Create Together</h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-            Have a project in mind? Reach out and let's bring your vision to life through art.
-          </p>
+          <span className="text-accent font-medium text-sm uppercase tracking-widest">Get In Touch</span>
+          <h2 className="text-4xl font-bold text-foreground mt-2 mb-4">Contact Me</h2>
+          <div className="w-16 h-1 bg-accent mx-auto rounded-full" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Contact Info */}
-          <div className="space-y-6">
-            {/* Location Card */}
-            <div className="bg-gray-50 rounded-2xl p-6 flex items-start gap-4">
-              <div className="bg-terracotta/10 rounded-xl p-3 shrink-0">
-                <MapPin className="w-6 h-6 text-terracotta" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Location</h3>
-                <p className="text-gray-600 text-sm">Rajasthan, India</p>
-                <p className="text-gray-500 text-xs mt-1">Available for projects across India</p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Location */}
+          <div className="bg-card rounded-2xl p-8 text-center shadow-card hover:shadow-lg transition-shadow">
+            <div className="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin size={24} className="text-accent" />
             </div>
-
-            {/* WhatsApp Card */}
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-50 rounded-2xl p-6 flex items-start gap-4 hover:bg-green-50 transition-colors group"
-            >
-              <div className="bg-green-100 rounded-xl p-3 shrink-0 group-hover:bg-green-200 transition-colors">
-                <Phone className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">WhatsApp</h3>
-                <p className="text-gray-600 text-sm">+91 76658 54193</p>
-                <p className="text-gray-500 text-xs mt-1">Click to chat on WhatsApp</p>
-              </div>
-            </a>
-
-            {/* Instagram Card */}
-            <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-50 rounded-2xl p-6 flex items-start gap-4 hover:bg-pink-50 transition-colors group"
-            >
-              <div className="bg-pink-100 rounded-xl p-3 shrink-0 group-hover:bg-pink-200 transition-colors">
-                <SiInstagram className="w-6 h-6 text-pink-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Instagram</h3>
-                <p className="text-gray-600 text-sm">@khudrangkalakaar</p>
-                <p className="text-gray-500 text-xs mt-1">Follow for latest artwork updates</p>
-              </div>
-            </a>
+            <h3 className="font-semibold text-foreground mb-2">Location</h3>
+            <p className="text-muted-foreground text-sm">Rajasthan, India</p>
+            <p className="text-muted-foreground text-sm">Available Pan India</p>
           </div>
 
-          {/* CTA Card */}
-          <div className="bg-gradient-to-br from-terracotta to-terracotta-dark rounded-2xl p-8 flex flex-col justify-between text-white">
-            <div>
-              <h3 className="text-2xl font-bold mb-3">Ready to Start Your Project?</h3>
-              <p className="text-white/80 text-sm leading-relaxed mb-6">
-                Whether it's a mural for your home, office, hotel, or any space — Mudit Sharma brings
-                your vision to life with vibrant colors and artistic excellence.
-              </p>
-              <ul className="space-y-2 mb-8">
-                {['Custom Murals & Wall Art', 'Hotel & Resort Decor', 'Commercial Spaces', 'Residential Projects'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-white/90">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+          {/* WhatsApp */}
+          <div className="bg-card rounded-2xl p-8 text-center shadow-card hover:shadow-lg transition-shadow">
+            <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle size={24} className="text-green-600" />
             </div>
-
-            <div className="space-y-3">
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-white text-terracotta font-semibold py-3 px-6 rounded-xl hover:bg-white/90 transition-colors w-full"
-              >
-                <SiWhatsapp className="w-5 h-5 text-green-600" />
-                Chat on WhatsApp
-              </a>
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 border border-white/40 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/10 transition-colors w-full"
-              >
-                <SiInstagram className="w-5 h-5" />
-                View on Instagram
-              </a>
-            </div>
+            <h3 className="font-semibold text-foreground mb-2">WhatsApp</h3>
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Loader2 size={14} className="animate-spin" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted-foreground text-sm mb-3">{whatsappDisplay}</p>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+                >
+                  Chat Now
+                </a>
+              </>
+            )}
           </div>
+
+          {/* Instagram */}
+          <div className="bg-card rounded-2xl p-8 text-center shadow-card hover:shadow-lg transition-shadow">
+            <div className="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Instagram size={24} className="text-pink-600" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-2">Instagram</h3>
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Loader2 size={14} className="animate-spin" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted-foreground text-sm mb-3">
+                  @{instagramProfile.replace(/.*instagram\.com\//, '').replace(/\/$/, '')}
+                </p>
+                <a
+                  href={instagramProfile}
+                  target="_blank"
+                  rel="noopener noreferrer external"
+                  className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+                >
+                  Follow Me
+                </a>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* CTA Panel */}
+        <div className="bg-accent rounded-2xl p-10 text-center text-white">
+          <h3 className="text-2xl font-bold mb-3">Ready to Transform Your Space?</h3>
+          <p className="text-white/80 mb-6 max-w-xl mx-auto">
+            Let's discuss your vision and create something extraordinary together.
+          </p>
+          {isLoading ? (
+            <div className="inline-flex items-center gap-2 bg-white/20 text-white px-8 py-3 rounded-full">
+              <Loader2 size={16} className="animate-spin" />
+              Loading...
+            </div>
+          ) : (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white text-accent font-semibold px-8 py-3 rounded-full hover:bg-white/90 transition-colors"
+            >
+              Start a Conversation
+            </a>
+          )}
         </div>
       </div>
     </section>

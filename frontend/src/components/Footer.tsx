@@ -1,104 +1,93 @@
-import React from 'react';
+import { useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { SiInstagram, SiWhatsapp } from 'react-icons/si';
-import { Heart } from 'lucide-react';
+import { Heart, MessageCircle, Instagram, MapPin } from 'lucide-react';
+import { useLogo, useMediaContacts } from '../hooks/useQueries';
 
-const WHATSAPP_NUMBER = '917665854193';
-const WHATSAPP_MESSAGE = encodeURIComponent('Hello Mudit Sharma');
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
-const INSTAGRAM_URL = 'https://www.instagram.com/khudrangkalakaar';
+const DEFAULT_WHATSAPP = '917665854193';
+const DEFAULT_INSTAGRAM = 'https://instagram.com/khudrangkalakaar';
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?"
+);
 
-const NAV_LINKS = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Services', href: '#services' },
-  { label: 'Portfolio', href: '#portfolio' },
-  { label: 'Contact', href: '#contact' },
+const navLinks = [
+  { href: '#home', label: 'Home' },
+  { href: '#about', label: 'About' },
+  { href: '#services', label: 'Services' },
+  { href: '#projects', label: 'Projects' },
+  { href: '#gallery', label: 'Gallery' },
+  { href: '#contact', label: 'Contact' },
 ];
 
 export default function Footer() {
   const navigate = useNavigate();
+  const { data: logo } = useLogo();
+  const { data: mediaContacts } = useMediaContacts();
 
-  const clickCount = React.useRef(0);
-  const clickTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleLogoClick = () => {
-    clickCount.current += 1;
-    if (clickTimer.current) clearTimeout(clickTimer.current);
+  const whatsappNumber = mediaContacts?.whatsappNumber || DEFAULT_WHATSAPP;
+  const instagramProfile = mediaContacts?.instagramProfile || DEFAULT_INSTAGRAM;
 
-    if (clickCount.current >= 2) {
-      clickCount.current = 0;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${WHATSAPP_MESSAGE}`;
+  const whatsappDisplay = whatsappNumber.startsWith('91')
+    ? `+91 ${whatsappNumber.slice(2, 7)} ${whatsappNumber.slice(7)}`
+    : `+${whatsappNumber}`;
+  const instagramHandle = instagramProfile
+    .replace(/.*instagram\.com\//, '')
+    .replace(/\/$/, '');
+
+  const handleLogoInteraction = () => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 2) {
+      tapCountRef.current = 0;
       navigate({ to: '/admin-login' });
-      return;
+    } else {
+      tapTimerRef.current = setTimeout(() => {
+        tapCountRef.current = 0;
+      }, 500);
     }
-
-    clickTimer.current = setTimeout(() => {
-      if (clickCount.current === 1) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      clickCount.current = 0;
-    }, 500);
   };
 
-  const scrollToSection = (href: string) => {
-    const id = href.replace('#', '');
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const logoSrc = logo
+    ? logo.getDirectURL()
+    : '/assets/generated/logo.dim_256x256.png';
 
-  const appId = encodeURIComponent(window.location.hostname || 'khudrang-kalakaar');
+  const appId = encodeURIComponent(
+    typeof window !== 'undefined' ? window.location.hostname : 'khudrang-kalakaar'
+  );
 
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+    <footer className="bg-card border-t border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div>
             <button
-              onClick={handleLogoClick}
-              className="font-bold text-xl tracking-tight mb-3 block text-left"
+              onClick={handleLogoInteraction}
+              className="flex items-center mb-4 focus:outline-none"
+              aria-label="Logo"
             >
-              <span className="text-terracotta">K</span>hudrang{' '}
-              <span className="text-terracotta">K</span>alakaar
+              <img src={logoSrc} alt="Logo" className="h-10 w-10 object-contain rounded-full" />
             </button>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Professional mural artist transforming spaces with vibrant, meaningful art across India.
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Transforming blank walls into meaningful art. Mural artist based in Rajasthan, available pan India.
             </p>
-            <div className="flex gap-3 mt-4">
-              <a
-                href={INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 hover:bg-pink-600 p-2.5 rounded-lg transition-colors"
-                aria-label="Instagram"
-              >
-                <SiInstagram className="w-4 h-4" />
-              </a>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 hover:bg-green-600 p-2.5 rounded-lg transition-colors"
-                aria-label="WhatsApp"
-              >
-                <SiWhatsapp className="w-4 h-4" />
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">
-              Quick Links
-            </h3>
+            <h3 className="font-semibold text-foreground mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.href}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                  <a
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-accent transition-colors"
                   >
                     {link.label}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -106,47 +95,47 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">
-              Contact
-            </h3>
+            <h3 className="font-semibold text-foreground mb-4">Contact</h3>
             <ul className="space-y-3">
+              <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin size={16} className="text-accent flex-shrink-0" />
+                Rajasthan, India
+              </li>
               <li>
                 <a
-                  href={WHATSAPP_URL}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
                 >
-                  <SiWhatsapp className="w-4 h-4 text-green-500" />
-                  +91 76658 54193
+                  <MessageCircle size={16} className="text-green-600 flex-shrink-0" />
+                  {whatsappDisplay}
                 </a>
               </li>
               <li>
                 <a
-                  href={INSTAGRAM_URL}
+                  href={instagramProfile}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2"
+                  rel="noopener noreferrer external"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
                 >
-                  <SiInstagram className="w-4 h-4 text-pink-500" />
-                  @khudrangkalakaar
+                  <Instagram size={16} className="text-pink-600 flex-shrink-0" />
+                  @{instagramHandle}
                 </a>
               </li>
-              <li className="text-gray-400 text-sm">📍 Rajasthan, India</li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} Khudrang Kalakaar. All rights reserved.</p>
           <p className="flex items-center gap-1">
-            Built with <Heart className="w-3 h-3 text-terracotta fill-terracotta" /> using{' '}
+            Built with <Heart size={14} className="text-accent fill-accent" /> using{' '}
             <a
               href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-terracotta hover:underline"
+              className="hover:text-accent transition-colors font-medium"
             >
               caffeine.ai
             </a>

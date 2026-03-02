@@ -1,46 +1,30 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T12:10:20.275Z",
+  "generatedAt": "2026-03-02T14:18:12.290Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
+        "summary": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' (used in WhatsApp href/link parameters across Navigation, HeroSection, ContactSection, and Footer components) with a proper artwork inquiry message such as: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?'",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminLogin.tsx"
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminLogin.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/HeroSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/HeroSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/QRSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/QRSection.tsx"
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx"
         ]
       }
     ]
@@ -50,10 +34,10 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png",
+    "frontend/src/components/ContactSection.tsx",
+    "frontend/src/components/Footer.tsx",
     "frontend/src/components/HeroSection.tsx",
-    "frontend/src/components/QRSection.tsx",
-    "frontend/src/pages/AdminLogin.tsx",
+    "frontend/src/components/Navigation.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

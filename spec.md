@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Admin Panel login stuck state, update the hero tagline, and replace the dynamic QR code with the official Instagram QR code image.
+**Goal:** Replace the generic WhatsApp pre-filled message "Hello Mudit Sharma" with a professional artwork inquiry message across all components.
 
 **Planned changes:**
-- Fix `AdminLogin.tsx` so the login button does not get stuck in "Initializing..." state; validate hardcoded credentials, open Internet Identity popup cleanly, and reset button state if authentication fails or is cancelled
-- Update the tagline in `HeroSection.tsx` to "Transforming Blank Walls into Meaningful Art."
-- Replace the dynamically generated QR code in `QRSection.tsx` with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (orange-to-pink gradient dot-style with Instagram logo in centre and bold pink label), served from `frontend/public/assets/generated/instagram-qr-khudrangkalakaar.png`
+- Update the WhatsApp `href` link in the Navigation "Hire Me" button to use the new inquiry message
+- Update the WhatsApp `href` link in the HeroSection "Hire Me" CTA button to use the new inquiry message
+- Update the WhatsApp `href` link in the ContactSection WhatsApp card to use the new inquiry message
+- Update the WhatsApp `href` link in the Footer to use the new inquiry message
+- New message text: "Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?"
 
-**User-visible outcome:** Admin can successfully log in through the Admin Panel without the button freezing; the hero section shows the updated tagline; the QR section displays the official Instagram QR code image.
+**User-visible outcome:** Clicking any WhatsApp/Hire Me button now opens WhatsApp with a professional artwork inquiry message pre-filled instead of "Hello Mudit Sharma".

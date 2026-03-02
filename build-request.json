@@ -1,80 +1,43 @@
 {
   "kind": "build_request",
-  "title": "Fix Admin Login, Update Cover Tagline, and Replace Instagram QR Code",
-  "projectName": "Khudrang Kalakaar",
-  "priority": "high",
+  "title": "Update WhatsApp message text to proper artwork inquiry",
+  "projectName": "Khudrang Kalakaar Portfolio",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
+      "text": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' (used in WhatsApp href/link parameters across Navigation, HeroSection, ContactSection, and Footer components) with a proper artwork inquiry message such as: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?'",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "This is current issues in Admin pannel login"
+          "Please change the WhatsApp text Hello Mudit Sharma To a proper text query regarding the artwork"
         ]
       },
       "acceptanceCriteria": [
-        "The login button does not remain stuck in 'Initializing...' indefinitely after credentials are entered",
-        "After entering valid credentials, the Internet Identity popup opens and completes successfully",
-        "If authentication is cancelled or fails, the button returns to its normal clickable state",
-        "Admin is redirected to the Admin Panel upon successful login"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Transforming Blank Walls into Meaningful Art.",
-          "Use this line on cover page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The cover/hero section displays the text 'Transforming Blank Walls into Meaningful Art.'",
-        "No other hero content is altered"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Use the qr code in second image for insta"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The QR section displays the official Instagram QR code image (orange/pink gradient with Instagram logo centre)",
-        "The '@KHUDRANGKALAKAAR' label is visible below the QR code",
-        "The image is served as a static asset from frontend/public/assets/generated",
-        "The dynamically generated QR code is no longer rendered"
+        "The WhatsApp link in the Navigation 'Hire Me' button opens WhatsApp with the new artwork inquiry message pre-filled.",
+        "The WhatsApp link in the HeroSection 'Hire Me' CTA button opens WhatsApp with the new artwork inquiry message pre-filled.",
+        "The WhatsApp card in ContactSection uses the new inquiry message in any WhatsApp href link.",
+        "The WhatsApp link in the Footer uses the new inquiry message.",
+        "No instance of 'Hello Mudit Sharma' remains as a WhatsApp pre-filled message anywhere in the frontend codebase.",
+        "The message text is professional, contextually relevant to artwork/mural inquiries, and written in English."
       ]
     }
   ],
   "constraints": [
-    "Do not change any other text content on the cover/hero page beyond the tagline",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts",
-    "Do not alter the backend admin credentials or role assignment logic"
+    "Do not change any other WhatsApp-related UI text labels (e.g., button labels like 'Hire Me' or 'WhatsApp' should remain unchanged).",
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Redesigning the Admin Panel UI",
-    "Changing the Instagram profile URL or WhatsApp link",
-    "Updating any other section content beyond the hero tagline and QR code"
+    "Changing the WhatsApp phone number or contact details.",
+    "Modifying any backend logic or data.",
+    "Redesigning any UI components or layouts.",
+    "Changing any other contact section content beyond the WhatsApp pre-filled message text."
   ],
   "imageRequirements": {
-    "required": [
-      "Orange-to-pink gradient dot-style Instagram QR code with Instagram camera logo in centre and '@KHUDRANGKALAKAAR' label in bold pink text at the bottom (instagram-qr-khudrangkalakaar.dim_600x650.png)"
-    ],
+    "required": [],
     "edits": []
   }
 }

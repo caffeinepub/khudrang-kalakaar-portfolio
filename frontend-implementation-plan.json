@@ -1,54 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Admin Login, Update Cover Tagline, and Replace Instagram QR Code",
+  "title": "Update WhatsApp message text to proper artwork inquiry",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix the Admin Panel login flow to prevent button getting stuck in 'Initializing...' state and ensure Internet Identity authentication completes successfully",
+      "summary": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' with a proper artwork inquiry message across Navigation, HeroSection, ContactSection, and Footer components",
       "acceptanceCriteria": [
-        "The login button does not remain stuck in 'Initializing...' indefinitely after credentials are entered",
-        "After entering valid credentials, the Internet Identity popup opens and completes successfully",
-        "If authentication is cancelled or fails, the button returns to its normal clickable state",
-        "Admin is redirected to the Admin Panel upon successful login"
+        "The WhatsApp link in the Navigation 'Hire Me' button opens WhatsApp with the new artwork inquiry message pre-filled.",
+        "The WhatsApp link in the HeroSection 'Hire Me' CTA button opens WhatsApp with the new artwork inquiry message pre-filled.",
+        "The WhatsApp card in ContactSection uses the new inquiry message in any WhatsApp href link.",
+        "The WhatsApp link in the Footer uses the new inquiry message.",
+        "No instance of 'Hello Mudit Sharma' remains as a WhatsApp pre-filled message anywhere in the frontend codebase.",
+        "The message text is professional, contextually relevant to artwork/mural inquiries, and written in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminLogin.tsx",
+          "path": "frontend/src/components/Navigation.tsx",
           "operation": "modify",
-          "description": "Fix the login button state management to prevent indefinite 'Initializing...' state. Refactor the authentication flow to properly handle credential validation followed by Internet Identity authentication. Add proper error handling and state reset for authentication cancellation or failure scenarios. Ensure the button state transitions correctly through: idle → validating credentials → triggering II auth → processing → success/error. Add timeout handling and proper cleanup of authentication listeners."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Update the hero section tagline to 'Transforming Blank Walls into Meaningful Art.'",
-      "acceptanceCriteria": [
-        "The cover/hero section displays the text 'Transforming Blank Walls into Meaningful Art.'",
-        "No other hero content is altered"
-      ],
-      "file_operations": [
+          "description": "Update the WhatsApp href link in the 'Hire Me' button to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
+        },
         {
           "path": "frontend/src/components/HeroSection.tsx",
           "operation": "modify",
-          "description": "Update the tagline text displayed in the hero section to read 'Transforming Blank Walls into Meaningful Art.' The component fetches text content via useGetTextContent hook, so verify whether the tagline is hardcoded in the JSX or comes from the backend textContent.tagline field. If hardcoded, replace the text directly. If dynamic, the change may need to be made via the Admin Panel's text content management tab instead (but per the BuildRequest, make the frontend change to display this specific text)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Replace the dynamically generated QR code with the static Instagram QR code image asset",
-      "acceptanceCriteria": [
-        "The QR section displays the official Instagram QR code image (orange/pink gradient with Instagram logo centre)",
-        "The '@KHUDRANGKALAKAAR' label is visible below the QR code",
-        "The image is served as a static asset from frontend/public/assets/generated",
-        "The dynamically generated QR code is no longer rendered"
-      ],
-      "file_operations": [
+          "description": "Update the WhatsApp href link in the HeroSection 'Hire Me' CTA button to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
+        },
         {
-          "path": "frontend/src/components/QRSection.tsx",
+          "path": "frontend/src/components/ContactSection.tsx",
           "operation": "modify",
-          "description": "Replace the dynamically generated QR code with a static image reference. Remove the QR code generation logic and error handling/retry mechanism. Instead, render an <img> element pointing to the generated Instagram QR code asset at 'frontend/public/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png'. Ensure the '@KHUDRANGKALAKAAR' label remains visible below the QR code image. Add appropriate alt text for accessibility."
+          "description": "Update the WhatsApp card's href link to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp href link in the Footer contact info section to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
         }
       ]
     }

@@ -13,10 +13,16 @@ import type { Principal } from '@icp-sdk/core/principal';
 export interface Artwork {
   'id' : bigint,
   'title' : string,
+  'imageFileName' : [] | [string],
+  'imageFormat' : [] | [string],
   'description' : string,
-  'image' : ExternalBlob,
+  'image' : Uint8Array,
 }
 export type ExternalBlob = Uint8Array;
+export interface MediaContacts {
+  'instagramProfile' : string,
+  'whatsappNumber' : string,
+}
 export interface TextContent {
   'bio' : string,
   'tagline' : string,
@@ -54,28 +60,31 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addArtwork' : ActorMethod<[string, string, ExternalBlob], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteArtwork' : ActorMethod<[bigint], undefined>,
+  'editArtwork' : ActorMethod<
+    [bigint, string, string, Uint8Array, [] | [string], [] | [string]],
+    undefined
+  >,
   'getAllArtworks' : ActorMethod<[], Array<Artwork>>,
   'getArtistPortrait' : ActorMethod<[], [] | [ExternalBlob]>,
   'getArtwork' : ActorMethod<[bigint], [] | [Artwork]>,
-  'getArtworksByDescription' : ActorMethod<[string], Array<Artwork>>,
-  'getArtworksByTitle' : ActorMethod<[string], Array<Artwork>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCoverImage' : ActorMethod<[], [] | [ExternalBlob]>,
   'getLogo' : ActorMethod<[], [] | [ExternalBlob]>,
+  'getMediaContacts' : ActorMethod<[], [] | [MediaContacts]>,
   'getTextContent' : ActorMethod<[], TextContent>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'updateArtwork' : ActorMethod<
-    [bigint, string, string, ExternalBlob],
-    undefined
-  >,
+  'updateMediaContacts' : ActorMethod<[string, string], undefined>,
   'updateTextContent' : ActorMethod<[string, string, string], undefined>,
   'uploadArtistPortrait' : ActorMethod<[ExternalBlob], undefined>,
+  'uploadArtwork' : ActorMethod<
+    [string, string, Uint8Array, [] | [string], [] | [string]],
+    bigint
+  >,
   'uploadCoverImage' : ActorMethod<[ExternalBlob], undefined>,
   'uploadLogo' : ActorMethod<[ExternalBlob], undefined>,
 }

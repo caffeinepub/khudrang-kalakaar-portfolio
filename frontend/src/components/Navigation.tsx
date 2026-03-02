@@ -1,29 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { SiWhatsapp } from 'react-icons/si';
 import { Menu, X } from 'lucide-react';
-import { useScrollSpy } from '../hooks/useScrollSpy';
+import { useLogo, useMediaContacts } from '../hooks/useQueries';
 
-const WHATSAPP_NUMBER = '917665854193';
-const WHATSAPP_MESSAGE = encodeURIComponent('Hello Mudit Sharma');
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+const DEFAULT_WHATSAPP = '917665854193';
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?"
+);
 
-const NAV_LINKS = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Services', href: '#services' },
-  { label: 'Portfolio', href: '#portfolio' },
-  { label: 'Contact', href: '#contact' },
+const navLinks = [
+  { href: '#home', label: 'Home' },
+  { href: '#about', label: 'About' },
+  { href: '#services', label: 'Services' },
+  { href: '#projects', label: 'Projects' },
+  { href: '#gallery', label: 'Gallery' },
+  { href: '#contact', label: 'Contact' },
 ];
 
 export default function Navigation() {
   const navigate = useNavigate();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const activeSection = useScrollSpy(['home', 'about', 'services', 'portfolio', 'contact']);
+  const { data: logo } = useLogo();
+  const { data: mediaContacts } = useMediaContacts();
 
-  const clickCount = React.useRef(0);
-  const clickTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const whatsappNumber = mediaContacts?.whatsappNumber || DEFAULT_WHATSAPP;
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${WHATSAPP_MESSAGE}`;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -31,125 +36,99 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogoClick = useCallback(() => {
-    clickCount.current += 1;
-    if (clickTimer.current) clearTimeout(clickTimer.current);
-
-    if (clickCount.current >= 2) {
-      clickCount.current = 0;
+  const handleLogoInteraction = () => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 2) {
+      tapCountRef.current = 0;
       navigate({ to: '/admin-login' });
-      return;
+    } else {
+      tapTimerRef.current = setTimeout(() => {
+        tapCountRef.current = 0;
+      }, 500);
     }
-
-    clickTimer.current = setTimeout(() => {
-      if (clickCount.current === 1) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      clickCount.current = 0;
-    }, 500);
-  }, [navigate]);
-
-  const scrollToSection = (href: string) => {
-    const id = href.replace('#', '');
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    setMobileOpen(false);
   };
+
+  const logoSrc = logo
+    ? logo.getDirectURL()
+    : '/assets/generated/logo.dim_256x256.png';
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+        isScrolled ? 'bg-card/95 backdrop-blur-md shadow-md' : 'bg-transparent'
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <button
-            onClick={handleLogoClick}
-            className={`font-bold text-xl tracking-tight transition-colors ${
-              isScrolled ? 'text-gray-900' : 'text-white'
-            }`}
+            onClick={handleLogoInteraction}
+            className="flex items-center focus:outline-none"
+            aria-label="Logo"
           >
-            <span className="text-terracotta">K</span>hudrang{' '}
-            <span className="text-terracotta">K</span>alakaar
+            <img src={logoSrc} alt="Logo" className="h-10 w-10 object-contain rounded-full" />
           </button>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-8">
-            {NAV_LINKS.map((link) => {
-              const sectionId = link.href.replace('#', '');
-              const isActive = activeSection === sectionId;
-              return (
-                <button
-                  key={link.href}
-                  onClick={() => scrollToSection(link.href)}
-                  className={`text-sm font-medium transition-colors relative ${
-                    isScrolled
-                      ? isActive
-                        ? 'text-terracotta'
-                        : 'text-gray-700 hover:text-terracotta'
-                      : isActive
-                      ? 'text-terracotta'
-                      : 'text-white/90 hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                  {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-terracotta rounded-full" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* CTA */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors hover:text-accent ${
+                  isScrolled ? 'text-foreground' : 'text-white/90'
+                }`}
+              >
+                {link.label}
+              </a>
+            ))}
             <a
-              href={WHATSAPP_URL}
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-terracotta hover:bg-terracotta-dark text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg"
+              className="bg-accent hover:bg-accent/90 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
             >
-              <SiWhatsapp className="w-4 h-4" />
               Hire Me
             </a>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile menu button */}
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className={`lg:hidden p-2 rounded-lg transition-colors ${
-              isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+            className={`md:hidden p-2 rounded-lg transition-colors ${
+              isScrolled ? 'text-foreground hover:bg-muted' : 'text-white hover:bg-white/10'
             }`}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
+      {isMenuOpen && (
+        <div className="md:hidden bg-card/98 backdrop-blur-md border-t border-border shadow-lg">
           <div className="px-4 py-4 space-y-1">
-            {NAV_LINKS.map((link) => (
-              <button
+            {navLinks.map((link) => (
+              <a
                 key={link.href}
-                onClick={() => scrollToSection(link.href)}
-                className="block w-full text-left px-4 py-3 text-gray-700 hover:text-terracotta hover:bg-terracotta/5 rounded-lg transition-colors text-sm font-medium"
+                href={link.href}
+                className="block px-3 py-2.5 text-sm font-medium text-foreground hover:text-accent hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
-              </button>
+              </a>
             ))}
-            <div className="pt-2 border-t border-gray-100 mt-2">
+            <div className="pt-2">
               <a
-                href={WHATSAPP_URL}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-terracotta text-white font-semibold py-3 px-6 rounded-full w-full transition-colors hover:bg-terracotta-dark"
+                className="block text-center bg-accent hover:bg-accent/90 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors"
+                onClick={() => setIsMenuOpen(false)}
               >
-                <SiWhatsapp className="w-4 h-4" />
-                Hire Me on WhatsApp
+                Hire Me
               </a>
             </div>
           </div>
