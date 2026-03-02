@@ -1,0 +1,223 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Mudit Sharma – Khudrang Kalakaar Wall Painting Portfolio Website",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Apply consistent visual theme: white/light grey backgrounds, Poppins font, bold uppercase headings, uniform spacing, earthy accent colors, and minimal clean layout",
+      "acceptanceCriteria": [
+        "Background is white or light grey throughout",
+        "Poppins font is applied globally",
+        "All section headings are bold",
+        "Margins and spacing are consistent across all pages/sections",
+        "An earthy accent color is used for highlights and decorative elements"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Import Poppins font from Google Fonts, set global font family to Poppins, define CSS custom properties for white background (#FFFFFF), light grey (#F5F5F5), and earthy accent color (terracotta #D2691E or ochre #CC7722), apply base typography styles with bold uppercase section headings, and establish consistent margin and padding utility classes"
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind theme to include Poppins as default font family, add custom colors for light grey background and earthy accent (terracotta/ochre), configure spacing scale for consistent margins and padding across all sections"
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Create full-screen Cover Section displaying artist name, subtitle, location, experience badge, and tagline over hero mural background image with semi-transparent overlay",
+      "acceptanceCriteria": [
+        "Full-screen hero section displays the mural background image",
+        "Artist name, subtitle, location, experience, and tagline are all visible",
+        "A semi-transparent overlay ensures text readability over the image",
+        "Layout is centered and visually impactful"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/HeroSection.tsx",
+          "operation": "create",
+          "description": "Create full-screen hero component with background image from frontend/public/assets/generated/cover-hero.dim_1920x1080.png, semi-transparent dark overlay (rgba(0,0,0,0.4)), centered content displaying 'MUDIT SHARMA' in large bold text, subtitle 'Professional Wall Painting Artist', location '📍 Bikaner, Rajasthan', experience badge '🖌 5+ Years Experience', and tagline '\"Transforming Blank Walls into Meaningful Art.\"' with responsive typography and proper contrast"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render HeroSection component as the first section in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Create About the Artist section with heading, professional portrait placeholder, and bio text in two-column layout",
+      "acceptanceCriteria": [
+        "Section heading 'About Mudit Sharma' is displayed prominently",
+        "Full bio paragraph text is present and readable",
+        "Layout uses a two-column arrangement (image placeholder + text) on wider screens",
+        "Section is visually balanced"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AboutSection.tsx",
+          "operation": "create",
+          "description": "Create About section component with id 'about' for scroll navigation, bold heading 'About Mudit Sharma', two-column responsive layout (portrait on left, bio text on right), portrait image from frontend/public/assets/generated/artist-portrait.dim_800x900.png, and bio text: 'Mudit Sharma is a professional wall painting artist based in Bikaner, Rajasthan, with over 5 years of experience in residential, commercial, and public mural projects. He specializes in customized wall art that enhances spaces and creates strong visual impact. His focus is on clean finishing, creative concepts, and complete client satisfaction.'"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render AboutSection component after HeroSection in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Create Services Offered section with heading and 7 services in responsive grid with checkmark icons",
+      "acceptanceCriteria": [
+        "All 7 services are listed with checkmark icons",
+        "Section heading 'Our Services' is bold and prominent",
+        "Services are displayed in a responsive grid (2–3 columns on desktop, 1 column on mobile)",
+        "Each service item is clearly readable"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ServicesSection.tsx",
+          "operation": "create",
+          "description": "Create Services section component with id 'services', bold heading 'Our Services', responsive grid layout (3 columns on desktop, 2 on tablet, 1 on mobile), and display all 7 services with checkmark icons: 'Home Wall Murals', 'Kids Room Theme Painting', 'Café & Restaurant Concept Walls', 'Hotel & Resort Artwork', 'Public Infrastructure Art', '3D Illusion Wall Designs', 'Custom Hand-Painted Designs'"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render ServicesSection component after AboutSection in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Create Why Choose Us section with heading and 6 trust points in grid with checkmark icons and differentiated background",
+      "acceptanceCriteria": [
+        "All 6 trust points are displayed with checkmark icons",
+        "Section heading 'Why Clients Trust Us' is bold and prominent",
+        "Points are arranged in a grid (2–3 columns on desktop)",
+        "Section uses a slightly different background shade to visually differentiate it"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/WhyChooseSection.tsx",
+          "operation": "create",
+          "description": "Create Why Choose Us section component with id 'why-us', light grey (#F5F5F5) background for visual differentiation, bold heading 'Why Clients Trust Us', responsive grid layout (3 columns on desktop, 2 on tablet, 1 on mobile), and display all 6 trust points with checkmark icons: '5+ Years Practical Experience', 'Unique Custom Designs', 'Premium Quality Paints', 'Professional & Clean Work', 'On-Time Project Completion', 'Budget-Friendly Packages'"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render WhyChooseSection component after ServicesSection in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Create 5 Featured Project sections with 70/30 image-to-text layout, project details, and alternating layouts",
+      "acceptanceCriteria": [
+        "All 5 project sections are present in order",
+        "Each project shows a large image (~70% width) and a text panel (~30% width)",
+        "Project name, description, and location (where applicable) are displayed",
+        "Alternate image-left/image-right layout between projects for visual variety",
+        "Sections are clearly separated with consistent spacing"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProjectSection.tsx",
+          "operation": "create",
+          "description": "Create reusable ProjectSection component accepting props for project name, description, location badge (optional), image path, and layout direction (image-left or image-right), with 70% image width and 30% text panel width, responsive stacking on mobile"
+        },
+        {
+          "path": "frontend/src/components/FeaturedProjects.tsx",
+          "operation": "create",
+          "description": "Create FeaturedProjects container component with id 'projects' that renders 5 ProjectSection instances with alternating layouts: (1) 'Café Wall Art Project' using frontend/public/assets/generated/project-cafe.dim_1200x800.png with description 'vibrant Instagram-worthy atmosphere, enhances interior vibe, modern aesthetic' (image-left), (2) 'Sawai Madhopur Overbridge' using frontend/public/assets/generated/project-overbridge.dim_1200x800.png with location 'Sawai Madhopur' and description 'public infrastructure mural, beautifies overbridge, reflects cultural identity' (image-right), (3) 'Sanskriti Fort & Resort' using frontend/public/assets/generated/project-fort-resort.dim_1200x800.png with description 'heritage-themed property, enhances royal ambiance, fine detailing' (image-left), (4) 'Hotel & Resort Wall Art' using frontend/public/assets/generated/project-hotel.dim_1200x800.png with description 'elevates guest experience, creative visual storytelling, adds character and sophistication' (image-right), (5) 'Jiman Restaurant – Bikaner' using frontend/public/assets/generated/project-restaurant.dim_1200x800.png with location 'Bikaner' and description 'traditional restaurant vibe, enhances customer engagement, memorable dining atmosphere' (image-left)"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render FeaturedProjects component after WhyChooseSection in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Create Contact section with heading, location, Instagram link, WhatsApp placeholder, availability note, and WhatsApp CTA button with distinct background",
+      "acceptanceCriteria": [
+        "Heading 'Let's Transform Your Space' is displayed",
+        "Location, Instagram handle, WhatsApp placeholder, and availability note are all shown",
+        "Instagram handle is a clickable link",
+        "A WhatsApp CTA button is present",
+        "Section has a visually distinct background to signal end-of-page"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ContactSection.tsx",
+          "operation": "create",
+          "description": "Create Contact section component with id 'contact', distinct background color (light grey or subtle earthy tone), bold heading 'Let's Transform Your Space', display location '📍 Bikaner, Rajasthan', Instagram handle '@khudrangkalakaar' as clickable link to https://instagram.com/khudrangkalakaar, WhatsApp placeholder text 'WhatsApp: [Add Number]', availability note 'Available for Residential & Commercial Projects', and prominent WhatsApp CTA button (linking to WhatsApp with placeholder)"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render ContactSection component after FeaturedProjects in the App layout"
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add sticky navigation bar with brand name, smooth-scroll anchor links, and mobile hamburger menu",
+      "acceptanceCriteria": [
+        "Navigation bar is fixed at the top and visible while scrolling",
+        "All 5 nav links scroll smoothly to their respective sections",
+        "Artist brand name is displayed on the left",
+        "On mobile, a hamburger menu reveals the nav links",
+        "Active section is visually indicated in the nav"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Navigation.tsx",
+          "operation": "create",
+          "description": "Create sticky navigation component fixed at top with white/light background and subtle shadow, display 'Khudrang Kalakaar' brand name on left, render anchor links on right (About, Services, Why Us, Projects, Contact) that smoothly scroll to corresponding section IDs, implement active section highlighting based on scroll position, and add hamburger menu toggle for mobile viewports that reveals nav links in dropdown/overlay"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Import and render Navigation component at the top of the App layout before all sections, ensure proper z-index stacking"
+        },
+        {
+          "path": "frontend/src/hooks/useScrollSpy.ts",
+          "operation": "create",
+          "description": "Create custom hook to track which section is currently in viewport based on scroll position, returning active section ID for navigation highlighting"
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Render all generated images as static assets from frontend/public/assets/generated/ and reference them in respective components",
+      "acceptanceCriteria": [
+        "All images load correctly from frontend/public/assets/generated/",
+        "No broken image links on any section",
+        "Images are responsive and maintain aspect ratio"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Ensure hero background image references frontend/public/assets/generated/cover-hero.dim_1920x1080.png with proper responsive sizing and aspect ratio"
+        },
+        {
+          "path": "frontend/src/components/AboutSection.tsx",
+          "operation": "modify",
+          "description": "Ensure portrait image references frontend/public/assets/generated/artist-portrait.dim_800x900.png with responsive sizing and aspect ratio preservation"
+        },
+        {
+          "path": "frontend/src/components/FeaturedProjects.tsx",
+          "operation": "modify",
+          "description": "Verify all 5 project images correctly reference their respective files from frontend/public/assets/generated/: project-cafe.dim_1200x800.png, project-overbridge.dim_1200x800.png, project-fort-resort.dim_1200x800.png, project-hotel.dim_1200x800.png, and project-restaurant.dim_1200x800.png with responsive sizing and aspect ratio preservation"
+        }
+      ]
+    }
+  ]
+}

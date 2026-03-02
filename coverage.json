@@ -1,0 +1,253 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-03-01T18:24:14.798Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 9,
+    "implemented": 9,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Apply a consistent visual theme across the entire portfolio: white and light grey (#F5F5F5) backgrounds, Poppins as the primary font, bold uppercase section headings, generous uniform margins and padding on all pages, warm earthy accent color (terracotta or ochre) for highlights and dividers, and a clean minimal layout that lets imagery breathe.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Create a full-screen Cover Section (Page 1) displaying: artist name 'MUDIT SHARMA' in large bold text, subtitle 'Professional Wall Painting Artist', location '📍 Bikaner, Rajasthan', experience badge '🖌 5+ Years Experience', and tagline '\"Transforming Blank Walls into Meaningful Art.\"' overlaid on a full-page hero mural background image (cover-hero.dim_1920x1080.png). Text must be legible over the image with a semi-transparent dark overlay.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Create an About the Artist section (Page 2) with a heading 'About Mudit Sharma', a professional portrait placeholder area on one side, and the bio text on the other: 'Mudit Sharma is a professional wall painting artist based in Bikaner, Rajasthan, with over 5 years of experience in residential, commercial, and public mural projects. He specializes in customized wall art that enhances spaces and creates strong visual impact. His focus is on clean finishing, creative concepts, and complete client satisfaction.'",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Create a Services Offered section (Page 3) with heading 'Our Services' displaying these 7 services in a clean grid or list with checkmark icons: Home Wall Murals, Kids Room Theme Painting, Café & Restaurant Concept Walls, Hotel & Resort Artwork, Public Infrastructure Art, 3D Illusion Wall Designs, Custom Hand-Painted Designs.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ServicesSection.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ServicesSection.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Create a Why Choose Us section (Page 4) with heading 'Why Clients Trust Us' displaying these 6 trust points with checkmark icons: 5+ Years Practical Experience, Unique Custom Designs, Premium Quality Paints, Professional & Clean Work, On-Time Project Completion, Budget-Friendly Packages.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/WhyChooseSection.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/WhyChooseSection.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Create 5 Featured Project sections (Pages 5–9), each with the project image occupying ~70% of the section width and project details in the remaining 30%. Projects and their details: (1) 'Café Wall Art Project' – vibrant Instagram-worthy atmosphere, enhances interior vibe, modern aesthetic; (2) 'Sawai Madhopur Overbridge' – Location: Sawai Madhopur, public infrastructure mural, beautifies overbridge, reflects cultural identity; (3) 'Sanskriti Fort & Resort' – heritage-themed property, enhances royal ambiance, fine detailing; (4) 'Hotel & Resort Wall Art' – elevates guest experience, creative visual storytelling, adds character and sophistication; (5) 'Jiman Restaurant – Bikaner' – traditional restaurant vibe, enhances customer engagement, memorable dining atmosphere. Each section includes the project name as a bold heading, description text, and a location badge where applicable. Use generated placeholder project images for each.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProjectSection.tsx",
+          "frontend/src/components/FeaturedProjects.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProjectSection.tsx",
+          "frontend/src/components/FeaturedProjects.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Create a Contact section (Page 10) with heading 'Let's Transform Your Space', displaying: location '📍 Bikaner, Rajasthan', Instagram '@khudrangkalakaar' (linked to https://instagram.com/khudrangkalakaar), WhatsApp contact (display 'WhatsApp: [Add Number]' as a placeholder), and availability note 'Available for Residential & Commercial Projects'. Include a prominent call-to-action button linking to WhatsApp.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Add a sticky navigation bar at the top of the page with the artist name/logo 'Khudrang Kalakaar' on the left and smooth-scroll anchor links on the right: About, Services, Why Us, Projects, Contact. On mobile, collapse to a hamburger menu.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useScrollSpy.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useScrollSpy.ts"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Render all generated images (cover hero mural, about portrait, and 5 project images) as static assets from frontend/public/assets/generated/ and reference them in the respective components.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/components/FeaturedProjects.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/AboutSection.tsx",
+          "frontend/src/components/FeaturedProjects.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "build-template/Dockerfile",
+    "build-template/LICENSE",
+    "build-template/README.md",
+    "build-template/deploy.sh",
+    "build-template/icp.yaml",
+    "build-template/package.json",
+    "build-template/pnpm-lock.yaml",
+    "build-template/pnpm-workspace.yaml",
+    "build-template/scripts/prune-unused-images.js",
+    "build-template/scripts/resize-images.js",
+    "build-template/src/backend/canister.yaml",
+    "build-template/src/backend/system-idl/aaaaa-aa.did",
+    "build-template/src/frontend/canister.yaml",
+    "build-template/src/frontend/components.json",
+    "build-template/src/frontend/env.json",
+    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
+    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
+    "build-template/src/frontend/eslint.config.js",
+    "build-template/src/frontend/package.json",
+    "build-template/src/frontend/postcss.config.js",
+    "build-template/src/frontend/src/components/ui/accordion.tsx",
+    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
+    "build-template/src/frontend/src/components/ui/alert.tsx",
+    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
+    "build-template/src/frontend/src/components/ui/avatar.tsx",
+    "build-template/src/frontend/src/components/ui/badge.tsx",
+    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
+    "build-template/src/frontend/src/components/ui/button.tsx",
+    "build-template/src/frontend/src/components/ui/calendar.tsx",
+    "build-template/src/frontend/src/components/ui/card.tsx",
+    "build-template/src/frontend/src/components/ui/carousel.tsx",
+    "build-template/src/frontend/src/components/ui/chart.tsx",
+    "build-template/src/frontend/src/components/ui/checkbox.tsx",
+    "build-template/src/frontend/src/components/ui/collapsible.tsx",
+    "build-template/src/frontend/src/components/ui/command.tsx",
+    "build-template/src/frontend/src/components/ui/context-menu.tsx",
+    "build-template/src/frontend/src/components/ui/dialog.tsx",
+    "build-template/src/frontend/src/components/ui/drawer.tsx",
+    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
+    "build-template/src/frontend/src/components/ui/form.tsx",
+    "build-template/src/frontend/src/components/ui/hover-card.tsx",
+    "build-template/src/frontend/src/components/ui/input-otp.tsx",
+    "build-template/src/frontend/src/components/ui/input.tsx",
+    "build-template/src/frontend/src/components/ui/label.tsx",
+    "build-template/src/frontend/src/components/ui/menubar.tsx",
+    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
+    "build-template/src/frontend/src/components/ui/pagination.tsx",
+    "build-template/src/frontend/src/components/ui/popover.tsx",
+    "build-template/src/frontend/src/components/ui/progress.tsx",
+    "build-template/src/frontend/src/components/ui/radio-group.tsx",
+    "build-template/src/frontend/src/components/ui/resizable.tsx",
+    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
+    "build-template/src/frontend/src/components/ui/select.tsx",
+    "build-template/src/frontend/src/components/ui/separator.tsx",
+    "build-template/src/frontend/src/components/ui/sheet.tsx",
+    "build-template/src/frontend/src/components/ui/sidebar.tsx",
+    "build-template/src/frontend/src/components/ui/skeleton.tsx",
+    "build-template/src/frontend/src/components/ui/slider.tsx",
+    "build-template/src/frontend/src/components/ui/sonner.tsx",
+    "build-template/src/frontend/src/components/ui/switch.tsx",
+    "build-template/src/frontend/src/components/ui/table.tsx",
+    "build-template/src/frontend/src/components/ui/tabs.tsx",
+    "build-template/src/frontend/src/components/ui/textarea.tsx",
+    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
+    "build-template/src/frontend/src/components/ui/toggle.tsx",
+    "build-template/src/frontend/src/components/ui/tooltip.tsx",
+    "build-template/src/frontend/src/hooks/use-mobile.tsx",
+    "build-template/src/frontend/src/lib/utils.ts",
+    "build-template/src/frontend/tsconfig.json",
+    "build-template/src/frontend/vite.config.js",
+    "build-template/tsconfig.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/assets/generated/artist-portrait.dim_800x900.png",
+    "frontend/public/assets/generated/cover-hero.dim_1920x1080.png",
+    "frontend/public/assets/generated/project-cafe.dim_1200x800.png",
+    "frontend/public/assets/generated/project-fort-resort.dim_1200x800.png",
+    "frontend/public/assets/generated/project-hotel.dim_1200x800.png",
+    "frontend/public/assets/generated/project-overbridge.dim_1200x800.png",
+    "frontend/public/assets/generated/project-restaurant.dim_1200x800.png",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AboutSection.tsx",
+    "frontend/src/components/ContactSection.tsx",
+    "frontend/src/components/FeaturedProjects.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/HeroSection.tsx",
+    "frontend/src/components/Navigation.tsx",
+    "frontend/src/components/ProjectSection.tsx",
+    "frontend/src/components/ServicesSection.tsx",
+    "frontend/src/components/WhyChooseSection.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useScrollSpy.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/ui-summary.json",
+    "frontend/src/utils/StorageClient.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

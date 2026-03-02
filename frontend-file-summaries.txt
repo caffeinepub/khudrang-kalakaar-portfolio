@@ -1,0 +1,15 @@
+{
+  "frontend/src/index.css": "Global styles importing Poppins from Google Fonts, defining OKLCH color tokens including terracotta accent colors, and setting up base typography and utility classes for the portfolio.",
+  "frontend/tailwind.config.js": "Extended Tailwind config adding Poppins as the default font family, terracotta color tokens (default/light/dark), and custom card shadow utilities.",
+  "frontend/src/hooks/useScrollSpy.ts": "Custom hook that tracks which section is currently in the viewport based on scroll position, returning the active section ID for navigation highlighting.",
+  "frontend/src/components/Navigation.tsx": "Sticky top navigation bar with the Khudrang Kalakaar brand, smooth-scroll anchor links, active section highlighting, and a mobile hamburger menu.",
+  "frontend/src/components/HeroSection.tsx": "Full-screen hero section with the cover mural background image, dark overlay, artist name, subtitle, location, experience badge, tagline, and CTA buttons.",
+  "frontend/src/components/AboutSection.tsx": "Two-column about section with the artist portrait image, bio text, decorative corner accents, floating experience badge, and stats row.",
+  "frontend/src/components/ServicesSection.tsx": "Services grid section displaying all 7 services with checkmark icons, hover effects, and a clean card layout on a light grey background.",
+  "frontend/src/components/WhyChooseSection.tsx": "Why Choose Us section with 6 trust points in a responsive grid, numbered background accents, and a two-column header layout.",
+  "frontend/src/components/ProjectSection.tsx": "Reusable project section component with a 70/30 image-to-text split layout, supporting both normal and reversed orientations with project number badge and optional location tag.",
+  "frontend/src/components/FeaturedProjects.tsx": "Container component rendering all 5 featured project sections with alternating layouts, section header, and project descriptions.",
+  "frontend/src/components/ContactSection.tsx": "Contact section with location, Instagram, and WhatsApp cards, plus prominent CTA buttons for WhatsApp and Instagram.",
+  "frontend/src/components/Footer.tsx": "Footer with brand logo, copyright, location info, and caffeine.ai attribution with UTM tracking.",
+  "frontend/src/App.tsx": "Main app component composing all portfolio sections in order: Navigation, Hero, About, Services, Why Choose, Projects, Contact, and Footer."
+}
