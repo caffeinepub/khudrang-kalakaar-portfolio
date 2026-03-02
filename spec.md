@@ -1,11 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Fix admin panel access via logo click, expand admin editing capabilities, and correct the Instagram profile link.
+**Goal:** Fix and improve social links, admin panel trigger behavior, admin login/upload logic, and add a QR code section for the Khudrang Kalakaar portfolio app.
 
 **Planned changes:**
-- Make the site logo in the Navigation and Footer components clickable to trigger Internet Identity login and redirect to `/admin` upon successful authentication, with no visual indication of admin access for regular visitors
-- Ensure the Admin Panel at `/admin` supports uploading/replacing the site logo, hero cover image, and artist portrait image, as well as adding/editing/deleting gallery artworks and editing artist name, tagline, and bio text — with all changes persisted to the backend
-- Fix the Instagram link in the ContactSection (and anywhere else on the site) to open the specific profile URL `https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy` in a new tab
+- Update the Instagram icon/button link to open `https://www.instagram.com/khudrangkalakaar` in a new tab with `rel="noopener noreferrer"` everywhere it appears in the UI.
+- Update the WhatsApp icon link to open `https://wa.me/917665854193?text=Hello%20Mudit%20Sharma` in a new tab.
+- Change the admin panel trigger to require a double-click (two taps within 500ms) on the logo; reset the tap counter after 500ms of inactivity.
+- Admin login validates username `Deepak Kumawat` and password `Kinnu*0613`; on success shows the upload section, on failure shows an "Invalid Credentials" error message.
+- Admin image upload reads a selected local file as a data URL and immediately appends it to the gallery without a page reload; does nothing if no file is selected.
+- Add a QR code section on the main page with the heading "Scan QR to Visit Instagram" displaying the QR image from `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar`.
 
-**User-visible outcome:** The site owner can access the admin panel by clicking the logo, edit all images and key text content from the admin panel, and visitors clicking the Instagram link are taken directly to the correct Instagram profile page.
+**User-visible outcome:** Instagram and WhatsApp social links open the correct URLs in new tabs. Double-clicking the logo reveals the hidden admin panel where the owner can log in and upload images to the gallery instantly. A QR code section is visible on the main page for visitors to scan and visit the Instagram profile.

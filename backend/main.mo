@@ -2,14 +2,16 @@ import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
+import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+// Apply migration through's actor's with clause
+
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -18,14 +20,14 @@ actor {
     name : Text;
   };
 
-  type Artwork = {
+  public type Artwork = {
     id : Nat;
     title : Text;
     description : Text;
     image : Storage.ExternalBlob;
   };
 
-  type TextContent = {
+  public type TextContent = {
     artistName : Text;
     tagline : Text;
     bio : Text;
@@ -45,7 +47,7 @@ actor {
   var artistPortrait : ?Storage.ExternalBlob = null;
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can get profiles");
     };
     userProfiles.get(caller);
@@ -59,7 +61,7 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
@@ -68,8 +70,8 @@ actor {
   include MixinStorage();
 
   public shared ({ caller }) func uploadLogo(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can upload logo");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     logo := ?blob;
   };
@@ -79,8 +81,8 @@ actor {
   };
 
   public shared ({ caller }) func uploadCoverImage(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can upload cover image");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     coverImage := ?blob;
   };
@@ -90,8 +92,8 @@ actor {
   };
 
   public shared ({ caller }) func uploadArtistPortrait(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can upload artist portrait");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     artistPortrait := ?blob;
   };
@@ -101,8 +103,8 @@ actor {
   };
 
   public shared ({ caller }) func addArtwork(title : Text, description : Text, image : Storage.ExternalBlob) : async Nat {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can add artwork");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     let id = nextArtworkId;
     let artwork : Artwork = {
@@ -117,8 +119,8 @@ actor {
   };
 
   public shared ({ caller }) func updateArtwork(id : Nat, title : Text, description : Text, image : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update artwork");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     switch (artworks.get(id)) {
       case (null) { Runtime.trap("Artwork not found") };
@@ -135,8 +137,8 @@ actor {
   };
 
   public shared ({ caller }) func deleteArtwork(id : Nat) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can delete artwork");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     if (not artworks.containsKey(id)) {
       Runtime.trap("Artwork not found");
@@ -161,8 +163,8 @@ actor {
   };
 
   public shared ({ caller }) func updateTextContent(artistName : Text, tagline : Text, bio : Text) : async () {
-    if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can update text content");
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     textContent := {
       artistName;

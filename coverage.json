@@ -1,72 +1,106 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T06:06:11.390Z",
+  "generatedAt": "2026-03-02T11:04:59.576Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Make the admin panel accessible by tapping/clicking the site logo in the Navigation and Footer components. When the logo is clicked, trigger the Internet Identity login flow (if not already authenticated) and redirect to the /admin route upon successful authentication. The logo should not visually indicate admin access to regular visitors.",
+        "summary": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/pages/AdminPanel.tsx"
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/pages/AdminPanel.tsx"
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Ensure the AdminPanel page (/admin route) provides full editing capabilities: upload/replace the site logo, upload/replace the hero cover image, upload/replace the artist portrait image used in the About section, add/edit/delete artworks in the gallery, and edit key text content (artist name, tagline, bio). All changes must persist to the backend.",
+        "summary": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/Navigation.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/ContactSection.tsx",
+          "frontend/src/components/Footer.tsx",
+          "frontend/src/components/HeroSection.tsx",
+          "frontend/src/components/Navigation.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Fix the Instagram link in the ContactSection (and anywhere else it appears on the site) so it opens the specific Instagram profile page: https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy — not the generic Instagram homepage.",
+        "summary": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ContactSection.tsx"
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/Footer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ContactSection.tsx"
+          "frontend/src/components/Navigation.tsx",
+          "frontend/src/components/Footer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminLogin.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminLogin.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "The admin image upload feature must allow selecting a local image file and display it in the gallery immediately after upload, without requiring a page reload. The upload reads the file as a data URL and appends it to the gallery.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/QRSection.tsx",
+          "frontend/src/pages/Home.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/QRSection.tsx",
+          "frontend/src/App.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
+    "frontend/src/App.tsx",
     "frontend/src/components/ContactSection.tsx",
     "frontend/src/components/Footer.tsx",
+    "frontend/src/components/HeroSection.tsx",
     "frontend/src/components/Navigation.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminPanel.tsx",
+    "frontend/src/components/QRSection.tsx",
+    "frontend/src/pages/AdminLogin.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,74 +1,135 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin panel access via logo tap and correct Instagram profile link",
+  "title": "Improve social links, admin panel behavior, and gallery upload logic",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make the admin panel accessible by tapping/clicking the site logo in the Navigation and Footer components, triggering Internet Identity login and redirecting to /admin upon successful authentication",
+      "summary": "Ensure Instagram social icon link opens https://www.instagram.com/khudrangkalakaar in a new tab with rel='noopener noreferrer' from all locations in the app",
       "acceptanceCriteria": [
-        "Clicking the logo in the Navigation bar initiates admin login flow",
-        "Clicking the logo in the Footer initiates admin login flow",
-        "After successful Internet Identity authentication as admin, user is redirected to /admin",
-        "Non-admin users clicking the logo are prompted to authenticate but see an access-denied message if not admin",
-        "Logo appearance is unchanged for regular visitors — no visible admin hint"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Navigation.tsx",
-          "operation": "modify",
-          "description": "Wrap the logo image in a clickable handler that triggers Internet Identity login (if not authenticated) and redirects to /admin after successful authentication. Use useInternetIdentity hook for login flow and useNavigate for routing. Add onClick handler to the logo img element without changing its visual appearance."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Wrap the logo image in a clickable handler that triggers Internet Identity login (if not authenticated) and redirects to /admin after successful authentication. Use useInternetIdentity hook for login flow and useNavigate for routing. Add onClick handler to the logo img element without changing its visual appearance."
-        },
-        {
-          "path": "frontend/src/pages/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "Add an access-denied message or redirect for non-admin authenticated users. Check isCallerAdmin status and display an appropriate error message if the authenticated user is not an admin. Keep existing admin functionality intact for authorized users."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Ensure the AdminPanel page provides full editing capabilities including uploading/replacing the site logo, hero cover image, artist portrait, managing artworks, and editing text content",
-      "acceptanceCriteria": [
-        "Admin can upload or replace the site logo",
-        "Admin can upload or replace the hero cover image",
-        "Admin can upload or replace the artist portrait/profile image shown in the About section",
-        "Admin can add, edit, and delete artworks in the gallery",
-        "Admin can edit the artist name, tagline, and bio text displayed on the site",
-        "All edits are saved to the backend and reflected on the public-facing portfolio immediately",
-        "Admin panel is only accessible to authenticated admin users"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "Add a new section for uploading/replacing the artist portrait image using the uploadArtistPortrait backend method. Include file input, preview, upload progress indicator, and submit handler. Add another section for editing text content (artist name, tagline, bio) with form inputs and updateTextContent backend method integration. Verify existing logo upload, cover image upload, and artwork management features are present and functional."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add React Query mutation hooks for uploadArtistPortrait and updateTextContent backend methods if not already present. Include proper query invalidation to refresh the AboutSection and HeroSection after updates. Ensure mutations use the actor from useActor and handle loading/error states appropriately."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Fix the Instagram link in the ContactSection to open the specific Instagram profile page instead of the generic Instagram homepage",
-      "acceptanceCriteria": [
-        "The Instagram card/button in ContactSection links to https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy",
-        "The link opens in a new tab",
-        "No other Instagram links on the site point to the generic Instagram homepage"
+        "Clicking the Instagram icon/button opens https://www.instagram.com/khudrangkalakaar in a new tab.",
+        "The link uses target='_blank' and rel='noopener noreferrer'.",
+        "No broken or missing Instagram links exist anywhere in the UI."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/ContactSection.tsx",
           "operation": "modify",
-          "description": "Update the Instagram link href to https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy. Ensure the link has target=\"_blank\" and rel=\"noopener noreferrer\" attributes for security. Verify no other Instagram links in the file point to the generic Instagram homepage."
+          "description": "Update the Instagram link to use href='https://www.instagram.com/khudrangkalakaar', target='_blank', and rel='noopener noreferrer' in the social card."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Update the Instagram link in the footer social links section to use href='https://www.instagram.com/khudrangkalakaar', target='_blank', and rel='noopener noreferrer'."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure WhatsApp social icon link opens https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab",
+      "acceptanceCriteria": [
+        "Clicking the WhatsApp icon opens the correct WhatsApp link with pre-filled message 'Hello Mudit Sharma'.",
+        "Link opens in a new tab."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ContactSection.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp link to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank' in the social card."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp link in the footer social links section to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
+        },
+        {
+          "path": "frontend/src/components/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp CTA button to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
+        },
+        {
+          "path": "frontend/src/components/Navigation.tsx",
+          "operation": "modify",
+          "description": "Update the WhatsApp CTA button in the navigation bar to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement double-click (two rapid taps within 500ms) on the logo to trigger the hidden admin panel, with tap count reset after 500ms",
+      "acceptanceCriteria": [
+        "Double-clicking (two taps within 500ms) on the logo reveals the admin login panel.",
+        "A single click does not reveal the admin panel.",
+        "The tap counter resets after 500ms of inactivity."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Navigation.tsx",
+          "operation": "modify",
+          "description": "Replace the existing double-click logic on the logo with a tap counter that increments on each click, navigates to /admin-login on the second tap within 500ms, and resets the counter after 500ms of inactivity using a setTimeout cleanup mechanism."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Replace the existing double-click logic on the footer logo with a tap counter that increments on each click, navigates to /admin-login on the second tap within 500ms, and resets the counter after 500ms of inactivity using a setTimeout cleanup mechanism."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Validate admin login against username 'Deepak Kumawat' and password 'Kinnu*0613', showing upload section on success or 'Invalid Credentials' error on failure",
+      "acceptanceCriteria": [
+        "Entering username 'Deepak Kumawat' and password 'Kinnu*0613' grants access and shows the upload section.",
+        "Any other credentials show an 'Invalid Credentials' error.",
+        "The upload section is hidden by default before login."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminLogin.tsx",
+          "operation": "modify",
+          "description": "Update the credentials validation to check username === 'Deepak Kumawat' and password === 'Kinnu*0613'. On success, proceed with Internet Identity login and admin role assignment, then redirect to /admin. On failure, display an error message 'Invalid Credentials' using toast or alert."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Allow admin to select and upload an image file, displaying it immediately in the gallery without page reload using FileReader and data URL",
+      "acceptanceCriteria": [
+        "Selecting an image file and clicking Upload immediately adds the image to the gallery section.",
+        "No page reload is required.",
+        "If no file is selected, nothing happens."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Add a file input and upload button in the 'Manage Artworks' tab that reads the selected image file using FileReader.readAsDataURL(), converts it to ExternalBlob.fromBytes(), then calls the addArtwork mutation to persist it to the backend. Ensure the gallery updates immediately via React Query cache invalidation without requiring a page reload. If no file is selected, disable the upload button or show a validation message."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar",
+      "acceptanceCriteria": [
+        "A QR code image is visible on the page with the heading 'Scan QR to Visit Instagram'.",
+        "The QR code resolves to https://www.instagram.com/khudrangkalakaar when scanned.",
+        "The QR image is loaded from the correct API URL."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/QRSection.tsx",
+          "operation": "create",
+          "description": "Create a new QRSection component that renders a section with a heading 'Scan QR to Visit Instagram' and an img element with src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar' and alt='QR Code'. Apply consistent styling with other sections using the existing Tailwind theme."
+        },
+        {
+          "path": "frontend/src/pages/Home.tsx",
+          "operation": "create",
+          "description": "Create a Home page component that imports and renders all the main page sections in order: HeroSection, AboutSection, ServicesSection, FeaturedProjects, ArtworkGallery, WhyChooseSection, QRSection, ContactSection, and Footer. This consolidates the main page structure."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update the root route '/' to render the new Home page component instead of rendering sections directly, ensuring the QRSection is now included in the main page flow."
         }
       ]
     }

@@ -1,53 +1,65 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Art/creative website project with an admin panel (accessible by tapping the logo) for editing/uploading images and text, WhatsApp link, and Instagram profile integration.",
+  "summary": "Khudrang Kalakaar — an art portfolio/gallery website for Mudit Sharma with Instagram/WhatsApp social links, a QR code for Instagram, a hidden admin panel (double-click logo) for image uploads, and a dark-themed gallery.",
   "architectural_notes": [
-    "Admin panel is hidden by default and accessed by tapping the site logo",
-    "Admin panel must support image upload/edit for all site images and artist images, plus text editing"
+    "Admin panel triggered by double-clicking the logo; credentials: username='Deepak Kumawat', password='Kinnu*0613'",
+    "Gallery images are loaded client-side via FileReader (base64) — no backend storage",
+    "Instagram link: https://www.instagram.com/khudrangkalakaar; WhatsApp link: https://wa.me/917665854193",
+    "QR code generated via api.qrserver.com pointing to the Instagram profile",
+    "Dark theme: background #111, panel background #222, white text"
   ],
-  "known_issues": [
-    "Admin panel not visible/accessible",
-    "Instagram link opens generic Instagram instead of the specific profile (khudrangkalakaar)"
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-make-the-admin-panel-accessible-by-tapping-clicking-the-site-logo-in-the-navigation-and-footer-components-when-the-logo-is-clicked-trigger-the-internet-identity-login-flow-if-not-already-authenticated-and-redirect-to-the-admin-route-upon-successful-authentication-the-logo-should-not-visually-indicate-admin-access-to-regular-visitors",
-      "title": "Make the admin panel accessible by tapping/clicking the site logo in the Navigation and Footer components. When the logo is clicked, trigger the Internet Identity login flow (if not already authenticated) and redirect to the /admin route upon successful authentication. The logo should not visually indicate admin access to regular visitors.",
+      "id": "feature-the-instagram-social-icon-link-must-open-https-www-instagram-com-khudrangkalakaar-in-a-new-tab-using-rel-noopener-noreferrer-ensure-it-works-both-from-the-social-icons-section-and-any-other-instagram-button-link-in-the-app",
+      "title": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-the-adminpanel-page-admin-route-provides-full-editing-capabilities-upload-replace-the-site-logo-upload-replace-the-hero-cover-image-upload-replace-the-artist-portrait-image-used-in-the-about-section-add-edit-delete-artworks-in-the-gallery-and-edit-key-text-content-artist-name-tagline-bio-all-changes-must-persist-to-the-backend",
-      "title": "Ensure the AdminPanel page (/admin route) provides full editing capabilities: upload/replace the site logo, upload/replace the hero cover image, upload/replace the artist portrait image used in the About section, add/edit/delete artworks in the gallery, and edit key text content (artist name, tagline, bio). All changes must persist to the backend.",
+      "id": "feature-the-whatsapp-social-icon-link-must-open-https-wa-me-917665854193-text-hello-20mudit-20sharma-in-a-new-tab",
+      "title": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-the-instagram-link-in-the-contactsection-and-anywhere-else-it-appears-on-the-site-so-it-opens-the-specific-instagram-profile-page-https-www-instagram-com-khudrangkalakaar-igsh-bmrsdgx6z3nrd2vy-not-the-generic-instagram-homepage",
-      "title": "Fix the Instagram link in the ContactSection (and anywhere else it appears on the site) so it opens the specific Instagram profile page: https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy — not the generic Instagram homepage.",
+      "id": "feature-the-hidden-admin-panel-must-be-triggered-by-a-double-click-two-rapid-taps-within-500ms-on-the-logo-the-double-click-detection-must-reset-the-tap-count-after-500ms-to-prevent-accidental-triggers",
+      "title": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-admin-login-must-validate-against-username-deepak-kumawat-and-password-kinnu-0613-on-success-show-an-upload-section-on-failure-display-an-invalid-credentials-error-message",
+      "title": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-a-qr-code-section-on-the-main-page-with-label-scan-qr-to-visit-instagram-linking-to-https-www-instagram-com-khudrangkalakaar-using-the-qr-image-url-https-api-qrserver-com-v1-create-qr-code-size-200x200-data-https-www-instagram-com-khudrangkalakaar",
+      "title": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
+      "reqIds": [
+        "REQ-6"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Admin panel accessible by tapping the logo — allows editing/uploading all images including artist images and editing text",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Fix Instagram link to open the specific profile page: https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy",
-      "reqIds": [],
+      "id": "AR-5",
+      "summary": "The admin image upload feature must allow selecting a local image file and display it in the gallery immediately after upload, without requiring a page reload. The upload reads the file as a data URL and appends it to the gallery.",
+      "reqIds": [
+        "REQ-5"
+      ],
       "status": "pending"
     }
   ],

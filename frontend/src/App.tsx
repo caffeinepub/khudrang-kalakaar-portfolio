@@ -8,8 +8,10 @@ import WhyChooseSection from './components/WhyChooseSection';
 import FeaturedProjects from './components/FeaturedProjects';
 import ArtworkGallery from './components/ArtworkGallery';
 import ContactSection from './components/ContactSection';
+import QRSection from './components/QRSection';
 import Footer from './components/Footer';
 import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,7 @@ function PortfolioPage() {
         <WhyChooseSection />
         <FeaturedProjects />
         <ArtworkGallery />
+        <QRSection />
         <ContactSection />
       </main>
       <Footer />
@@ -53,13 +56,19 @@ const indexRoute = createRoute({
   component: PortfolioPage,
 });
 
+const adminLoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin-login',
+  component: AdminLogin,
+});
+
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
   component: AdminPanel,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, adminRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, adminLoginRoute, adminRoute]);
 
 const router = createRouter({ routeTree });
 

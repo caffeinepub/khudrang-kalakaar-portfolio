@@ -2,12 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-make-the-admin-panel-accessible-by-tapping-clicking-the-site-logo-in-the-navigation-and-footer-components-when-the-logo-is-clicked-trigger-the-internet-identity-login-flow-if-not-already-authenticated-and-redirect-to-the-admin-route-upon-successful-authentication-the-logo-should-not-visually-indicate-admin-access-to-regular-visitors",
-      "featureTitle": "Make the admin panel accessible by tapping/clicking the site logo in the Navigation and Footer components. When the logo is clicked, trigger the Internet Identity login flow (if not already authenticated) and redirect to the /admin route upon successful authentication. The logo should not visually indicate admin access to regular visitors.",
+      "featureId": "feature-the-instagram-social-icon-link-must-open-https-www-instagram-com-khudrangkalakaar-in-a-new-tab-using-rel-noopener-noreferrer-ensure-it-works-both-from-the-social-icons-section-and-any-other-instagram-button-link-in-the-app",
+      "featureTitle": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
       "files": [
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/Navigation.tsx",
-        "frontend/src/pages/AdminPanel.tsx"
+        "frontend/src/components/ContactSection.tsx",
+        "frontend/src/components/Footer.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -24,11 +23,13 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-adminpanel-page-admin-route-provides-full-editing-capabilities-upload-replace-the-site-logo-upload-replace-the-hero-cover-image-upload-replace-the-artist-portrait-image-used-in-the-about-section-add-edit-delete-artworks-in-the-gallery-and-edit-key-text-content-artist-name-tagline-bio-all-changes-must-persist-to-the-backend",
-      "featureTitle": "Ensure the AdminPanel page (/admin route) provides full editing capabilities: upload/replace the site logo, upload/replace the hero cover image, upload/replace the artist portrait image used in the About section, add/edit/delete artworks in the gallery, and edit key text content (artist name, tagline, bio). All changes must persist to the backend.",
+      "featureId": "feature-the-whatsapp-social-icon-link-must-open-https-wa-me-917665854193-text-hello-20mudit-20sharma-in-a-new-tab",
+      "featureTitle": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminPanel.tsx"
+        "frontend/src/components/ContactSection.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/HeroSection.tsx",
+        "frontend/src/components/Navigation.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -45,10 +46,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-the-instagram-link-in-the-contactsection-and-anywhere-else-it-appears-on-the-site-so-it-opens-the-specific-instagram-profile-page-https-www-instagram-com-khudrangkalakaar-igsh-bmrsdgx6z3nrd2vy-not-the-generic-instagram-homepage",
-      "featureTitle": "Fix the Instagram link in the ContactSection (and anywhere else it appears on the site) so it opens the specific Instagram profile page: https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy — not the generic Instagram homepage.",
+      "featureId": "feature-the-hidden-admin-panel-must-be-triggered-by-a-double-click-two-rapid-taps-within-500ms-on-the-logo-the-double-click-detection-must-reset-the-tap-count-after-500ms-to-prevent-accidental-triggers",
+      "featureTitle": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
       "files": [
-        "frontend/src/components/ContactSection.tsx"
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/Navigation.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -61,6 +63,47 @@
       ],
       "testIds": [
         "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-admin-login-must-validate-against-username-deepak-kumawat-and-password-kinnu-0613-on-success-show-an-upload-section-on-failure-display-an-invalid-credentials-error-message",
+      "featureTitle": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
+      "files": [
+        "frontend/src/pages/AdminLogin.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-display-a-qr-code-section-on-the-main-page-with-label-scan-qr-to-visit-instagram-linking-to-https-www-instagram-com-khudrangkalakaar-using-the-qr-image-url-https-api-qrserver-com-v1-create-qr-code-size-200x200-data-https-www-instagram-com-khudrangkalakaar",
+      "featureTitle": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/QRSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
       ],
       "confidence": "high"
     }
