@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-the-instagram-social-icon-link-must-open-https-www-instagram-com-khudrangkalakaar-in-a-new-tab-using-rel-noopener-noreferrer-ensure-it-works-both-from-the-social-icons-section-and-any-other-instagram-button-link-in-the-app",
-      "featureTitle": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
+      "featureId": "feature-fix-the-admin-panel-login-flow-in-adminlogin-tsx-the-login-button-currently-gets-stuck-in-initializing-state-and-shows-please-complete-authentication-in-the-popup-without-proceeding-the-login-should-validate-the-hardcoded-credentials-and-then-trigger-internet-identity-authentication-cleanly-allowing-the-admin-to-successfully-reach-the-admin-panel-ensure-the-button-state-resets-properly-if-authentication-fails-or-is-cancelled",
+      "featureTitle": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
       "files": [
-        "frontend/src/components/ContactSection.tsx",
-        "frontend/src/components/Footer.tsx"
+        "frontend/src/pages/AdminLogin.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,13 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-the-whatsapp-social-icon-link-must-open-https-wa-me-917665854193-text-hello-20mudit-20sharma-in-a-new-tab",
-      "featureTitle": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
+      "featureId": "feature-update-the-hero-cover-page-tagline-in-herosection-tsx-to-read-transforming-blank-walls-into-meaningful-art-replacing-the-current-tagline-text",
+      "featureTitle": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
       "files": [
-        "frontend/src/components/ContactSection.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/HeroSection.tsx",
-        "frontend/src/components/Navigation.tsx"
+        "frontend/src/components/HeroSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -46,51 +42,9 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-the-hidden-admin-panel-must-be-triggered-by-a-double-click-two-rapid-taps-within-500ms-on-the-logo-the-double-click-detection-must-reset-the-tap-count-after-500ms-to-prevent-accidental-triggers",
-      "featureTitle": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
+      "featureId": "feature-replace-the-dynamically-generated-qr-code-in-qrsection-tsx-with-a-static-image-of-the-official-khudrangkalakaar-instagram-qr-code-the-orange-pink-gradient-qr-code-with-the-instagram-logo-in-the-center-and-khudrangkalakaar-label-as-provided-in-the-uploaded-second-image-display-this-static-image-asset-instead-of-the-programmatically-generated-qr-code",
+      "featureTitle": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
       "files": [
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/Navigation.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-admin-login-must-validate-against-username-deepak-kumawat-and-password-kinnu-0613-on-success-show-an-upload-section-on-failure-display-an-invalid-credentials-error-message",
-      "featureTitle": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
-      "files": [
-        "frontend/src/pages/AdminLogin.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-display-a-qr-code-section-on-the-main-page-with-label-scan-qr-to-visit-instagram-linking-to-https-www-instagram-com-khudrangkalakaar-using-the-qr-image-url-https-api-qrserver-com-v1-create-qr-code-size-200x200-data-https-www-instagram-com-khudrangkalakaar",
-      "featureTitle": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
-      "files": [
-        "frontend/src/App.tsx",
         "frontend/src/components/QRSection.tsx"
       ],
       "components": [
@@ -103,7 +57,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-3"
       ],
       "confidence": "high"
     }

@@ -4,7 +4,9 @@ import { ChevronDown } from 'lucide-react';
 import { useGetCoverImage, useGetTextContent } from '../hooks/useQueries';
 
 const WHATSAPP_NUMBER = '917665854193';
-const WHATSAPP_MESSAGE = encodeURIComponent('Hello Mudit Sharma');
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  'Hello! I am interested in your artwork and would like to discuss a custom art project or commission. Could you please share more details about your services, pricing, and availability? Thank you!'
+);
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 
 export default function HeroSection() {
@@ -12,7 +14,7 @@ export default function HeroSection() {
   const { data: textContent } = useGetTextContent();
 
   const artistName = textContent?.artistName || 'Mudit Sharma';
-  const tagline = textContent?.tagline || 'Transforming Spaces with Art';
+  const tagline = textContent?.tagline || 'Transforming Blank Walls into Meaningful Art.';
 
   const scrollToPortfolio = () => {
     document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' });

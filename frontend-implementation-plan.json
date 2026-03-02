@@ -1,135 +1,54 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Improve social links, admin panel behavior, and gallery upload logic",
+  "title": "Fix Admin Login, Update Cover Tagline, and Replace Instagram QR Code",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Ensure Instagram social icon link opens https://www.instagram.com/khudrangkalakaar in a new tab with rel='noopener noreferrer' from all locations in the app",
+      "summary": "Fix the Admin Panel login flow to prevent button getting stuck in 'Initializing...' state and ensure Internet Identity authentication completes successfully",
       "acceptanceCriteria": [
-        "Clicking the Instagram icon/button opens https://www.instagram.com/khudrangkalakaar in a new tab.",
-        "The link uses target='_blank' and rel='noopener noreferrer'.",
-        "No broken or missing Instagram links exist anywhere in the UI."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ContactSection.tsx",
-          "operation": "modify",
-          "description": "Update the Instagram link to use href='https://www.instagram.com/khudrangkalakaar', target='_blank', and rel='noopener noreferrer' in the social card."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Update the Instagram link in the footer social links section to use href='https://www.instagram.com/khudrangkalakaar', target='_blank', and rel='noopener noreferrer'."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Ensure WhatsApp social icon link opens https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab",
-      "acceptanceCriteria": [
-        "Clicking the WhatsApp icon opens the correct WhatsApp link with pre-filled message 'Hello Mudit Sharma'.",
-        "Link opens in a new tab."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ContactSection.tsx",
-          "operation": "modify",
-          "description": "Update the WhatsApp link to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank' in the social card."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Update the WhatsApp link in the footer social links section to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
-        },
-        {
-          "path": "frontend/src/components/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Update the WhatsApp CTA button to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
-        },
-        {
-          "path": "frontend/src/components/Navigation.tsx",
-          "operation": "modify",
-          "description": "Update the WhatsApp CTA button in the navigation bar to use href='https://wa.me/917665854193?text=Hello%20Mudit%20Sharma' and target='_blank'."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Implement double-click (two rapid taps within 500ms) on the logo to trigger the hidden admin panel, with tap count reset after 500ms",
-      "acceptanceCriteria": [
-        "Double-clicking (two taps within 500ms) on the logo reveals the admin login panel.",
-        "A single click does not reveal the admin panel.",
-        "The tap counter resets after 500ms of inactivity."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Navigation.tsx",
-          "operation": "modify",
-          "description": "Replace the existing double-click logic on the logo with a tap counter that increments on each click, navigates to /admin-login on the second tap within 500ms, and resets the counter after 500ms of inactivity using a setTimeout cleanup mechanism."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Replace the existing double-click logic on the footer logo with a tap counter that increments on each click, navigates to /admin-login on the second tap within 500ms, and resets the counter after 500ms of inactivity using a setTimeout cleanup mechanism."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Validate admin login against username 'Deepak Kumawat' and password 'Kinnu*0613', showing upload section on success or 'Invalid Credentials' error on failure",
-      "acceptanceCriteria": [
-        "Entering username 'Deepak Kumawat' and password 'Kinnu*0613' grants access and shows the upload section.",
-        "Any other credentials show an 'Invalid Credentials' error.",
-        "The upload section is hidden by default before login."
+        "The login button does not remain stuck in 'Initializing...' indefinitely after credentials are entered",
+        "After entering valid credentials, the Internet Identity popup opens and completes successfully",
+        "If authentication is cancelled or fails, the button returns to its normal clickable state",
+        "Admin is redirected to the Admin Panel upon successful login"
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/AdminLogin.tsx",
           "operation": "modify",
-          "description": "Update the credentials validation to check username === 'Deepak Kumawat' and password === 'Kinnu*0613'. On success, proceed with Internet Identity login and admin role assignment, then redirect to /admin. On failure, display an error message 'Invalid Credentials' using toast or alert."
+          "description": "Fix the login button state management to prevent indefinite 'Initializing...' state. Refactor the authentication flow to properly handle credential validation followed by Internet Identity authentication. Add proper error handling and state reset for authentication cancellation or failure scenarios. Ensure the button state transitions correctly through: idle → validating credentials → triggering II auth → processing → success/error. Add timeout handling and proper cleanup of authentication listeners."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "Allow admin to select and upload an image file, displaying it immediately in the gallery without page reload using FileReader and data URL",
+      "id": "REQ-2",
+      "summary": "Update the hero section tagline to 'Transforming Blank Walls into Meaningful Art.'",
       "acceptanceCriteria": [
-        "Selecting an image file and clicking Upload immediately adds the image to the gallery section.",
-        "No page reload is required.",
-        "If no file is selected, nothing happens."
+        "The cover/hero section displays the text 'Transforming Blank Walls into Meaningful Art.'",
+        "No other hero content is altered"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminPanel.tsx",
+          "path": "frontend/src/components/HeroSection.tsx",
           "operation": "modify",
-          "description": "Add a file input and upload button in the 'Manage Artworks' tab that reads the selected image file using FileReader.readAsDataURL(), converts it to ExternalBlob.fromBytes(), then calls the addArtwork mutation to persist it to the backend. Ensure the gallery updates immediately via React Query cache invalidation without requiring a page reload. If no file is selected, disable the upload button or show a validation message."
+          "description": "Update the tagline text displayed in the hero section to read 'Transforming Blank Walls into Meaningful Art.' The component fetches text content via useGetTextContent hook, so verify whether the tagline is hardcoded in the JSX or comes from the backend textContent.tagline field. If hardcoded, replace the text directly. If dynamic, the change may need to be made via the Admin Panel's text content management tab instead (but per the BuildRequest, make the frontend change to display this specific text)."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar",
+      "id": "REQ-3",
+      "summary": "Replace the dynamically generated QR code with the static Instagram QR code image asset",
       "acceptanceCriteria": [
-        "A QR code image is visible on the page with the heading 'Scan QR to Visit Instagram'.",
-        "The QR code resolves to https://www.instagram.com/khudrangkalakaar when scanned.",
-        "The QR image is loaded from the correct API URL."
+        "The QR section displays the official Instagram QR code image (orange/pink gradient with Instagram logo centre)",
+        "The '@KHUDRANGKALAKAAR' label is visible below the QR code",
+        "The image is served as a static asset from frontend/public/assets/generated",
+        "The dynamically generated QR code is no longer rendered"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/QRSection.tsx",
-          "operation": "create",
-          "description": "Create a new QRSection component that renders a section with a heading 'Scan QR to Visit Instagram' and an img element with src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar' and alt='QR Code'. Apply consistent styling with other sections using the existing Tailwind theme."
-        },
-        {
-          "path": "frontend/src/pages/Home.tsx",
-          "operation": "create",
-          "description": "Create a Home page component that imports and renders all the main page sections in order: HeroSection, AboutSection, ServicesSection, FeaturedProjects, ArtworkGallery, WhyChooseSection, QRSection, ContactSection, and Footer. This consolidates the main page structure."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update the root route '/' to render the new Home page component instead of rendering sections directly, ensuring the QRSection is now included in the main page flow."
+          "description": "Replace the dynamically generated QR code with a static image reference. Remove the QR code generation logic and error handling/retry mechanism. Instead, render an <img> element pointing to the generated Instagram QR code asset at 'frontend/public/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png'. Ensure the '@KHUDRANGKALAKAAR' label remains visible below the QR code image. Add appropriate alt text for accessibility."
         }
       ]
     }

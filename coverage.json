@@ -1,90 +1,46 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T11:04:59.576Z",
+  "generatedAt": "2026-03-02T12:10:20.275Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
+        "summary": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/pages/AdminLogin.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/pages/AdminLogin.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
+        "summary": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/HeroSection.tsx",
-          "frontend/src/components/Navigation.tsx"
+          "frontend/src/components/HeroSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/HeroSection.tsx",
-          "frontend/src/components/Navigation.tsx"
+          "frontend/src/components/HeroSection.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
+        "summary": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/Footer.tsx"
+          "frontend/src/components/QRSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/Footer.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/AdminLogin.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/AdminLogin.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "The admin image upload feature must allow selecting a local image file and display it in the gallery immediately after upload, without requiring a page reload. The upload reads the file as a data URL and appends it to the gallery.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/pages/AdminPanel.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/QRSection.tsx",
-          "frontend/src/pages/Home.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/QRSection.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/QRSection.tsx"
         ]
       }
     ]
@@ -94,11 +50,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/ContactSection.tsx",
-    "frontend/src/components/Footer.tsx",
+    "frontend/public/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png",
     "frontend/src/components/HeroSection.tsx",
-    "frontend/src/components/Navigation.tsx",
     "frontend/src/components/QRSection.tsx",
     "frontend/src/pages/AdminLogin.tsx",
     "project_state.json",

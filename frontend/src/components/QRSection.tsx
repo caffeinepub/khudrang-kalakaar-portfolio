@@ -2,7 +2,7 @@ import React from 'react';
 import { SiInstagram } from 'react-icons/si';
 
 const INSTAGRAM_URL = 'https://www.instagram.com/khudrangkalakaar';
-const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(INSTAGRAM_URL)}`;
+const STATIC_QR_IMAGE = '/assets/generated/instagram-qr-khudrangkalakaar.dim_600x650.png';
 
 export default function QRSection() {
   return (
@@ -27,13 +27,20 @@ export default function QRSection() {
           </p>
 
           <div className="bg-white rounded-2xl shadow-md p-6 inline-flex flex-col items-center gap-4">
-            <img
-              src={QR_CODE_URL}
-              alt="QR Code"
-              width={200}
-              height={200}
-              className="rounded-lg"
-            />
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <img
+                src={STATIC_QR_IMAGE}
+                alt="QR Code for @KHUDRANGKALAKAAR Instagram"
+                width={260}
+                height={260}
+                className="rounded-lg object-contain"
+              />
+            </a>
             <a
               href={INSTAGRAM_URL}
               target="_blank"
@@ -41,8 +48,20 @@ export default function QRSection() {
               className="flex items-center gap-2 text-pink-600 font-semibold text-sm hover:text-pink-700 transition-colors"
             >
               <SiInstagram className="w-4 h-4" />
-              @khudrangkalakaar
+              @KHUDRANGKALAKAAR
             </a>
+            <p className="text-gray-400 text-xs">
+              Or{' '}
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-terracotta hover:underline font-medium"
+              >
+                click here
+              </a>{' '}
+              to open Instagram directly
+            </p>
           </div>
         </div>
       </div>

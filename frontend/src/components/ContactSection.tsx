@@ -3,7 +3,9 @@ import { SiInstagram, SiWhatsapp } from 'react-icons/si';
 import { MapPin, Phone } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '917665854193';
-const WHATSAPP_MESSAGE = encodeURIComponent('Hello Mudit Sharma');
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  'Hello! I am interested in your artwork and would like to discuss a custom art project or commission. Could you please share more details about your services, pricing, and availability? Thank you!'
+);
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 const INSTAGRAM_URL = 'https://www.instagram.com/khudrangkalakaar';
 

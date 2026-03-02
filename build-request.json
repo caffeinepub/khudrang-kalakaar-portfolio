@@ -1,132 +1,80 @@
 {
   "kind": "build_request",
-  "title": "Improve social links, admin panel behavior, and gallery upload logic",
+  "title": "Fix Admin Login, Update Cover Tagline, and Replace Instagram QR Code",
   "projectName": "Khudrang Kalakaar",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "The Instagram social icon link must open https://www.instagram.com/khudrangkalakaar in a new tab using rel='noopener noreferrer'. Ensure it works both from the social icons section and any other Instagram button/link in the app.",
+      "text": "Fix the Admin Panel login flow in AdminLogin.tsx. The login button currently gets stuck in 'Initializing...' state and shows 'Please complete authentication in the popup...' without proceeding. The login should validate the hardcoded credentials and then trigger Internet Identity authentication cleanly, allowing the admin to successfully reach the Admin Panel. Ensure the button state resets properly if authentication fails or is cancelled.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1"
         ],
         "quotes": [
-          "a href=\"https://www.instagram.com/khudrangkalakaar\" target=\"_blank\"",
-          "function goToInsta(){ const a = document.createElement(\"a\"); a.href = \"https://instagram.com/khudrangkalakaar\"; a.target = \"_blank\"; a.rel = \"noopener noreferrer\";"
+          "This is current issues in Admin pannel login"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking the Instagram icon/button opens https://www.instagram.com/khudrangkalakaar in a new tab.",
-        "The link uses target='_blank' and rel='noopener noreferrer'.",
-        "No broken or missing Instagram links exist anywhere in the UI."
+        "The login button does not remain stuck in 'Initializing...' indefinitely after credentials are entered",
+        "After entering valid credentials, the Internet Identity popup opens and completes successfully",
+        "If authentication is cancelled or fails, the button returns to its normal clickable state",
+        "Admin is redirected to the Admin Panel upon successful login"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "The WhatsApp social icon link must open https://wa.me/917665854193?text=Hello%20Mudit%20Sharma in a new tab.",
+      "text": "Update the hero/cover page tagline in HeroSection.tsx to read 'Transforming Blank Walls into Meaningful Art.' replacing the current tagline text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1"
         ],
         "quotes": [
-          "a href=\"https://wa.me/917665854193?text=Hello%20Mudit%20Sharma\" target=\"_blank\""
+          "Transforming Blank Walls into Meaningful Art.",
+          "Use this line on cover page"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking the WhatsApp icon opens the correct WhatsApp link with pre-filled message 'Hello Mudit Sharma'.",
-        "Link opens in a new tab."
+        "The cover/hero section displays the text 'Transforming Blank Walls into Meaningful Art.'",
+        "No other hero content is altered"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "The hidden admin panel must be triggered by a double-click (two rapid taps within 500ms) on the logo. The double-click detection must reset the tap count after 500ms to prevent accidental triggers.",
+      "text": "Replace the dynamically generated QR code in QRSection.tsx with a static image of the official @KHUDRANGKALAKAAR Instagram QR code (the orange/pink gradient QR code with the Instagram logo in the center and '@KHUDRANGKALAKAAR' label, as provided in the uploaded second image). Display this static image asset instead of the programmatically generated QR code.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-1"
         ],
         "quotes": [
-          "logo.addEventListener(\"click\", function() { tapCount++; if (tapCount === 2) { adminPanel.style.display = \"block\"; tapCount = 0; } setTimeout(() => tapCount = 0, 500); });"
+          "Use the qr code in second image for insta"
         ]
       },
       "acceptanceCriteria": [
-        "Double-clicking (two taps within 500ms) on the logo reveals the admin login panel.",
-        "A single click does not reveal the admin panel.",
-        "The tap counter resets after 500ms of inactivity."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Admin login must validate against username 'Deepak Kumawat' and password 'Kinnu*0613'. On success, show an upload section. On failure, display an 'Invalid Credentials' error message.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "if (user === \"Deepak Kumawat\" && pass === \"Kinnu*0613\") { document.getElementById(\"uploadSection\").style.display = \"block\"; alert(\"Login Successful\"); } else { alert(\"Invalid Credentials\"); }"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Entering username 'Deepak Kumawat' and password 'Kinnu*0613' grants access and shows the upload section.",
-        "Any other credentials show an 'Invalid Credentials' error.",
-        "The upload section is hidden by default before login."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "The admin image upload feature must allow selecting a local image file and display it in the gallery immediately after upload, without requiring a page reload. The upload reads the file as a data URL and appends it to the gallery.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "function uploadImage() { const input = document.getElementById(\"imageUpload\"); ... const reader = new FileReader(); reader.onload = function(e) { const img = document.createElement(\"img\"); img.src = e.target.result; gallery.appendChild(img); } reader.readAsDataURL(input.files[0]); }"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Selecting an image file and clicking Upload immediately adds the image to the gallery section.",
-        "No page reload is required.",
-        "If no file is selected, nothing happens."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Display a QR code section on the main page with label 'Scan QR to Visit Instagram' linking to https://www.instagram.com/khudrangkalakaar using the QR image URL: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "<section class=\"qr-section\"><h3>Scan QR to Visit Instagram</h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.instagram.com/khudrangkalakaar\" alt=\"QR Code\"></section>"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A QR code image is visible on the page with the heading 'Scan QR to Visit Instagram'.",
-        "The QR code resolves to https://www.instagram.com/khudrangkalakaar when scanned.",
-        "The QR image is loaded from the correct API URL."
+        "The QR section displays the official Instagram QR code image (orange/pink gradient with Instagram logo centre)",
+        "The '@KHUDRANGKALAKAAR' label is visible below the QR code",
+        "The image is served as a static asset from frontend/public/assets/generated",
+        "The dynamically generated QR code is no longer rendered"
       ]
     }
   ],
   "constraints": [
-    "Admin credentials must remain exactly: username = 'Deepak Kumawat', password = 'Kinnu*0613'.",
-    "Instagram URL must be https://www.instagram.com/khudrangkalakaar.",
-    "WhatsApp URL must be https://wa.me/917665854193?text=Hello%20Mudit%20Sharma.",
-    "Do not modify files under frontend/src/hooks/ or frontend/src/components/ui."
+    "Do not change any other text content on the cover/hero page beyond the tagline",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts",
+    "Do not alter the backend admin credentials or role assignment logic"
   ],
   "nonGoals": [
-    "Changing the overall visual theme or color palette.",
-    "Adding new backend data models or API endpoints.",
-    "Implementing real server-side image persistence (uploads remain client-side/in-memory).",
-    "Adding new pages or routes beyond what already exists."
+    "Redesigning the Admin Panel UI",
+    "Changing the Instagram profile URL or WhatsApp link",
+    "Updating any other section content beyond the hero tagline and QR code"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Orange-to-pink gradient dot-style Instagram QR code with Instagram camera logo in centre and '@KHUDRANGKALAKAAR' label in bold pink text at the bottom (instagram-qr-khudrangkalakaar.dim_600x650.png)"
+    ],
     "edits": []
   }
 }
