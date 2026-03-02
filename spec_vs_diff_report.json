@@ -1,80 +1,45 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-01T18:24:14.795Z",
-  "summary": "The diff implements a comprehensive static portfolio website for Mudit Sharma / Khudrang Kalakaar. All major requirements (REQ-1 through REQ-9) appear to be substantially implemented: hero section, about section, services, why choose us, 5 featured projects, contact section, sticky navigation with hamburger menu, Poppins font, terracotta accent colors, and image references from the correct asset path. A few minor gaps and hallucinated features are noted.",
+  "generatedAt": "2026-03-02T06:06:11.387Z",
+  "summary": "The diff implements all three requirements: REQ-1 (logo-click admin login flow in Navigation and Footer), REQ-2 (full AdminPanel with image uploads, text editing, artwork CRUD), and REQ-3 (corrected Instagram URL). Most acceptance criteria are satisfied. One minor gap: the non-admin access-denied message behavior after login is partially handled — Footer and Navigation redirect unconditionally to /admin after login without checking isAdmin first, deferring the access-denied experience entirely to the AdminPanel page.",
   "missing_requirements": [
     {
-      "requirement": "REQ-8: Active section is visually indicated in the nav — the 'Why Us' nav link maps to section id 'why-us', but the WhyChooseSection component content is not shown in the diff to confirm it uses id='why-us'.",
-      "reason": "Navigation uses href='why-us' but the WhyChooseSection file content is not visible in the diff. If the section id does not match, smooth-scroll and active highlighting would break for that link.",
+      "id": "REQ-1",
+      "requirement": "Non-admin users clicking the logo are prompted to authenticate but see an access-denied message if not admin",
+      "reason": "In Footer.tsx and Navigation.tsx, after a successful login the code unconditionally does window.location.href = '/admin' without checking isAdmin. The access-denied experience depends entirely on the AdminPanel page guard rather than being surfaced at the logo-click level as specified in the AC.",
       "evidence": [
-        "frontend/src/components/WhyChooseSection.tsx",
+        "frontend/src/components/Footer.tsx",
         "frontend/src/components/Navigation.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "InternetIdentity authentication provider, useInternetIdentity hook, useActor hook, and QueryClientProvider wrapping the app are included.",
-      "reason": "The build request explicitly states 'No backend required', lists 'User authentication' as a non-goal, and prohibits login infrastructure. Including Internet Identity auth client and actor creation directly contradicts these constraints.",
+      "description": "ArtworkGallery component added to the public-facing portfolio page",
+      "reason": "The build request does not mention adding an ArtworkGallery section to the public portfolio page. The frontend-file-summaries.txt describes a new ArtworkGallery component rendered in App.tsx between FeaturedProjects and ContactSection, which was not requested.",
       "evidence": [
-        "frontend/src/hooks/useInternetIdentity.ts",
-        "frontend/src/hooks/useActor.ts",
-        "frontend/src/main.tsx"
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "A backend Motoko actor file was added as an empty actor.",
-      "reason": "The build request states 'No backend required — this is a purely static frontend portfolio site'. Adding backend/main.mo introduces backend infrastructure not requested.",
+      "description": "Migration module added for backend state migration",
+      "reason": "The build request does not mention adding a migration system. A new backend/migration.mo file was added to handle state schema upgrades, which was not part of any requirement.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "Footer includes a caffeine.ai attribution link with UTM tracking parameters.",
-      "reason": "This attribution link was not part of any specified requirement in the build request.",
-      "evidence": [
-        "frontend/src/components/Footer.tsx"
-      ]
-    },
-    {
-      "description": "About section stats row shows '50+ Projects Done' and '100% Client Satisfaction' as specific figures.",
-      "reason": "The build request only specifies '5+ Years Experience' as a stat. The additional project count and satisfaction percentage are fabricated statistics not present in the provided portfolio structure.",
-      "evidence": [
-        "frontend/src/components/AboutSection.tsx"
-      ]
-    },
-    {
-      "description": "Hero section includes 'Explore Portfolio' and 'Get In Touch' CTA buttons plus a scroll indicator animation.",
-      "reason": "REQ-2 specifies only artist name, subtitle, location, experience badge, tagline, background image, and semi-transparent overlay. CTA buttons and scroll indicators were not requested.",
-      "evidence": [
-        "frontend/src/components/HeroSection.tsx"
+        "backend/migration.mo"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.82,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AboutSection.tsx",
     "frontend/src/components/ContactSection.tsx",
-    "frontend/src/components/FeaturedProjects.tsx",
     "frontend/src/components/Footer.tsx",
-    "frontend/src/components/HeroSection.tsx",
     "frontend/src/components/Navigation.tsx",
-    "frontend/src/components/ProjectSection.tsx",
-    "frontend/src/components/ServicesSection.tsx",
-    "frontend/src/components/WhyChooseSection.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useScrollSpy.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminPanel.tsx",
     "project_state.json"
   ]
 }

@@ -1,8 +1,11 @@
-import { MapPin, Instagram, MessageCircle, Phone } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { SiInstagram, SiWhatsapp } from 'react-icons/si';
 
 export default function ContactSection() {
-  const whatsappUrl = 'https://wa.me/?text=Hi%20Mudit%2C%20I%20am%20interested%20in%20your%20wall%20painting%20services.';
+  const whatsappNumber = '917665854193';
+  const whatsappMessage = encodeURIComponent("Hello! I'm interested in your artwork. I'd love to discuss a project with you.");
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+  const instagramUrl = 'https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy';
 
   return (
     <section id="contact" className="py-20 px-6 md:px-12 lg:px-20 bg-secondary">
@@ -37,29 +40,36 @@ export default function ContactSection() {
           </div>
 
           {/* Instagram */}
-          <div className="bg-white rounded-sm p-8 text-center shadow-xs border border-border hover:shadow-card transition-shadow">
-            <div className="w-12 h-12 bg-terracotta-light rounded-sm flex items-center justify-center mx-auto mb-4">
-              <SiInstagram className="w-6 h-6 text-terracotta" />
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white rounded-sm p-8 text-center shadow-xs border border-border hover:shadow-card transition-shadow block group"
+          >
+            <div className="w-12 h-12 bg-terracotta-light rounded-sm flex items-center justify-center mx-auto mb-4 group-hover:bg-terracotta transition-colors">
+              <SiInstagram className="w-6 h-6 text-terracotta group-hover:text-white transition-colors" />
             </div>
             <h3 className="font-bold text-foreground mb-2">Instagram</h3>
-            <a
-              href="https://instagram.com/khudrangkalakaar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-terracotta text-sm font-medium hover:text-terracotta-dark transition-colors"
-            >
+            <p className="text-terracotta text-sm font-medium group-hover:text-terracotta-dark transition-colors">
               @khudrangkalakaar
-            </a>
-          </div>
+            </p>
+            <p className="text-foreground/40 text-xs mt-1">Follow for updates</p>
+          </a>
 
           {/* WhatsApp */}
-          <div className="bg-white rounded-sm p-8 text-center shadow-xs border border-border hover:shadow-card transition-shadow">
-            <div className="w-12 h-12 bg-terracotta-light rounded-sm flex items-center justify-center mx-auto mb-4">
-              <SiWhatsapp className="w-6 h-6 text-terracotta" />
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white rounded-sm p-8 text-center shadow-xs border border-border hover:shadow-card transition-shadow block group"
+          >
+            <div className="w-12 h-12 bg-terracotta-light rounded-sm flex items-center justify-center mx-auto mb-4 group-hover:bg-terracotta transition-colors">
+              <SiWhatsapp className="w-6 h-6 text-terracotta group-hover:text-white transition-colors" />
             </div>
             <h3 className="font-bold text-foreground mb-2">WhatsApp</h3>
-            <p className="text-foreground/60 text-sm">[Add Number]</p>
-          </div>
+            <p className="text-foreground/70 text-sm font-medium">+91 76658 54193</p>
+            <p className="text-foreground/40 text-xs mt-1">Tap to message</p>
+          </a>
         </div>
 
         {/* CTA */}
@@ -75,7 +85,7 @@ export default function ContactSection() {
               Chat on WhatsApp
             </a>
             <a
-              href="https://instagram.com/khudrangkalakaar"
+              href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2.5 px-8 py-4 bg-white border-2 border-terracotta text-terracotta font-semibold rounded-sm hover:bg-terracotta hover:text-white transition-all duration-200 text-base"

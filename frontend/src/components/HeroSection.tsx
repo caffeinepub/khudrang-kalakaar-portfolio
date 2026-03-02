@@ -1,4 +1,12 @@
+import { useGetCoverImage } from '../hooks/useQueries';
+
 export default function HeroSection() {
+  const { data: coverBlob } = useGetCoverImage();
+
+  const coverUrl = coverBlob
+    ? coverBlob.getDirectURL()
+    : '/assets/generated/cover-hero.dim_1920x1080.png';
+
   const scrollToAbout = () => {
     const el = document.getElementById('about');
     if (el) {
@@ -12,7 +20,7 @@ export default function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       style={{
-        backgroundImage: `url('/assets/generated/cover-hero.dim_1920x1080.png')`,
+        backgroundImage: `url('${coverUrl}')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -64,7 +72,7 @@ export default function HeroSection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
-            onClick={() => scrollToAbout()}
+            onClick={scrollToAbout}
             className="px-8 py-3.5 bg-terracotta text-white font-semibold rounded-sm hover:bg-terracotta-dark transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
           >
             Explore Portfolio

@@ -1,229 +1,84 @@
 {
   "kind": "build_request",
-  "title": "Mudit Sharma – Khudrang Kalakaar Wall Painting Portfolio Website",
-  "projectName": "Khudrang Kalakaar Portfolio",
-  "priority": "normal",
+  "title": "Fix admin panel access via logo tap and correct Instagram profile link",
+  "projectName": "Khudrang Kalakaar",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Apply a consistent visual theme across the entire portfolio: white and light grey (#F5F5F5) backgrounds, Poppins as the primary font, bold uppercase section headings, generous uniform margins and padding on all pages, warm earthy accent color (terracotta or ochre) for highlights and dividers, and a clean minimal layout that lets imagery breathe.",
+      "text": "Make the admin panel accessible by tapping/clicking the site logo in the Navigation and Footer components. When the logo is clicked, trigger the Internet Identity login flow (if not already authenticated) and redirect to the /admin route upon successful authentication. The logo should not visually indicate admin access to regular visitors.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-4"
         ],
         "quotes": [
-          "Keep background white / light grey",
-          "Use bold headings",
-          "Use 1 clean font (Montserrat / Poppins)",
-          "Same margin & spacing on all pages"
+          "if I tap on logo I can access admin pannel",
+          "Create website without any mistake in admin panel by taping on logo I can edit images or upload images and can edit text"
         ]
       },
       "acceptanceCriteria": [
-        "Background is white or light grey throughout",
-        "Poppins font is applied globally",
-        "All section headings are bold",
-        "Margins and spacing are consistent across all pages/sections",
-        "An earthy accent color is used for highlights and decorative elements"
+        "Clicking the logo in the Navigation bar initiates admin login flow",
+        "Clicking the logo in the Footer initiates admin login flow",
+        "After successful Internet Identity authentication as admin, user is redirected to /admin",
+        "Non-admin users clicking the logo are prompted to authenticate but see an access-denied message if not admin",
+        "Logo appearance is unchanged for regular visitors — no visible admin hint"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Create a full-screen Cover Section (Page 1) displaying: artist name 'MUDIT SHARMA' in large bold text, subtitle 'Professional Wall Painting Artist', location '📍 Bikaner, Rajasthan', experience badge '🖌 5+ Years Experience', and tagline '\"Transforming Blank Walls into Meaningful Art.\"' overlaid on a full-page hero mural background image (cover-hero.dim_1920x1080.png). Text must be legible over the image with a semi-transparent dark overlay.",
-      "target": "frontend",
+      "text": "Ensure the AdminPanel page (/admin route) provides full editing capabilities: upload/replace the site logo, upload/replace the hero cover image, upload/replace the artist portrait image used in the About section, add/edit/delete artworks in the gallery, and edit key text content (artist name, tagline, bio). All changes must persist to the backend.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-4"
         ],
         "quotes": [
-          "PAGE 1 – COVER PAGE",
-          "MUDIT SHARMA",
-          "Transforming Blank Walls into Meaningful Art.",
-          "Background: Full page strong mural image with minimal text"
+          "edit all images along with the artist images",
+          "I can edit images or upload images and can edit text"
         ]
       },
       "acceptanceCriteria": [
-        "Full-screen hero section displays the mural background image",
-        "Artist name, subtitle, location, experience, and tagline are all visible",
-        "A semi-transparent overlay ensures text readability over the image",
-        "Layout is centered and visually impactful"
+        "Admin can upload or replace the site logo",
+        "Admin can upload or replace the hero cover image",
+        "Admin can upload or replace the artist portrait/profile image shown in the About section",
+        "Admin can add, edit, and delete artworks in the gallery",
+        "Admin can edit the artist name, tagline, and bio text displayed on the site",
+        "All edits are saved to the backend and reflected on the public-facing portfolio immediately",
+        "Admin panel is only accessible to authenticated admin users"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Create an About the Artist section (Page 2) with a heading 'About Mudit Sharma', a professional portrait placeholder area on one side, and the bio text on the other: 'Mudit Sharma is a professional wall painting artist based in Bikaner, Rajasthan, with over 5 years of experience in residential, commercial, and public mural projects. He specializes in customized wall art that enhances spaces and creates strong visual impact. His focus is on clean finishing, creative concepts, and complete client satisfaction.'",
+      "text": "Fix the Instagram link in the ContactSection (and anywhere else it appears on the site) so it opens the specific Instagram profile page: https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy — not the generic Instagram homepage.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-4"
         ],
         "quotes": [
-          "PAGE 2 – ABOUT THE ARTIST",
-          "Mudit Sharma is a professional wall painting artist based in Bikaner, Rajasthan"
+          "insta page is not opening for only insta opening not that particular page https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy"
         ]
       },
       "acceptanceCriteria": [
-        "Section heading 'About Mudit Sharma' is displayed prominently",
-        "Full bio paragraph text is present and readable",
-        "Layout uses a two-column arrangement (image placeholder + text) on wider screens",
-        "Section is visually balanced"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Create a Services Offered section (Page 3) with heading 'Our Services' displaying these 7 services in a clean grid or list with checkmark icons: Home Wall Murals, Kids Room Theme Painting, Café & Restaurant Concept Walls, Hotel & Resort Artwork, Public Infrastructure Art, 3D Illusion Wall Designs, Custom Hand-Painted Designs.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "PAGE 3 – SERVICES OFFERED",
-          "Home Wall Murals",
-          "Kids Room Theme Painting",
-          "Café & Restaurant Concept Walls"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All 7 services are listed with checkmark icons",
-        "Section heading 'Our Services' is bold and prominent",
-        "Services are displayed in a responsive grid (2–3 columns on desktop, 1 column on mobile)",
-        "Each service item is clearly readable"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Create a Why Choose Us section (Page 4) with heading 'Why Clients Trust Us' displaying these 6 trust points with checkmark icons: 5+ Years Practical Experience, Unique Custom Designs, Premium Quality Paints, Professional & Clean Work, On-Time Project Completion, Budget-Friendly Packages.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "PAGE 4 – WHY CHOOSE US",
-          "Why Clients Trust Us",
-          "5+ Years Practical Experience"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All 6 trust points are displayed with checkmark icons",
-        "Section heading 'Why Clients Trust Us' is bold and prominent",
-        "Points are arranged in a grid (2–3 columns on desktop)",
-        "Section uses a slightly different background shade to visually differentiate it"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Create 5 Featured Project sections (Pages 5–9), each with the project image occupying ~70% of the section width and project details in the remaining 30%. Projects and their details: (1) 'Café Wall Art Project' – vibrant Instagram-worthy atmosphere, enhances interior vibe, modern aesthetic; (2) 'Sawai Madhopur Overbridge' – Location: Sawai Madhopur, public infrastructure mural, beautifies overbridge, reflects cultural identity; (3) 'Sanskriti Fort & Resort' – heritage-themed property, enhances royal ambiance, fine detailing; (4) 'Hotel & Resort Wall Art' – elevates guest experience, creative visual storytelling, adds character and sophistication; (5) 'Jiman Restaurant – Bikaner' – traditional restaurant vibe, enhances customer engagement, memorable dining atmosphere. Each section includes the project name as a bold heading, description text, and a location badge where applicable. Use generated placeholder project images for each.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "PAGE 5 – FEATURED PROJECT 1",
-          "PAGE 6 – FEATURED PROJECT 2",
-          "PAGE 7 – FEATURED PROJECT 3",
-          "PAGE 8 – FEATURED PROJECT 4",
-          "PAGE 9 – FEATURED PROJECT 5",
-          "Every project page = 70% image, 30% text"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All 5 project sections are present in order",
-        "Each project shows a large image (~70% width) and a text panel (~30% width)",
-        "Project name, description, and location (where applicable) are displayed",
-        "Alternate image-left/image-right layout between projects for visual variety",
-        "Sections are clearly separated with consistent spacing"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Create a Contact section (Page 10) with heading 'Let's Transform Your Space', displaying: location '📍 Bikaner, Rajasthan', Instagram '@khudrangkalakaar' (linked to https://instagram.com/khudrangkalakaar), WhatsApp contact (display 'WhatsApp: [Add Number]' as a placeholder), and availability note 'Available for Residential & Commercial Projects'. Include a prominent call-to-action button linking to WhatsApp.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "PAGE 10 – CONTACT PAGE",
-          "Let's Transform Your Space",
-          "Instagram: @khudrangkalakaar",
-          "Available for Residential & Commercial Projects"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Heading 'Let's Transform Your Space' is displayed",
-        "Location, Instagram handle, WhatsApp placeholder, and availability note are all shown",
-        "Instagram handle is a clickable link",
-        "A WhatsApp CTA button is present",
-        "Section has a visually distinct background to signal end-of-page"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Add a sticky navigation bar at the top of the page with the artist name/logo 'Khudrang Kalakaar' on the left and smooth-scroll anchor links on the right: About, Services, Why Us, Projects, Contact. On mobile, collapse to a hamburger menu.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "MUDIT SHARMA – WALL PAINTING PORTFOLIO",
-          "Khudrang Kalakaar"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Navigation bar is fixed at the top and visible while scrolling",
-        "All 5 nav links scroll smoothly to their respective sections",
-        "Artist brand name is displayed on the left",
-        "On mobile, a hamburger menu reveals the nav links",
-        "Active section is visually indicated in the nav"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Render all generated images (cover hero mural, about portrait, and 5 project images) as static assets from frontend/public/assets/generated/ and reference them in the respective components.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "Background: Full page strong mural image with minimal text",
-          "Every project page = 70% image, 30% text"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All images load correctly from frontend/public/assets/generated/",
-        "No broken image links on any section",
-        "Images are responsive and maintain aspect ratio"
+        "The Instagram card/button in ContactSection links to https://www.instagram.com/khudrangkalakaar?igsh=bmRsdGx6Z3Nrd2Vy",
+        "The link opens in a new tab",
+        "No other Instagram links on the site point to the generic Instagram homepage"
       ]
     }
   ],
   "constraints": [
-    "No backend required — this is a purely static frontend portfolio site",
-    "All content is hardcoded based on the provided portfolio structure",
-    "Use Poppins or Montserrat font only (via Google Fonts import)",
-    "Do not add any CMS, login, or form-submission backend"
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Admin access must use Internet Identity authentication — no custom auth system",
+    "All backend logic must remain in the single main actor file (backend/main.mo)"
   ],
   "nonGoals": [
-    "PDF generation or export functionality",
-    "Backend data storage or API integration",
-    "User authentication",
-    "Blog or dynamic content management",
-    "Multi-language support"
+    "Adding any new sections or pages beyond what already exists",
+    "Redesigning the visual theme or layout",
+    "Integrating any third-party services other than Internet Identity"
   ],
   "imageRequirements": {
-    "required": [
-      "Dramatic full-wall mural painting with bold colors — vibrant abstract patterns in deep reds, oranges, and golds on a large architectural wall surface (cover-hero.dim_1920x1080.png)",
-      "A male artist painting a colorful mural on a wall, brush in hand, warm earthy tones, artistic studio setting (artist-portrait.dim_800x900.png)",
-      "Vibrant café interior wall mural with bright colors, tropical or geometric patterns, modern aesthetic (project-cafe.dim_1200x800.png)",
-      "Large public infrastructure overbridge mural with cultural motifs, Rajasthani folk art patterns, vivid colors on concrete surface (project-overbridge.dim_1200x800.png)",
-      "Heritage fort wall painting with royal Rajasthani motifs — elephants, peacocks, intricate patterns in gold and royal blue (project-fort-resort.dim_1200x800.png)",
-      "Luxury hotel corridor with decorative wall art murals in warm tones, sophisticated floral and geometric patterns (project-hotel.dim_1200x800.png)",
-      "Traditional Indian restaurant interior wall painting with warm earthy tones, ethnic patterns, and cultural motifs evoking Rajasthani heritage (project-restaurant.dim_1200x800.png)"
-    ],
+    "required": [],
     "edits": []
   }
 }
