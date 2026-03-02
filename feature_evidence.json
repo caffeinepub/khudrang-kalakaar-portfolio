@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-replace-all-occurrences-of-the-whatsapp-pre-filled-message-text-hello-mudit-sharma-used-in-whatsapp-href-link-parameters-across-navigation-herosection-contactsection-and-footer-components-with-a-proper-artwork-inquiry-message-such-as-hello-i-came-across-your-artwork-portfolio-and-i-m-interested-in-discussing-a-potential-project-could-you-please-share-more-details-about-your-services-and-availability",
-      "featureTitle": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' (used in WhatsApp href/link parameters across Navigation, HeroSection, ContactSection, and Footer components) with a proper artwork inquiry message such as: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?'",
+      "featureId": "feature-redesign-the-overall-visual-theme-of-the-portfolio-website-with-a-bold-artisanal-aesthetic-that-reflects-the-identity-of-a-mural-artist-use-a-rich-warm-color-palette-deep-earthy-tones-terracotta-warm-cream-charcoal-with-strong-typography-contrasts-apply-the-theme-consistently-across-all-sections-navigation-herosection-aboutsection-servicessection-featuredprojects-artworkgallery-whychoosesection-contactsection-qrsection-and-footer",
+      "featureTitle": "Redesign the overall visual theme of the portfolio website with a bold, artisanal aesthetic that reflects the identity of a mural artist. Use a rich, warm color palette (deep earthy tones, terracotta, warm cream, charcoal) with strong typography contrasts. Apply the theme consistently across all sections: Navigation, HeroSection, AboutSection, ServicesSection, FeaturedProjects, ArtworkGallery, WhyChooseSection, ContactSection, QRSection, and Footer.",
       "files": [
-        "frontend/src/components/ContactSection.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/HeroSection.tsx",
-        "frontend/src/components/Navigation.tsx"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,6 +21,227 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-navigation-component-with-a-visually-refined-layout-improved-logo-presentation-cleaner-link-styling-refined-mobile-menu-and-a-high-contrast-hire-me-cta-button-that-matches-the-new-theme-preserve-existing-functionality-scroll-aware-styling-double-tap-easter-egg-to-admin-login-whatsapp-link",
+      "featureTitle": "Redesign the Navigation component with a visually refined layout: improved logo presentation, cleaner link styling, refined mobile menu, and a high-contrast 'Hire Me' CTA button that matches the new theme. Preserve existing functionality (scroll-aware styling, double-tap easter egg to admin login, WhatsApp link).",
+      "files": [
+        "frontend/src/components/Navigation.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-herosection-with-a-full-screen-immersive-layout-large-dramatic-typography-for-the-artist-name-and-tagline-refined-cta-button-styling-and-a-well-composed-overlay-on-the-background-cover-image-preserve-existing-dynamic-content-fetching-from-the-backend-cms",
+      "featureTitle": "Redesign the HeroSection with a full-screen, immersive layout: large dramatic typography for the artist name and tagline, refined CTA button styling, and a well-composed overlay on the background cover image. Preserve existing dynamic content fetching from the backend CMS.",
+      "files": [
+        "frontend/src/components/HeroSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-aboutsection-with-an-improved-two-column-layout-featuring-the-artist-portrait-bio-text-floating-experience-badge-and-stats-row-enhance-decorative-accents-to-align-with-the-new-artisanal-theme-preserve-all-existing-static-content",
+      "featureTitle": "Redesign the AboutSection with an improved two-column layout featuring the artist portrait, bio text, floating experience badge, and stats row. Enhance decorative accents to align with the new artisanal theme. Preserve all existing static content.",
+      "files": [
+        "frontend/src/components/AboutSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-servicessection-with-improved-card-layouts-for-the-seven-service-offerings-cards-should-have-refined-styling-borders-shadows-icon-treatment-hover-effects-consistent-with-the-new-theme-preserve-all-existing-service-data",
+      "featureTitle": "Redesign the ServicesSection with improved card layouts for the seven service offerings. Cards should have refined styling (borders, shadows, icon treatment, hover effects) consistent with the new theme. Preserve all existing service data.",
+      "files": [
+        "frontend/src/components/ServicesSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-featuredprojects-and-projectsection-components-with-a-more-visually-impactful-layout-improve-the-image-text-split-presentation-numbered-overlay-badge-styling-and-section-heading-preserve-existing-project-data-and-alternating-layout-direction-logic",
+      "featureTitle": "Redesign the FeaturedProjects and ProjectSection components with a more visually impactful layout. Improve the image/text split presentation, numbered overlay badge styling, and section heading. Preserve existing project data and alternating layout direction logic.",
+      "files": [
+        "frontend/src/components/FeaturedProjects.tsx",
+        "frontend/src/components/ProjectSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-artworkgallery-section-with-an-improved-grid-layout-refined-card-hover-effects-and-a-polished-lightbox-dialog-preserve-existing-backend-data-fetching-and-uint8array-to-object-url-conversion-logic",
+      "featureTitle": "Redesign the ArtworkGallery section with an improved grid layout, refined card hover effects, and a polished lightbox dialog. Preserve existing backend data fetching and Uint8Array-to-object-URL conversion logic.",
+      "files": [
+        "frontend/src/components/ArtworkGallery.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-whychoosesection-with-improved-card-styling-for-the-six-trust-point-cards-enhance-numbered-accents-card-layout-and-section-heading-to-match-the-new-artisanal-theme-preserve-all-existing-content",
+      "featureTitle": "Redesign the WhyChooseSection with improved card styling for the six trust-point cards. Enhance numbered accents, card layout, and section heading to match the new artisanal theme. Preserve all existing content.",
+      "files": [
+        "frontend/src/components/WhyChooseSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-contactsection-with-improved-card-layouts-for-location-whatsapp-and-instagram-contact-cards-apply-refined-iconography-card-styling-and-section-heading-consistent-with-the-new-theme-preserve-existing-dynamic-contact-detail-fetching-and-fallback-defaults",
+      "featureTitle": "Redesign the ContactSection with improved card layouts for Location, WhatsApp, and Instagram contact cards. Apply refined iconography, card styling, and section heading consistent with the new theme. Preserve existing dynamic contact detail fetching and fallback defaults.",
+      "files": [
+        "frontend/src/components/ContactSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-footer-with-a-refined-layout-covering-brand-info-quick-nav-links-and-contact-details-improve-typography-spacing-and-visual-hierarchy-to-match-the-new-theme-preserve-existing-double-tap-logo-easter-egg-and-whatsapp-instagram-links",
+      "featureTitle": "Redesign the Footer with a refined layout covering brand info, quick nav links, and contact details. Improve typography, spacing, and visual hierarchy to match the new theme. Preserve existing double-tap logo easter egg and WhatsApp/Instagram links.",
+      "files": [
+        "frontend/src/components/Footer.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-global-css-frontend-src-index-css-and-frontend-index-css-and-tailwind-configuration-frontend-tailwind-config-js-to-reflect-the-new-design-system-revised-color-tokens-font-choices-and-spacing-shadow-utilities-aligned-with-the-artisanal-mural-artist-theme",
+      "featureTitle": "Update the global CSS (frontend/src/index.css and frontend/index.css) and Tailwind configuration (frontend/tailwind.config.js) to reflect the new design system: revised color tokens, font choices, and spacing/shadow utilities aligned with the artisanal mural artist theme.",
+      "files": [
+        "frontend/src/components/QRSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
       ],
       "confidence": "high"
     }

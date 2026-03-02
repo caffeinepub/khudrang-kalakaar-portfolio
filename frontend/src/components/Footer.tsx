@@ -59,33 +59,62 @@ export default function Footer() {
   );
 
   return (
-    <footer className="bg-card border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand */}
-          <div>
+    <footer className="bg-foreground border-t border-white/10">
+      {/* Main footer content */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-16 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+          {/* Brand — 5 cols */}
+          <div className="md:col-span-5">
             <button
               onClick={handleLogoInteraction}
-              className="flex items-center mb-4 focus:outline-none"
+              className="flex items-center gap-3 mb-5 focus:outline-none group"
               aria-label="Logo"
             >
-              <img src={logoSrc} alt="Logo" className="h-10 w-10 object-contain rounded-full" />
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 group-hover:border-terracotta transition-colors">
+                <img src={logoSrc} alt="Khudrang Kalakaar Logo" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-lg text-background leading-none">Khudrang</p>
+                <p className="font-body text-[10px] tracking-[0.2em] uppercase text-background/40 mt-0.5">Kalakaar</p>
+              </div>
             </button>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="font-body text-background/50 text-sm leading-relaxed max-w-xs">
               Transforming blank walls into meaningful art. Mural artist based in Rajasthan, available pan India.
             </p>
+            {/* Social icons */}
+            <div className="flex items-center gap-3 mt-6">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-sm bg-white/8 hover:bg-terracotta flex items-center justify-center transition-colors duration-300"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle size={16} className="text-background/70" />
+              </a>
+              <a
+                href={instagramProfile}
+                target="_blank"
+                rel="noopener noreferrer external"
+                className="w-9 h-9 rounded-sm bg-white/8 hover:bg-terracotta flex items-center justify-center transition-colors duration-300"
+                aria-label="Instagram"
+              >
+                <Instagram size={16} className="text-background/70" />
+              </a>
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+          {/* Quick Links — 3 cols */}
+          <div className="md:col-span-3">
+            <h3 className="font-display font-bold text-background text-sm mb-5 tracking-wide">Quick Links</h3>
+            <ul className="space-y-2.5">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-accent transition-colors"
+                    className="font-body text-sm text-background/45 hover:text-terracotta transition-colors flex items-center gap-2 group"
                   >
+                    <span className="w-3 h-px bg-background/20 group-hover:bg-terracotta group-hover:w-5 transition-all duration-300" />
                     {link.label}
                   </a>
                 </li>
@@ -93,12 +122,12 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin size={16} className="text-accent flex-shrink-0" />
+          {/* Contact — 4 cols */}
+          <div className="md:col-span-4">
+            <h3 className="font-display font-bold text-background text-sm mb-5 tracking-wide">Contact</h3>
+            <ul className="space-y-3.5">
+              <li className="flex items-center gap-3 font-body text-sm text-background/45">
+                <MapPin size={15} className="text-terracotta flex-shrink-0" />
                 Rajasthan, India
               </li>
               <li>
@@ -106,9 +135,9 @@ export default function Footer() {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
+                  className="flex items-center gap-3 font-body text-sm text-background/45 hover:text-terracotta transition-colors"
                 >
-                  <MessageCircle size={16} className="text-green-600 flex-shrink-0" />
+                  <MessageCircle size={15} className="text-terracotta flex-shrink-0" />
                   {whatsappDisplay}
                 </a>
               </li>
@@ -117,9 +146,9 @@ export default function Footer() {
                   href={instagramProfile}
                   target="_blank"
                   rel="noopener noreferrer external"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
+                  className="flex items-center gap-3 font-body text-sm text-background/45 hover:text-terracotta transition-colors"
                 >
-                  <Instagram size={16} className="text-pink-600 flex-shrink-0" />
+                  <Instagram size={15} className="text-terracotta flex-shrink-0" />
                   @{instagramHandle}
                 </a>
               </li>
@@ -127,15 +156,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Khudrang Kalakaar. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Built with <Heart size={14} className="text-accent fill-accent" /> using{' '}
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="font-body text-sm text-background/30">
+            © {new Date().getFullYear()} Khudrang Kalakaar. All rights reserved.
+          </p>
+          <p className="font-body flex items-center gap-1.5 text-sm text-background/30">
+            Built with <Heart size={13} className="text-terracotta fill-terracotta" /> using{' '}
             <a
               href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-accent transition-colors font-medium"
+              className="hover:text-terracotta transition-colors font-medium"
             >
               caffeine.ai
             </a>

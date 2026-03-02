@@ -16,8 +16,9 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ['Poppins', 'sans-serif'],
-                poppins: ['Poppins', 'sans-serif'],
+                sans: ['Inter', 'sans-serif'],
+                display: ['Playfair Display', 'serif'],
+                body: ['Inter', 'sans-serif'],
             },
             colors: {
                 border: 'oklch(var(--border))',
@@ -49,6 +50,11 @@ export default {
                     DEFAULT: 'oklch(var(--terracotta))',
                     light: 'oklch(var(--terracotta-light))',
                     dark: 'oklch(var(--terracotta-dark))',
+                    muted: 'oklch(var(--terracotta-muted))',
+                },
+                gold: {
+                    DEFAULT: 'oklch(var(--gold))',
+                    light: 'oklch(var(--gold-light))',
                 },
                 popover: {
                     DEFAULT: 'oklch(var(--popover))',
@@ -82,9 +88,11 @@ export default {
                 sm: 'calc(var(--radius) - 4px)'
             },
             boxShadow: {
-                xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
-                card: '0 4px 24px 0 rgba(0,0,0,0.08)',
-                'card-hover': '0 8px 40px 0 rgba(0,0,0,0.14)',
+                xs: '0 1px 2px 0 rgba(0,0,0,0.04)',
+                card: '0 2px 20px 0 rgba(0,0,0,0.07)',
+                'card-hover': '0 8px 40px 0 rgba(0,0,0,0.13)',
+                warm: '0 8px 40px -8px rgba(160,80,40,0.18)',
+                'warm-lg': '0 20px 60px -12px rgba(160,80,40,0.25)',
             },
             keyframes: {
                 'accordion-down': {
@@ -96,14 +104,19 @@ export default {
                     to: { height: '0' }
                 },
                 'fade-in-up': {
-                    from: { opacity: '0', transform: 'translateY(24px)' },
+                    from: { opacity: '0', transform: 'translateY(32px)' },
                     to: { opacity: '1', transform: 'translateY(0)' }
+                },
+                'fade-in': {
+                    from: { opacity: '0' },
+                    to: { opacity: '1' }
                 }
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
-                'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+                'fade-in-up': 'fade-in-up 0.7s ease-out forwards',
+                'fade-in': 'fade-in 0.5s ease-out forwards',
             }
         }
     },

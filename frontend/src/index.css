@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,45 +6,50 @@
 
 @layer base {
   :root {
-    --radius: 0.375rem;
+    --radius: 0.5rem;
 
-    /* Background: clean white */
-    --background: 0.99 0 0;
-    --foreground: 0.18 0.02 30;
+    /* Background: warm cream */
+    --background: 0.975 0.008 75;
+    --foreground: 0.16 0.02 40;
 
-    --card: 0.99 0 0;
-    --card-foreground: 0.18 0.02 30;
+    --card: 0.99 0.004 75;
+    --card-foreground: 0.16 0.02 40;
 
-    --popover: 0.99 0 0;
-    --popover-foreground: 0.18 0.02 30;
+    --popover: 0.99 0.004 75;
+    --popover-foreground: 0.16 0.02 40;
 
-    /* Primary: deep charcoal */
-    --primary: 0.18 0.02 30;
-    --primary-foreground: 0.99 0 0;
+    /* Primary: deep charcoal-brown */
+    --primary: 0.16 0.02 40;
+    --primary-foreground: 0.975 0.008 75;
 
-    /* Secondary: light grey */
-    --secondary: 0.96 0.005 60;
-    --secondary-foreground: 0.18 0.02 30;
+    /* Secondary: warm sand */
+    --secondary: 0.94 0.018 75;
+    --secondary-foreground: 0.16 0.02 40;
 
-    /* Muted: soft grey */
-    --muted: 0.94 0.005 60;
-    --muted-foreground: 0.52 0.01 30;
+    /* Muted: soft warm grey */
+    --muted: 0.91 0.012 70;
+    --muted-foreground: 0.50 0.015 50;
 
-    /* Accent: terracotta / warm earthy orange */
-    --accent: 0.62 0.14 42;
+    /* Accent: deep terracotta / burnt sienna */
+    --accent: 0.58 0.16 38;
     --accent-foreground: 0.99 0 0;
 
-    /* Terracotta custom token */
-    --terracotta: 0.62 0.14 42;
-    --terracotta-light: 0.88 0.06 42;
-    --terracotta-dark: 0.48 0.12 42;
+    /* Terracotta custom tokens */
+    --terracotta: 0.58 0.16 38;
+    --terracotta-light: 0.90 0.06 42;
+    --terracotta-dark: 0.44 0.14 36;
+    --terracotta-muted: 0.94 0.04 50;
+
+    /* Gold accent */
+    --gold: 0.72 0.12 72;
+    --gold-light: 0.92 0.06 72;
 
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.985 0 0;
 
-    --border: 0.90 0.005 60;
-    --input: 0.90 0.005 60;
-    --ring: 0.62 0.14 42;
+    --border: 0.88 0.012 65;
+    --input: 0.88 0.012 65;
+    --ring: 0.58 0.16 38;
 
     --chart-1: 0.646 0.222 41.116;
     --chart-2: 0.6 0.118 184.704;
@@ -72,20 +77,37 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
   }
 }
 
 @layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
   .section-padding {
-    @apply py-20 px-6 md:px-12 lg:px-20;
+    @apply py-24 px-6 md:px-12 lg:px-20;
   }
 
   .section-heading {
-    @apply text-3xl md:text-4xl font-bold tracking-tight text-foreground;
+    @apply text-4xl md:text-5xl font-bold tracking-tight text-foreground;
+    font-family: 'Playfair Display', serif;
   }
 
   .accent-bar {
-    @apply block w-16 h-1 bg-terracotta mt-3 mb-6;
+    @apply block w-14 h-0.5 bg-terracotta mt-4 mb-8;
+  }
+
+  .terracotta-label {
+    @apply text-terracotta text-xs font-semibold tracking-[0.25em] uppercase font-body;
   }
 }

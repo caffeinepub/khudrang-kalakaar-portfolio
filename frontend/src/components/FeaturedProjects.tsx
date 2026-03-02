@@ -47,25 +47,24 @@ const PROJECTS = [
 
 export default function FeaturedProjects() {
   return (
-    <section id="projects" className="bg-white">
+    <section id="projects" className="bg-background">
       {/* Section Header */}
-      <div className="py-16 px-6 md:px-12 lg:px-20 text-center border-b border-border bg-secondary">
-        <p className="text-terracotta text-sm font-semibold tracking-widest uppercase mb-3">
-          Our Work
-        </p>
-        <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Featured Projects</h2>
-        <div className="flex items-center justify-center gap-3">
-          <div className="h-px w-12 bg-terracotta/40" />
-          <div className="w-2 h-2 rounded-full bg-terracotta" />
-          <div className="h-px w-12 bg-terracotta/40" />
+      <div className="py-20 px-6 md:px-12 lg:px-20 bg-secondary border-b border-border">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <p className="terracotta-label mb-4">Our Work</p>
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-tight">
+              Featured <span className="italic text-terracotta">Projects</span>
+            </h2>
+          </div>
+          <p className="font-body text-foreground/55 text-base max-w-sm leading-relaxed">
+            A selection of our finest wall painting projects across residential, commercial, and public spaces.
+          </p>
         </div>
-        <p className="text-foreground/60 text-base mt-5 max-w-xl mx-auto">
-          A selection of our finest wall painting projects across residential, commercial, and public spaces.
-        </p>
       </div>
 
       {/* Projects */}
-      <div className="border-t border-border">
+      <div>
         {PROJECTS.map((project, idx) => (
           <ProjectSection
             key={idx}

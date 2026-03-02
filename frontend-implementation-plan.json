@@ -1,39 +1,198 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Update WhatsApp message text to proper artwork inquiry",
+  "title": "Full Website Redesign for Khudrang Kalakaar Portfolio",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace all occurrences of the WhatsApp pre-filled message text 'Hello Mudit Sharma' with a proper artwork inquiry message across Navigation, HeroSection, ContactSection, and Footer components",
+      "summary": "Apply unified artisanal visual theme with warm color palette and bold typography across all sections",
       "acceptanceCriteria": [
-        "The WhatsApp link in the Navigation 'Hire Me' button opens WhatsApp with the new artwork inquiry message pre-filled.",
-        "The WhatsApp link in the HeroSection 'Hire Me' CTA button opens WhatsApp with the new artwork inquiry message pre-filled.",
-        "The WhatsApp card in ContactSection uses the new inquiry message in any WhatsApp href link.",
-        "The WhatsApp link in the Footer uses the new inquiry message.",
-        "No instance of 'Hello Mudit Sharma' remains as a WhatsApp pre-filled message anywhere in the frontend codebase.",
-        "The message text is professional, contextually relevant to artwork/mural inquiries, and written in English."
+        "A unified visual theme is applied consistently across all page sections",
+        "Color palette uses warm, earthy, artisanal tones (no generic blue/grey corporate look)",
+        "Typography is bold and expressive with clear hierarchy between headings and body text",
+        "No section feels visually disconnected or inconsistent with the rest"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update global CSS custom properties to reflect the new artisanal theme: replace existing color tokens with a warm, earthy palette (deep terracotta, warm cream, charcoal, rust, ochre tones). Add custom font declarations if needed. Ensure all color variables use OKLCH color space for consistency. Add utility classes for the new design system (shadows, spacing, decorative accents)."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update Tailwind configuration to extend the theme with new artisanal color tokens (terracotta primary, warm cream backgrounds, charcoal text, rust accents). Configure custom font stacks with bold weights. Add custom spacing scales, border radius values, and box-shadow utilities aligned with the artisanal aesthetic. Ensure all components can consume these tokens consistently."
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Update root-level CSS custom properties to align with the new artisanal design system. Replace existing OKLCH color tokens with warm earthy tones. Ensure consistency with frontend/src/index.css."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Redesign Navigation component with refined layout, improved logo presentation, and high-contrast CTA button",
+      "acceptanceCriteria": [
+        "Navigation is visually polished and matches the new design theme",
+        "Mobile menu is clean and functional",
+        "WhatsApp 'Hire Me' CTA button is prominent and styled consistently",
+        "Double-tap logo easter egg still navigates to admin login"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Navigation.tsx",
           "operation": "modify",
-          "description": "Update the WhatsApp href link in the 'Hire Me' button to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
-        },
+          "description": "Redesign the Navigation component with refined visual styling: update the header background, logo sizing and positioning, nav link typography and hover effects, mobile menu button and panel styling. Apply high-contrast styling to the 'Hire Me' WhatsApp CTA button using the new terracotta accent color. Ensure scroll-aware backdrop blur and shadow effects match the new theme. Preserve all existing functionality: scroll-aware styling logic, double-tap logo easter egg navigation to admin login, WhatsApp pre-filled message link, mobile menu toggle. Do not modify any functional logic or data fetching."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Redesign HeroSection with full-screen immersive layout, dramatic typography, and refined CTA buttons",
+      "acceptanceCriteria": [
+        "Hero section is visually striking and full-screen",
+        "Artist name and tagline are displayed with large, dramatic typography",
+        "CTA buttons (WhatsApp and Gallery) are styled consistently with the new theme",
+        "Background cover image with overlay is well-composed"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/HeroSection.tsx",
           "operation": "modify",
-          "description": "Update the WhatsApp href link in the HeroSection 'Hire Me' CTA button to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
+          "description": "Redesign the HeroSection with a full-screen, immersive layout: apply large, dramatic typography for the artist name and tagline using the new bold font stack. Refine the background overlay gradient to match the warm color palette. Update CTA button styling (WhatsApp and Gallery links) with high-contrast colors, refined borders, shadows, and hover effects consistent with the artisanal theme. Ensure the cover image (fetched via useGetCoverImage) is displayed prominently with the overlay. Preserve all existing dynamic content fetching logic and WhatsApp pre-filled message link. Do not modify backend data fetching."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Redesign AboutSection with improved two-column layout, portrait presentation, and decorative accents",
+      "acceptanceCriteria": [
+        "About section layout is clean and well-proportioned",
+        "Portrait image is prominently displayed with tasteful decorative treatment",
+        "Stats row (years active, projects done, client satisfaction) is clearly presented",
+        "Section matches the overall new visual theme"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AboutSection.tsx",
+          "operation": "modify",
+          "description": "Redesign the AboutSection with an improved two-column layout: refine the artist portrait image presentation with decorative border treatment and shadow effects matching the artisanal theme. Update the floating experience badge styling with warm accent colors and refined typography. Enhance the stats row (years active, projects done, client satisfaction) with improved card styling, icon treatment, and spacing. Update decorative corner accents to align with the new design system. Apply consistent typography hierarchy for the heading and bio text using the new font stack. Preserve all existing static content (bio text, stats values, portrait image reference). Do not modify any data structures or backend fetching logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Redesign ServicesSection with improved card layouts for seven service offerings",
+      "acceptanceCriteria": [
+        "Service cards are visually polished with consistent spacing and hover effects",
+        "All seven services are displayed correctly",
+        "Card style matches the new overall design theme"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ServicesSection.tsx",
+          "operation": "modify",
+          "description": "Redesign the ServicesSection with improved card layouts: apply refined card styling with warm borders, subtle shadows, and hover effects consistent with the artisanal theme. Update the CheckCircle icon color to use the new terracotta accent. Refine typography for service titles and descriptions using the new font stack. Ensure consistent card spacing and responsive grid layout. Apply improved section heading typography. Preserve all existing service data (seven services with titles and descriptions). Do not modify the service data array or any logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Redesign FeaturedProjects and ProjectSection with impactful layout and refined numbered badges",
+      "acceptanceCriteria": [
+        "Featured projects section has a striking, editorial-style layout",
+        "Numbered badges are stylistically on-brand",
+        "Image and text areas are well-balanced",
+        "All five projects render correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/FeaturedProjects.tsx",
+          "operation": "modify",
+          "description": "Redesign the FeaturedProjects wrapper component: update section heading typography and spacing to match the new artisanal theme. Ensure consistent styling is applied to all five project entries rendered via ProjectSection. Preserve the existing PROJECTS array data and mapping logic. Do not modify project data or rendering logic."
         },
+        {
+          "path": "frontend/src/components/ProjectSection.tsx",
+          "operation": "modify",
+          "description": "Redesign the ProjectSection component with a more visually impactful layout: refine the 70/30 image-to-text split presentation with improved spacing and visual hierarchy. Update the numbered overlay badge styling with warm accent colors, refined borders, and bold typography matching the artisanal theme. Apply improved text panel styling (location, title, description) with the new font stack and color palette. Ensure alternating layout direction logic is preserved for odd/even projects. Add refined hover effects and transitions. Preserve all existing props (title, description, image, location, project number) and layout direction logic. Do not modify any functional behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Redesign ArtworkGallery with improved grid layout, refined hover effects, and polished lightbox",
+      "acceptanceCriteria": [
+        "Gallery grid is visually clean and responsive",
+        "Hover effects on artwork cards are elegant and on-brand",
+        "Lightbox dialog is well-styled and functional",
+        "Backend data fetching is preserved"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ArtworkGallery.tsx",
+          "operation": "modify",
+          "description": "Redesign the ArtworkGallery component: update the responsive grid layout with improved card styling (borders, shadows, hover scale effects) consistent with the artisanal theme. Refine the lightbox dialog styling with warm colors, improved close button, and refined image presentation. Apply improved section heading typography. Ensure elegant hover effects on artwork cards with smooth transitions. Preserve all existing backend data fetching via useGetAllArtworks and Uint8Array-to-object-URL conversion logic. Do not modify any data fetching or image conversion logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Redesign WhyChooseSection with improved card styling for six trust-point cards",
+      "acceptanceCriteria": [
+        "Trust cards are visually refined and consistent with the new theme",
+        "Numbered accents are styled on-brand",
+        "All six trust points are displayed correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/WhyChooseSection.tsx",
+          "operation": "modify",
+          "description": "Redesign the WhyChooseSection component: update card layouts with refined styling (warm borders, subtle shadows, improved spacing) matching the artisanal theme. Apply numbered accent styling with terracotta colors, bold typography, and decorative treatment. Refine section heading typography and card title/description text using the new font stack. Ensure all six trust-point cards are visually consistent. Preserve all existing static content (trust point titles and descriptions). Do not modify any data or logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Redesign ContactSection with improved card layouts for Location, WhatsApp, and Instagram",
+      "acceptanceCriteria": [
+        "Contact cards are visually polished and clearly legible",
+        "Icons and labels are styled on-brand",
+        "Dynamic contact data from backend is still used with proper fallbacks"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/ContactSection.tsx",
           "operation": "modify",
-          "description": "Update the WhatsApp card's href link to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
-        },
+          "description": "Redesign the ContactSection component: update the three contact cards (Location, WhatsApp, Instagram) with refined styling (warm borders, subtle shadows, improved spacing and icon treatment) consistent with the artisanal theme. Apply improved typography for card labels and contact details using the new font stack. Refine icon colors to use terracotta accents. Ensure section heading typography matches the new theme. Preserve all existing dynamic contact detail fetching via useMediaContacts hook and hardcoded fallback defaults. Do not modify any data fetching logic or fallback values."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Redesign Footer with refined layout covering brand info, nav links, and contact details",
+      "acceptanceCriteria": [
+        "Footer is well-structured and visually consistent with the new theme",
+        "Brand info, nav links, and contact details are clearly organized",
+        "Double-tap logo easter egg to admin login is preserved"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/Footer.tsx",
           "operation": "modify",
-          "description": "Update the WhatsApp href link in the Footer contact info section to use the new pre-filled message: 'Hello, I came across your artwork portfolio and I'm interested in discussing a potential project. Could you please share more details about your services and availability?' The URL-encoded message should replace the current 'Hello Mudit Sharma' text in the WhatsApp link parameter."
+          "description": "Redesign the Footer component with a refined layout: update footer background color, border styling, and spacing to match the artisanal theme. Refine typography for brand info, navigation links, and contact details using the new font stack and warm color palette. Apply improved visual hierarchy with clear section separation. Enhance link hover effects with terracotta accents. Preserve all existing functionality: double-tap logo easter egg navigation to admin login, WhatsApp and Instagram external links, navigation links. Do not modify any functional logic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Update QRSection styling to match the new artisanal theme",
+      "acceptanceCriteria": [],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/QRSection.tsx",
+          "operation": "modify",
+          "description": "Update the QRSection component styling to match the new artisanal theme: refine section background, border, shadow, and spacing. Update typography for the section heading and follow CTA using the new font stack and warm color palette. Ensure the QR code display area is well-styled with decorative treatment consistent with the theme. Preserve all existing functionality: Google Charts QR code generation, Instagram profile link fetching via useMediaContacts, loading skeletons. Do not modify any data fetching or QR generation logic."
         }
       ]
     }
