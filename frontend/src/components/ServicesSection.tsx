@@ -55,7 +55,7 @@ export default function ServicesSection() {
           <span className="text-gold text-sm font-semibold tracking-[0.25em] uppercase">
             What I Offer
           </span>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-cream mt-2">
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-white mt-2">
             Services
           </h2>
           <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
@@ -71,20 +71,20 @@ export default function ServicesSection() {
                 className="group relative bg-white/5 hover:bg-terracotta/90 border border-white/10 hover:border-terracotta rounded-2xl p-6 transition-all duration-300 cursor-default overflow-hidden"
               >
                 {/* Number watermark */}
-                <span className="absolute top-3 right-4 font-display text-6xl font-bold text-white/5 group-hover:text-white/10 select-none transition-colors">
+                <span className="absolute top-3 right-4 font-display text-6xl font-bold text-white/10 group-hover:text-white/20 select-none transition-colors">
                   {service.number}
                 </span>
 
                 {/* Icon */}
                 <div className="w-12 h-12 rounded-xl bg-terracotta/20 group-hover:bg-white/20 flex items-center justify-center mb-4 transition-colors">
-                  <Icon className="w-6 h-6 text-terracotta group-hover:text-cream transition-colors" />
+                  <Icon className="w-6 h-6 text-terracotta group-hover:text-white transition-colors" />
                 </div>
 
                 {/* Text */}
-                <h3 className="font-display text-lg font-bold text-cream mb-2 leading-snug">
+                <h3 className="font-display text-lg font-bold text-white mb-2 leading-snug">
                   {service.title}
                 </h3>
-                <p className="text-cream/70 group-hover:text-cream/90 text-sm leading-relaxed transition-colors">
+                <p className="text-white/85 group-hover:text-white text-sm leading-relaxed transition-colors">
                   {service.description}
                 </p>
               </div>

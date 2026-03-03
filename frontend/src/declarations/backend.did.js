@@ -38,11 +38,6 @@ export const MediaContacts = IDL.Record({
   'instagramProfile' : IDL.Text,
   'whatsappNumber' : IDL.Text,
 });
-export const TextContent = IDL.Record({
-  'bio' : IDL.Text,
-  'tagline' : IDL.Text,
-  'artistName' : IDL.Text,
-});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -94,16 +89,18 @@ export const idlService = IDL.Service({
   'getCoverImage' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
   'getLogo' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
   'getMediaContacts' : IDL.Func([], [IDL.Opt(MediaContacts)], ['query']),
-  'getTextContent' : IDL.Func([], [TextContent], ['query']),
+  'getMyRole' : IDL.Func([], [IDL.Text], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'loginWithPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
+  'logout' : IDL.Func([], [], []),
+  'resetPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
-  'updateTextContent' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
   'uploadArtwork' : IDL.Func(
       [
@@ -152,11 +149,6 @@ export const idlFactory = ({ IDL }) => {
   const MediaContacts = IDL.Record({
     'instagramProfile' : IDL.Text,
     'whatsappNumber' : IDL.Text,
-  });
-  const TextContent = IDL.Record({
-    'bio' : IDL.Text,
-    'tagline' : IDL.Text,
-    'artistName' : IDL.Text,
   });
   
   return IDL.Service({
@@ -209,16 +201,18 @@ export const idlFactory = ({ IDL }) => {
     'getCoverImage' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
     'getLogo' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
     'getMediaContacts' : IDL.Func([], [IDL.Opt(MediaContacts)], ['query']),
-    'getTextContent' : IDL.Func([], [TextContent], ['query']),
+    'getMyRole' : IDL.Func([], [IDL.Text], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'loginWithPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
+    'logout' : IDL.Func([], [], []),
+    'resetPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
-    'updateTextContent' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
     'uploadArtwork' : IDL.Func(
         [

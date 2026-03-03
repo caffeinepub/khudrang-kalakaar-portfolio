@@ -1,11 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix admin authentication/permission errors and font color contrast issues across the Khudrang Kalakaar Portfolio.
+**Goal:** Fix the "Unauthorized: Only admins can perform this action" error in the Admin Panel so that logged-in admin users can successfully upload site images and save social links.
 
 **Planned changes:**
-- Fix backend admin principal registration and permission check so authenticated admins are correctly recognized and can perform all admin-only actions without receiving "Unauthorized" errors.
-- Fix frontend admin actor usage so all mutation hooks in the Admin Panel use the authenticated actor (not anonymous) after login.
-- Fix font color contrast across the entire public-facing portfolio (Hero, About, Services, Gallery, Contact, Footer, Navigation, Why Choose, QR sections) and the Admin Panel, ensuring all text is clearly legible while preserving the warm cream/terracotta/gold design palette.
+- Fix the backend authorization check so it correctly recognizes the session established by the client-side adminAuth utilities when admin mutations are called (logo upload, cover/hero image upload, save social links).
+- Ensure unauthenticated or non-admin users still receive the unauthorized error.
 
-**User-visible outcome:** Logged-in admins can save social media links, edit content, manage artworks, and perform all admin actions without errors. All text across the portfolio and Admin Panel is clearly readable against its background.
+**User-visible outcome:** After logging in with valid admin credentials, the admin can upload a logo, upload a cover/hero image, and save WhatsApp/Instagram social links in the Admin Panel without seeing the "Unauthorized: Only admins can perform this action" error banner.

@@ -1,72 +1,29 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-02T16:58:48.310Z",
+  "generatedAt": "2026-03-03T03:18:09.071Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Resolve the admin authentication and permission check in the backend so that users who have successfully logged in via the admin login flow are recognized as admins and can perform admin-only actions (saving social media links, editing content, managing artworks, etc.) without receiving 'Unauthorized: Only admins can perform this action' errors.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel. Ensure the actor used in admin mutations is the authenticated actor (not anonymous), so backend permission checks succeed.",
+        "summary": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminLogin.tsx",
+          "frontend/src/hooks/useActor.ts",
           "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/lib/adminAuth.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminLogin.tsx",
-          "frontend/src/pages/AdminPanel.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel. Ensure all body text, headings, labels, captions, card content, section descriptions, navigation items, footer text, and form fields use color values that meet readable contrast standards against their respective backgrounds. Replace any near-invisible or low-contrast text colors with clearly legible alternatives consistent with the warm cream/terracotta design palette defined in the project's CSS and Tailwind config.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/HeroSection.tsx",
-          "frontend/src/components/AboutSection.tsx",
-          "frontend/src/components/ServicesSection.tsx",
-          "frontend/src/components/ArtworkGallery.tsx",
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/WhyChooseSection.tsx",
-          "frontend/src/components/QRSection.tsx",
-          "frontend/src/components/FeaturedProjects.tsx",
-          "frontend/src/components/ProjectSection.tsx",
           "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/pages/PortfolioPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/HeroSection.tsx",
-          "frontend/src/components/AboutSection.tsx",
-          "frontend/src/components/ServicesSection.tsx",
-          "frontend/src/components/ArtworkGallery.tsx",
-          "frontend/src/components/ContactSection.tsx",
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/Navigation.tsx",
-          "frontend/src/components/WhyChooseSection.tsx",
-          "frontend/src/components/QRSection.tsx",
-          "frontend/src/components/FeaturedProjects.tsx",
-          "frontend/src/components/ProjectSection.tsx",
-          "frontend/src/pages/AdminPanel.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/lib/adminAuth.ts"
         ]
       }
     ]
@@ -77,21 +34,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/AboutSection.tsx",
-    "frontend/src/components/ArtworkGallery.tsx",
-    "frontend/src/components/ContactSection.tsx",
-    "frontend/src/components/FeaturedProjects.tsx",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/HeroSection.tsx",
-    "frontend/src/components/Navigation.tsx",
-    "frontend/src/components/ProjectSection.tsx",
-    "frontend/src/components/QRSection.tsx",
-    "frontend/src/components/ServicesSection.tsx",
-    "frontend/src/components/WhyChooseSection.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/AdminLogin.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/adminAuth.ts",
     "frontend/src/pages/AdminPanel.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

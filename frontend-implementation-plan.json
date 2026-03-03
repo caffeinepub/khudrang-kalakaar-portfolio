@@ -1,120 +1,38 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Admin Authentication Flow and Font Color Contrast Issues",
+  "title": "Fix admin authorization error in Admin Panel",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel",
+      "id": "REQ-1",
+      "summary": "Fix the 'Unauthorized: Only admins can perform this action' error by ensuring the backend recognizes the admin session established through loginWithPassword when performing image uploads and social link updates",
       "acceptanceCriteria": [
-        "After logging in through the Admin Login page, all React Query mutation hooks in the Admin Panel use the authenticated actor.",
-        "No admin mutation call uses an anonymous actor.",
-        "The Admin Panel loads and all tabs (artworks, site images, text content, media contacts) are accessible after login.",
-        "Save actions in all Admin Panel tabs complete successfully without Unauthorized errors."
+        "After logging in with valid admin credentials (DeepakKumawat / Kinnu*0613), uploading a logo image in the Site Images tab succeeds without showing the unauthorized error.",
+        "After logging in with valid admin credentials, uploading a cover/hero image succeeds without showing the unauthorized error.",
+        "After logging in with valid admin credentials, saving social links (WhatsApp number and Instagram URL) succeeds without showing the unauthorized error.",
+        "The unauthorized error banner does not appear in the Admin Panel for any action performed by a correctly authenticated admin session.",
+        "Unauthenticated or non-admin users still receive the unauthorized error when attempting admin actions."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminLogin.tsx",
+          "path": "frontend/src/hooks/useActor.ts",
           "operation": "modify",
-          "description": "Replace the hardcoded sessionStorage-based admin login with Internet Identity authentication. On successful Internet Identity login, verify the caller is an admin using the isCallerAdmin backend method. If verified, navigate to /admin; otherwise, show an error and clear the identity. Remove the username/password form and replace it with an Internet Identity login button. Preserve the existing UI structure and warm palette."
+          "description": "After successful loginWithPassword call in the admin initialization flow, ensure the actor instance is properly authenticated for subsequent admin mutations. Verify that the backend session persists across actor method calls within the same browser session."
         },
         {
           "path": "frontend/src/pages/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Add an authentication guard at the top of the AdminPanel component that checks if the user is authenticated via useInternetIdentity. If not authenticated, redirect to /admin-login. Ensure all mutation hooks (from useQueries.ts) are only invoked after the authenticated actor is available. Add a logout button in the admin panel header that calls clear() from useInternetIdentity and redirects to the home page. Verify that all tabs (artworks, site images, text content, media contacts) continue to work with the authenticated actor."
+          "description": "Add error handling and retry logic for authentication failures. If uploadLogo, uploadCoverImage, uploadArtistPortrait, or updateMediaContacts mutations fail with an 'Unauthorized' error, attempt to re-authenticate using loginWithPassword with the stored credentials before retrying the operation. Display user-friendly error messages distinguishing between authorization failures and other errors."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Review all mutation hooks (useUploadArtwork, useEditArtwork, useDeleteArtwork, useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUpdateTextContent, useUpdateMediaContacts) to ensure they correctly use the authenticated actor from useActor. Verify that no mutation inadvertently uses an anonymous actor. Add error handling for Unauthorized errors from the backend, displaying user-friendly error messages via toast notifications."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel",
-      "acceptanceCriteria": [
-        "All text content on the public portfolio page (Hero, About, Services, Gallery, Contact, Footer, Navigation, Why Choose, QR sections) is clearly readable against its background.",
-        "All headings, subheadings, body copy, and captions have sufficient contrast against their section backgrounds.",
-        "Admin Panel text (labels, tab titles, form fields, button text, error messages, toast notifications) is clearly legible.",
-        "No text element renders in a color that blends into or is barely distinguishable from its background.",
-        "The warm cream/terracotta/gold design palette is preserved while fixing contrast."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Review and update all text color CSS custom properties (--foreground, headings, body text, muted text) to ensure sufficient contrast against their respective background colors. Replace any low-contrast color values with clearly legible alternatives that maintain the warm cream/terracotta/gold palette. Update Tailwind utility classes for text if necessary. Test all text color tokens against light and dark theme backgrounds to ensure readability."
+          "description": "Enhance the mutation hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUpdateMediaContacts) to include onError handlers that detect authorization failures. When an 'Unauthorized' error occurs, trigger a silent re-authentication flow using the actor's loginWithPassword capability before invalidating queries or showing error toasts."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/lib/adminAuth.ts",
           "operation": "modify",
-          "description": "Review and adjust color definitions in the extended theme (terracotta, gold, cream, sidebar, chart colors) to ensure all text colors have sufficient contrast against their background colors. Update any low-contrast color values while preserving the warm palette. Ensure foreground/background color pairs meet WCAG contrast standards."
-        },
-        {
-          "path": "frontend/src/components/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (artist name, tagline, stats labels, button text) for color contrast against the hero background. Update className properties to use high-contrast text colors from the updated design tokens. Ensure all text is clearly readable on the cover image background."
-        },
-        {
-          "path": "frontend/src/components/AboutSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, artist name, bio, stat card labels and values) for color contrast. Update className properties to use high-contrast text colors from the updated design tokens. Ensure readability against the section background."
-        },
-        {
-          "path": "frontend/src/components/ServicesSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, service titles, service descriptions, icons) for color contrast against the dark background. Update className properties to ensure all text is clearly legible. Maintain hover effect visibility."
-        },
-        {
-          "path": "frontend/src/components/ArtworkGallery.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, artwork titles in lightbox, descriptions, labels) for color contrast. Update className properties to use high-contrast text colors from the updated design tokens. Ensure text in the lightbox dialog is clearly readable."
-        },
-        {
-          "path": "frontend/src/components/ContactSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, card titles, contact details, location info) for color contrast against card backgrounds. Update className properties to ensure all text is clearly legible on contact cards."
-        },
-        {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (brand name, quick links, social media labels, copyright text) for color contrast against the footer background. Update className properties to use high-contrast text colors from the updated design tokens."
-        },
-        {
-          "path": "frontend/src/components/Navigation.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (navigation links, mobile menu items, WhatsApp CTA button text) for color contrast in both default and scrolled states. Update className properties to ensure all text is clearly legible against the navigation bar background. Verify active state highlighting is visible."
-        },
-        {
-          "path": "frontend/src/components/WhyChooseSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, trust point titles, descriptions) for color contrast against card backgrounds. Update className properties to ensure all text is clearly readable on trust-point cards."
-        },
-        {
-          "path": "frontend/src/components/QRSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, Instagram button text, QR code caption) for color contrast against the section background. Update className properties to use high-contrast text colors from the updated design tokens."
-        },
-        {
-          "path": "frontend/src/components/FeaturedProjects.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (section heading, project titles via ProjectSection, descriptions) for color contrast. Update className properties to ensure all text is clearly legible against project card backgrounds."
-        },
-        {
-          "path": "frontend/src/components/ProjectSection.tsx",
-          "operation": "modify",
-          "description": "Review all text elements (project numbers, titles, descriptions, location tags) for color contrast against the text panel background. Update className properties to use high-contrast text colors from the updated design tokens."
-        },
-        {
-          "path": "frontend/src/pages/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "Review all text elements in the Admin Panel (page title, tab labels, form field labels, input text, button text, table headers, artwork titles, descriptions, error messages, success messages) for color contrast. Update className properties to ensure all admin UI text is clearly legible against backgrounds. Verify form field text and placeholder text have sufficient contrast."
-        },
-        {
-          "path": "frontend/src/pages/PortfolioPage.tsx",
-          "operation": "modify",
-          "description": "Review the overall page structure for any additional text elements not covered by individual components. Ensure consistent text color usage across all sections. Verify that skeleton loaders and loading states also have readable text."
+          "description": "Add a helper function getStoredCredentials() that retrieves the admin username and password hash from the session used during login. This allows the frontend to re-authenticate with the backend if the session expires or is lost between mutations."
         }
       ]
     }

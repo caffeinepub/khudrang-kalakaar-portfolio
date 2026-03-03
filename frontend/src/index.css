@@ -10,15 +10,15 @@
 
     /* Backgrounds */
     --background: oklch(0.97 0.012 75);          /* warm cream */
-    --foreground: oklch(0.18 0.025 50);           /* deep charcoal-brown — high contrast */
+    --foreground: oklch(0.15 0.025 50);           /* deep charcoal-brown — high contrast */
 
     /* Cards / Surfaces */
     --card: oklch(0.99 0.008 75);
-    --card-foreground: oklch(0.18 0.025 50);
+    --card-foreground: oklch(0.15 0.025 50);
 
     /* Popovers */
     --popover: oklch(0.99 0.008 75);
-    --popover-foreground: oklch(0.18 0.025 50);
+    --popover-foreground: oklch(0.15 0.025 50);
 
     /* Primary — Terracotta */
     --primary: oklch(0.52 0.14 38);
@@ -26,15 +26,15 @@
 
     /* Secondary — Warm Sand */
     --secondary: oklch(0.88 0.04 75);
-    --secondary-foreground: oklch(0.22 0.03 50);
+    --secondary-foreground: oklch(0.18 0.03 50);
 
     /* Muted */
     --muted: oklch(0.92 0.02 75);
-    --muted-foreground: oklch(0.42 0.03 55);      /* medium-dark for readability */
+    --muted-foreground: oklch(0.38 0.03 55);      /* dark enough for readability */
 
     /* Accent — Gold */
     --accent: oklch(0.72 0.12 75);
-    --accent-foreground: oklch(0.18 0.025 50);
+    --accent-foreground: oklch(0.15 0.025 50);
 
     /* Destructive */
     --destructive: oklch(0.55 0.20 25);
@@ -57,33 +57,33 @@
 
     /* Sidebar */
     --sidebar: oklch(0.95 0.015 75);
-    --sidebar-foreground: oklch(0.18 0.025 50);
+    --sidebar-foreground: oklch(0.15 0.025 50);
     --sidebar-primary: oklch(0.52 0.14 38);
     --sidebar-primary-foreground: oklch(0.98 0.005 75);
     --sidebar-accent: oklch(0.88 0.04 75);
-    --sidebar-accent-foreground: oklch(0.22 0.03 50);
+    --sidebar-accent-foreground: oklch(0.18 0.03 50);
     --sidebar-border: oklch(0.82 0.03 70);
     --sidebar-ring: oklch(0.52 0.14 38);
   }
 
   .dark {
     --background: oklch(0.14 0.02 50);
-    --foreground: oklch(0.93 0.015 75);
+    --foreground: oklch(0.95 0.015 75);
 
     --card: oklch(0.18 0.025 50);
-    --card-foreground: oklch(0.93 0.015 75);
+    --card-foreground: oklch(0.95 0.015 75);
 
     --popover: oklch(0.18 0.025 50);
-    --popover-foreground: oklch(0.93 0.015 75);
+    --popover-foreground: oklch(0.95 0.015 75);
 
     --primary: oklch(0.62 0.14 38);
     --primary-foreground: oklch(0.12 0.02 50);
 
     --secondary: oklch(0.25 0.03 55);
-    --secondary-foreground: oklch(0.88 0.02 75);
+    --secondary-foreground: oklch(0.90 0.02 75);
 
     --muted: oklch(0.22 0.025 55);
-    --muted-foreground: oklch(0.68 0.025 65);
+    --muted-foreground: oklch(0.72 0.025 65);
 
     --accent: oklch(0.68 0.12 75);
     --accent-foreground: oklch(0.12 0.02 50);
@@ -102,11 +102,11 @@
     --chart-5: oklch(0.58 0.15 300);
 
     --sidebar: oklch(0.16 0.022 50);
-    --sidebar-foreground: oklch(0.93 0.015 75);
+    --sidebar-foreground: oklch(0.95 0.015 75);
     --sidebar-primary: oklch(0.62 0.14 38);
     --sidebar-primary-foreground: oklch(0.12 0.02 50);
     --sidebar-accent: oklch(0.22 0.025 55);
-    --sidebar-accent-foreground: oklch(0.88 0.02 75);
+    --sidebar-accent-foreground: oklch(0.90 0.02 75);
     --sidebar-border: oklch(0.28 0.03 55);
     --sidebar-ring: oklch(0.62 0.14 38);
   }
@@ -126,7 +126,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
-    color: oklch(0.18 0.025 50);
+    color: oklch(0.15 0.025 50);
   }
 
   /* Ensure body text is always readable */
@@ -147,15 +147,15 @@
 
   /* ── Warm color utilities ── */
   .text-charcoal {
-    color: oklch(0.18 0.025 50);
+    color: oklch(0.15 0.025 50);
   }
 
   .text-charcoal-medium {
-    color: oklch(0.35 0.025 50);
+    color: oklch(0.32 0.025 50);
   }
 
   .text-charcoal-light {
-    color: oklch(0.50 0.025 50);
+    color: oklch(0.48 0.025 50);
   }
 
   .bg-cream {
@@ -167,7 +167,7 @@
   }
 
   .bg-charcoal {
-    background-color: oklch(0.18 0.025 50);
+    background-color: oklch(0.15 0.025 50);
   }
 
   .text-cream {
@@ -179,7 +179,7 @@
   }
 
   .text-terracotta {
-    color: oklch(0.52 0.14 38);
+    color: oklch(0.48 0.14 38);   /* slightly darker for better contrast on light bg */
   }
 
   .border-terracotta {
@@ -191,7 +191,7 @@
   }
 
   .text-gold {
-    color: oklch(0.62 0.12 75);   /* slightly darker for better contrast on light bg */
+    color: oklch(0.58 0.12 75);   /* darker for better contrast on light bg */
   }
 
   .border-warm-border {
@@ -235,9 +235,9 @@
   .hero-overlay {
     background: linear-gradient(
       to bottom,
-      oklch(0.14 0.02 50 / 0.55) 0%,
-      oklch(0.14 0.02 50 / 0.30) 50%,
-      oklch(0.14 0.02 50 / 0.70) 100%
+      oklch(0.12 0.02 50 / 0.65) 0%,
+      oklch(0.12 0.02 50 / 0.35) 50%,
+      oklch(0.12 0.02 50 / 0.75) 100%
     );
   }
 

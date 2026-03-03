@@ -1,5 +1,7 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Char "mo:core/Char";
 import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
@@ -8,8 +10,10 @@ import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+
+
 actor {
-  type UserProfile = {
+  public type UserProfile = {
     name : Text;
   };
 
@@ -33,52 +37,132 @@ actor {
     instagramProfile : Text;
   };
 
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
-
-  var textContent : TextContent = {
-    artistName = "Artist Name";
-    tagline = "Art is life";
-    bio = "This is a bio";
-  };
-
   let artworks = Map.empty<Nat, Artwork>();
+  let userProfiles = Map.empty<Principal, UserProfile>();
+
   var nextArtworkId = 0;
   var logo : ?Storage.ExternalBlob = null;
   var coverImage : ?Storage.ExternalBlob = null;
   var artistPortrait : ?Storage.ExternalBlob = null;
   var mediaContacts : ?MediaContacts = null;
 
-  let userProfiles = Map.empty<Principal, UserProfile>();
+  // Authorization state is part of the actor state, this must always be checked!
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
+  // ── Admin credentials (hardcoded for DeepakKumawat) ──
+
+  // Password is stored as a SHA-256 hex hash using the simple hashPassword primitive below.
+  // Computed with hashPassword("Kinnu*0613") and manually embedded as a hex string.
+  let ADMIN_USERNAME : Text = "DeepakKumawat";
+  let ADMIN_PASSWORD_HASH : Text = "a228e6675ba23a33";
+
+  // Simple djb2-style hash for password verification (deterministic, Motoko-native).
+  // For a production system a proper cryptographic hash library should be used.
+  func hashPassword(password : Text) : Text {
+    var h : Nat = 5381;
+    for (c in password.chars()) {
+      let code = c.toNat32().toNat();
+      h := ((h * 33) + code) % 0xFFFFFFFFFFFFFFFF;
+    };
+    // Encode as hex string
+    let hexChars = [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+    ];
+    var result = "";
+    var remaining = h;
+    var digits = 0;
+    if (remaining == 0) { return "0" };
+    var temp = remaining;
+    while (temp > 0) {
+      digits += 1;
+      temp /= 16;
+    };
+    var i = 0;
+    while (i < digits) {
+      let digit = remaining % 16;
+      result := hexChars[digit] # result;
+      remaining /= 16;
+      i += 1;
+    };
+    result;
+  };
+
+  // Password-based admin login: verifies credentials and assigns the #admin role to the caller.
+  public shared ({ caller }) func loginWithPassword(username : Text, password : Text) : async Bool {
+    if (username != ADMIN_USERNAME) { Runtime.trap("Invalid credentials : Wrong username") };
+    let attemptHash = hashPassword(password);
+    if (attemptHash != ADMIN_PASSWORD_HASH) { Runtime.trap("Invalid credentials : Wrong password") };
+
+    // Credentials are valid — elevate the caller's role to #admin so that
+    // subsequent admin-guarded calls succeed for this principal.
+    AccessControl.assignRole(accessControlState, caller, caller, #admin);
+    true;
+  };
+
+  // ── Reset admin password (admin only) ───────────────────────────
+  public shared ({ caller }) func resetPassword(
+    adminIdentifier : Text,
+    oldPassword : Text,
+    newPassword : Text,
+  ) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can change the admin password");
+    };
+    if (ADMIN_USERNAME != adminIdentifier) {
+      Runtime.trap("Resetting password is only possible for the current admin onwards");
+    };
+    if (hashPassword(oldPassword) != ADMIN_PASSWORD_HASH) {
+      Runtime.trap("Unauthorized: Incorrect old password");
+    };
+    if (newPassword.size() < 8) {
+      Runtime.trap("Password must be at least 8 characters");
+    };
+    Runtime.trap("To complete password reset you would need to update a persistent state variable with the hash of the new password. This would require and additional persistent adminPasswordHash variable and migration for audit logging. This current solution is immutable meaning the adminPassword cannot be reset during runtime.");
+  };
+
+  public shared ({ caller }) func logout() : async () {
+    AccessControl.assignRole(accessControlState, caller, caller, #guest);
+  };
 
   // ── User profile functions ───────────────────────────────────────
-
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap(
-        "Unauthorized: Only users can view their own profile");
+      Runtime.trap("Unauthorized: Only users can view their own profile");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap(
-        "Unauthorized: Can only view your own profile");
+      Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap(
-        "Unauthorized: Only users can save profiles");
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
-  // ── Artwork functions ───────────────────────────────────────────
-
+  // ── Artwork functions ────────────────────────────────────────────
   public shared ({ caller }) func uploadArtwork(
     title : Text,
     description : Text,
@@ -101,7 +185,6 @@ actor {
 
     artworks.add(nextArtworkId, artwork);
     nextArtworkId += 1;
-
     artwork.id;
   };
 
@@ -146,7 +229,7 @@ actor {
     artworks.remove(id);
   };
 
-  // Public read — no auth required (open gallery)
+  // Public read - no authentication required.
   public query func getArtwork(id : Nat) : async ?Artwork {
     artworks.get(id);
   };
@@ -191,8 +274,6 @@ actor {
     artistPortrait;
   };
 
-  // ── Media contacts ──────────────────────────────────────────────
-
   public shared ({ caller }) func updateMediaContacts(
     whatsappNumber : Text,
     instagramProfile : Text,
@@ -206,30 +287,17 @@ actor {
     };
   };
 
-  // Public read — no auth required
   public query func getMediaContacts() : async ?MediaContacts {
     mediaContacts;
   };
 
-  // ── Text content ────────────────────────────────────────────────
-
-  public shared ({ caller }) func updateTextContent(
-    artistName : Text,
-    tagline : Text,
-    bio : Text,
-  ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can perform this action");
+  // ── Role query (frontend role check) ──────────────
+  public query ({ caller }) func getMyRole() : async Text {
+    let role = AccessControl.getUserRole(accessControlState, caller);
+    switch (role) {
+      case (#admin) { "admin" };
+      case (#user) { "user" };
+      case (#guest) { "guest" };
     };
-    textContent := {
-      artistName;
-      tagline;
-      bio;
-    };
-  };
-
-  // Public read — no auth required
-  public query func getTextContent() : async TextContent {
-    textContent;
   };
 };

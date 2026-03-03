@@ -1,45 +1,22 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Web project with an Admin Panel feature. Currently fixing admin authentication/permission issues and font color contrast/text visibility problems.",
-  "architectural_notes": [
-    "Admin Panel requires authenticated admin role to save social media links and perform admin actions"
-  ],
-  "known_issues": [
-    "Admin Panel returns 'Unauthorized: Only admins can perform this action' — admin authentication/permission check failing",
-    "Website text has poor font color contrast, making content difficult to read"
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-admin-session-and-actor-authentication-flow-on-the-frontend-so-that-the-authenticated-internet-identity-principal-is-properly-forwarded-to-all-backend-calls-made-from-the-admin-panel-ensure-the-actor-used-in-admin-mutations-is-the-authenticated-actor-not-anonymous-so-backend-permission-checks-succeed",
-      "title": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel. Ensure the actor used in admin mutations is the authenticated actor (not anonymous), so backend permission checks succeed.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-font-color-contrast-issues-across-the-entire-public-facing-portfolio-website-and-the-admin-panel-ensure-all-body-text-headings-labels-captions-card-content-section-descriptions-navigation-items-footer-text-and-form-fields-use-color-values-that-meet-readable-contrast-standards-against-their-respective-backgrounds-replace-any-near-invisible-or-low-contrast-text-colors-with-clearly-legible-alternatives-consistent-with-the-warm-cream-terracotta-design-palette-defined-in-the-project-s-css-and-tailwind-config",
-      "title": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel. Ensure all body text, headings, labels, captions, card content, section descriptions, navigation items, footer text, and form fields use color values that meet readable contrast standards against their respective backgrounds. Replace any near-invisible or low-contrast text colors with clearly legible alternatives consistent with the warm cream/terracotta design palette defined in the project's CSS and Tailwind config.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    }
-  ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Resolve the admin authentication and permission check in the backend so that users who have successfully logged in via the admin login flow are recognized as admins and can perform admin-only actions (saving social media links, editing content, managing artworks, etc.) without receiving 'Unauthorized: Only admins can perform this action' errors.",
+      "id": "feature-fix-the-unauthorized-only-admins-can-perform-this-action-error-that-appears-in-the-admin-panel-when-logged-in-admin-users-attempt-to-upload-site-images-logo-cover-hero-image-or-save-social-links-whatsapp-number-instagram-url-the-backend-must-correctly-recognize-the-session-established-by-the-client-side-adminauth-utilities-and-allow-these-mutations-to-proceed-without-returning-an-authorization-error",
+      "title": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
       "reqIds": [
         "REQ-1"
       ],
-      "status": "pending"
+      "version": 1
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Khudrang Kalakaar Portfolio",
+  "new_feature_requests": [],
+  "projectName": "Fix admin authorization error in Admin Panel",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

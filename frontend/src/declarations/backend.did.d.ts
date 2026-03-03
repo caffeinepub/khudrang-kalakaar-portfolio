@@ -23,11 +23,6 @@ export interface MediaContacts {
   'instagramProfile' : string,
   'whatsappNumber' : string,
 }
-export interface TextContent {
-  'bio' : string,
-  'tagline' : string,
-  'artistName' : string,
-}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -74,12 +69,14 @@ export interface _SERVICE {
   'getCoverImage' : ActorMethod<[], [] | [ExternalBlob]>,
   'getLogo' : ActorMethod<[], [] | [ExternalBlob]>,
   'getMediaContacts' : ActorMethod<[], [] | [MediaContacts]>,
-  'getTextContent' : ActorMethod<[], TextContent>,
+  'getMyRole' : ActorMethod<[], string>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'loginWithPassword' : ActorMethod<[string, string], boolean>,
+  'logout' : ActorMethod<[], undefined>,
+  'resetPassword' : ActorMethod<[string, string, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateMediaContacts' : ActorMethod<[string, string], undefined>,
-  'updateTextContent' : ActorMethod<[string, string, string], undefined>,
   'uploadArtistPortrait' : ActorMethod<[ExternalBlob], undefined>,
   'uploadArtwork' : ActorMethod<
     [string, string, Uint8Array, [] | [string], [] | [string]],

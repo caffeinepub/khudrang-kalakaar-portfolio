@@ -1,81 +1,38 @@
 {
   "kind": "build_request",
-  "title": "Fix Admin Authentication/Permission and Font Color Contrast Issues",
-  "projectName": "Khudrang Kalakaar Portfolio",
+  "title": "Fix admin authorization error in Admin Panel",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Resolve the admin authentication and permission check in the backend so that users who have successfully logged in via the admin login flow are recognized as admins and can perform admin-only actions (saving social media links, editing content, managing artworks, etc.) without receiving 'Unauthorized: Only admins can perform this action' errors.",
-      "target": "backend",
+      "text": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "Failed to save social media links: Unauthorized: Only admins can perform this action",
           "Unauthorized: Only admins can perform this action"
         ]
       },
       "acceptanceCriteria": [
-        "An authenticated admin user can save social media links without receiving an Unauthorized error.",
-        "An authenticated admin user can perform all admin-only backend actions (create/edit/delete artworks, update text content, update media contacts, upload images) without receiving Unauthorized errors.",
-        "Unauthenticated or non-admin callers still correctly receive the Unauthorized error.",
-        "The admin principal registration/check logic correctly matches the caller's principal against stored admin principals."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel. Ensure the actor used in admin mutations is the authenticated actor (not anonymous), so backend permission checks succeed.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "The Admin Panel is currently not accessible",
-          "Unauthorized: Only admins can perform this action"
-        ]
-      },
-      "acceptanceCriteria": [
-        "After logging in through the Admin Login page, all React Query mutation hooks in the Admin Panel use the authenticated actor.",
-        "No admin mutation call uses an anonymous actor.",
-        "The Admin Panel loads and all tabs (artworks, site images, text content, media contacts) are accessible after login.",
-        "Save actions in all Admin Panel tabs complete successfully without Unauthorized errors."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel. Ensure all body text, headings, labels, captions, card content, section descriptions, navigation items, footer text, and form fields use color values that meet readable contrast standards against their respective backgrounds. Replace any near-invisible or low-contrast text colors with clearly legible alternatives consistent with the warm cream/terracotta design palette defined in the project's CSS and Tailwind config.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "website text is not clearly visible due to font color contrast issues",
-          "fix the text styling and ensure proper font color selection so that all content is easily readable and professionally displayed on the website"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All text content on the public portfolio page (Hero, About, Services, Gallery, Contact, Footer, Navigation, Why Choose, QR sections) is clearly readable against its background.",
-        "All headings, subheadings, body copy, and captions have sufficient contrast against their section backgrounds.",
-        "Admin Panel text (labels, tab titles, form fields, button text, error messages, toast notifications) is clearly legible.",
-        "No text element renders in a color that blends into or is barely distinguishable from its background.",
-        "The warm cream/terracotta/gold design palette is preserved while fixing contrast."
+        "After logging in with valid admin credentials (DeepakKumawat / Kinnu*0613), uploading a logo image in the Site Images tab succeeds without showing the unauthorized error.",
+        "After logging in with valid admin credentials, uploading a cover/hero image succeeds without showing the unauthorized error.",
+        "After logging in with valid admin credentials, saving social links (WhatsApp number and Instagram URL) succeeds without showing the unauthorized error.",
+        "The unauthorized error banner does not appear in the Admin Panel for any action performed by a correctly authenticated admin session.",
+        "Unauthenticated or non-admin users still receive the unauthorized error when attempting admin actions."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Preserve the existing warm cream/terracotta/gold design palette — only adjust color values where contrast is insufficient.",
-    "Do not change the existing admin login flow (sessionStorage-based hardcoded credentials in AdminLogin.tsx) unless required to fix the authentication issue."
+    "Do not change the admin credentials (username: DeepakKumawat, password: Kinnu*0613).",
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "Keep all Motoko logic in the single backend/main.mo actor."
   ],
   "nonGoals": [
-    "Redesigning the overall visual layout or adding new sections.",
-    "Adding new admin features or tabs beyond what already exists.",
-    "Migrating to a different authentication system.",
-    "Adding new backend endpoints unrelated to the permission fix."
+    "Adding new admin features beyond fixing the authorization error.",
+    "Changing the visual design or layout of the Admin Panel.",
+    "Implementing Internet Identity-based authentication."
   ],
   "imageRequirements": {
     "required": [],

@@ -89,11 +89,6 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface TextContent {
-    bio: string;
-    tagline: string;
-    artistName: string;
-}
 export interface Artwork {
     id: bigint;
     title: string;
@@ -144,12 +139,14 @@ export interface backendInterface {
     getCoverImage(): Promise<ExternalBlob | null>;
     getLogo(): Promise<ExternalBlob | null>;
     getMediaContacts(): Promise<MediaContacts | null>;
-    getTextContent(): Promise<TextContent>;
+    getMyRole(): Promise<string>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    loginWithPassword(username: string, password: string): Promise<boolean>;
+    logout(): Promise<void>;
+    resetPassword(adminIdentifier: string, oldPassword: string, newPassword: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateMediaContacts(whatsappNumber: string, instagramProfile: string): Promise<void>;
-    updateTextContent(artistName: string, tagline: string, bio: string): Promise<void>;
     uploadArtistPortrait(blob: ExternalBlob): Promise<void>;
     uploadArtwork(title: string, description: string, imageBytes: Uint8Array, format: string | null, fileName: string | null): Promise<bigint>;
     uploadCoverImage(blob: ExternalBlob): Promise<void>;
@@ -410,17 +407,17 @@ export class Backend implements backendInterface {
             return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getTextContent(): Promise<TextContent> {
+    async getMyRole(): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.getTextContent();
+                const result = await this.actor.getMyRole();
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getTextContent();
+            const result = await this.actor.getMyRole();
             return result;
         }
     }
@@ -452,6 +449,48 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async loginWithPassword(arg0: string, arg1: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.loginWithPassword(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.loginWithPassword(arg0, arg1);
+            return result;
+        }
+    }
+    async logout(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.logout();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.logout();
+            return result;
+        }
+    }
+    async resetPassword(arg0: string, arg1: string, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetPassword(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetPassword(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -477,20 +516,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateMediaContacts(arg0, arg1);
-            return result;
-        }
-    }
-    async updateTextContent(arg0: string, arg1: string, arg2: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.updateTextContent(arg0, arg1, arg2);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.updateTextContent(arg0, arg1, arg2);
             return result;
         }
     }

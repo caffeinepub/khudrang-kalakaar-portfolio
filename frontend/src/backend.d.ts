@@ -14,11 +14,6 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface TextContent {
-    bio: string;
-    tagline: string;
-    artistName: string;
-}
 export interface Artwork {
     id: bigint;
     title: string;
@@ -51,12 +46,14 @@ export interface backendInterface {
     getCoverImage(): Promise<ExternalBlob | null>;
     getLogo(): Promise<ExternalBlob | null>;
     getMediaContacts(): Promise<MediaContacts | null>;
-    getTextContent(): Promise<TextContent>;
+    getMyRole(): Promise<string>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    loginWithPassword(username: string, password: string): Promise<boolean>;
+    logout(): Promise<void>;
+    resetPassword(adminIdentifier: string, oldPassword: string, newPassword: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateMediaContacts(whatsappNumber: string, instagramProfile: string): Promise<void>;
-    updateTextContent(artistName: string, tagline: string, bio: string): Promise<void>;
     uploadArtistPortrait(blob: ExternalBlob): Promise<void>;
     uploadArtwork(title: string, description: string, imageBytes: Uint8Array, format: string | null, fileName: string | null): Promise<bigint>;
     uploadCoverImage(blob: ExternalBlob): Promise<void>;

@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-admin-session-and-actor-authentication-flow-on-the-frontend-so-that-the-authenticated-internet-identity-principal-is-properly-forwarded-to-all-backend-calls-made-from-the-admin-panel-ensure-the-actor-used-in-admin-mutations-is-the-authenticated-actor-not-anonymous-so-backend-permission-checks-succeed",
-      "featureTitle": "Fix the admin session and actor authentication flow on the frontend so that the authenticated Internet Identity principal is properly forwarded to all backend calls made from the Admin Panel. Ensure the actor used in admin mutations is the authenticated actor (not anonymous), so backend permission checks succeed.",
+      "featureId": "feature-fix-the-unauthorized-only-admins-can-perform-this-action-error-that-appears-in-the-admin-panel-when-logged-in-admin-users-attempt-to-upload-site-images-logo-cover-hero-image-or-save-social-links-whatsapp-number-instagram-url-the-backend-must-correctly-recognize-the-session-established-by-the-client-side-adminauth-utilities-and-allow-these-mutations-to-proceed-without-returning-an-authorization-error",
+      "featureTitle": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
       "files": [
-        "frontend/src/pages/AdminLogin.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/lib/adminAuth.ts",
         "frontend/src/pages/AdminPanel.tsx"
       ],
       "components": [
@@ -20,42 +21,7 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-font-color-contrast-issues-across-the-entire-public-facing-portfolio-website-and-the-admin-panel-ensure-all-body-text-headings-labels-captions-card-content-section-descriptions-navigation-items-footer-text-and-form-fields-use-color-values-that-meet-readable-contrast-standards-against-their-respective-backgrounds-replace-any-near-invisible-or-low-contrast-text-colors-with-clearly-legible-alternatives-consistent-with-the-warm-cream-terracotta-design-palette-defined-in-the-project-s-css-and-tailwind-config",
-      "featureTitle": "Fix font color contrast issues across the entire public-facing portfolio website and the Admin Panel. Ensure all body text, headings, labels, captions, card content, section descriptions, navigation items, footer text, and form fields use color values that meet readable contrast standards against their respective backgrounds. Replace any near-invisible or low-contrast text colors with clearly legible alternatives consistent with the warm cream/terracotta design palette defined in the project's CSS and Tailwind config.",
-      "files": [
-        "frontend/src/components/AboutSection.tsx",
-        "frontend/src/components/ArtworkGallery.tsx",
-        "frontend/src/components/ContactSection.tsx",
-        "frontend/src/components/FeaturedProjects.tsx",
-        "frontend/src/components/Footer.tsx",
-        "frontend/src/components/HeroSection.tsx",
-        "frontend/src/components/Navigation.tsx",
-        "frontend/src/components/ProjectSection.tsx",
-        "frontend/src/components/QRSection.tsx",
-        "frontend/src/components/ServicesSection.tsx",
-        "frontend/src/components/WhyChooseSection.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/AdminPanel.tsx",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "qr-code@1.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "confidence": "high"
     }

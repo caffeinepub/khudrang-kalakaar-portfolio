@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { ExternalBlob } from '../backend';
-import type { Artwork, TextContent, MediaContacts, UserProfile } from '../backend';
+import type { Artwork, MediaContacts, UserProfile } from '../backend';
 
 // ── User Profile ────────────────────────────────────────────────────────────
 
@@ -52,6 +52,19 @@ export function useIsCallerAdmin() {
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+// ── Backend Login (password-based admin auth) ────────────────────────────────
+
+export function useLoginWithPassword() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async (params: { username: string; password: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.loginWithPassword(params.username, params.password);
+    },
   });
 }
 
@@ -253,40 +266,6 @@ export function useUploadArtistPortrait() {
   });
 }
 
-// ── Text Content ────────────────────────────────────────────────────────────
-
-export function useTextContent() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<TextContent>({
-    queryKey: ['textContent'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getTextContent();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useUpdateTextContent() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (params: {
-      artistName: string;
-      tagline: string;
-      bio: string;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      await actor.updateTextContent(params.artistName, params.tagline, params.bio);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['textContent'] });
-    },
-  });
-}
-
 // ── Media Contacts ──────────────────────────────────────────────────────────
 
 export function useMediaContacts() {
@@ -316,6 +295,26 @@ export function useUpdateMediaContacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mediaContacts'] });
+    },
+  });
+}
+
+// ── Stub for components that still import useTextContent ────────────────────
+// The backend no longer exposes getTextContent/updateTextContent.
+// These stubs return empty/no-op values so existing callers don't break.
+
+export function useTextContent() {
+  return useQuery<{ artistName: string; tagline: string; bio: string } | null>({
+    queryKey: ['textContent'],
+    queryFn: async () => null,
+    enabled: false,
+  });
+}
+
+export function useUpdateTextContent() {
+  return useMutation({
+    mutationFn: async (_params: { artistName: string; tagline: string; bio: string }) => {
+      // no-op: backend no longer supports text content updates
     },
   });
 }
