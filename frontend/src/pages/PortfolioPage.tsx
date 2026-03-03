@@ -5,7 +5,7 @@ import AboutSection from '../components/AboutSection';
 import ServicesSection from '../components/ServicesSection';
 import WhyChooseSection from '../components/WhyChooseSection';
 import FeaturedProjects from '../components/FeaturedProjects';
-import ArtworkGallery from '../components/ArtworkGallery';
+import GallerySection from '../components/GallerySection';
 import QRSection from '../components/QRSection';
 import ContactSection from '../components/ContactSection';
 import Footer from '../components/Footer';
@@ -20,7 +20,7 @@ export default function PortfolioPage() {
         <ServicesSection />
         <WhyChooseSection />
         <FeaturedProjects />
-        <ArtworkGallery />
+        <GallerySection />
         <QRSection />
         <ContactSection />
       </main>

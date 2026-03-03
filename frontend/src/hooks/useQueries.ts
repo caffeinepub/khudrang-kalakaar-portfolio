@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Artwork, MediaContacts } from '../backend';
+import type { Artwork, MediaContacts, GalleryImage } from '../backend';
 import { ExternalBlob } from '../backend';
 
 // ── Public queries ──
@@ -73,8 +73,64 @@ export function useGetMediaContacts() {
 // Alias for backwards compatibility
 export const useMediaContacts = useGetMediaContacts;
 
+// ── Admin principal query ──
+
+export function useGetAdminPrincipal() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<string | null>({
+    queryKey: ['adminPrincipal'],
+    queryFn: async () => {
+      if (!actor) return null;
+      const principal = await actor.getAdminPrincipal();
+      return principal ? principal.toString() : null;
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ── Claim admin with 6-digit code mutation ──
+export function useClaimAdminWithCode() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (code: string) => {
+      if (!actor) throw new Error('Actor not available');
+      const result = await actor.claimAdminWithCode(code);
+      if (result.__kind__ === 'err') {
+        throw new Error(result.err);
+      }
+      return result.ok;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
+    },
+  });
+}
+
+// Keep old useClaimAdmin as a no-op stub for any remaining references
+export function useClaimAdmin() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const existing = await actor.getMediaContacts();
+      await actor.updateMediaContacts(
+        existing?.whatsappNumber ?? '',
+        existing?.instagramProfile ?? ''
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
+      queryClient.invalidateQueries({ queryKey: ['mediaContacts'] });
+    },
+  });
+}
+
 // ── Text content stub ──
-// Returns null so components gracefully fall back to defaults.
 export function useTextContent() {
   return useQuery<{ artistName: string; tagline: string; bio: string } | null>({
     queryKey: ['textContent'],
@@ -121,6 +177,7 @@ export function useUploadArtwork() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artworks'] });
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
     },
   });
 }
@@ -143,14 +200,11 @@ export function useEditArtwork() {
 
       let imageBlob: ExternalBlob | null = null;
       if (data.imageFile) {
-        // New image provided — convert and upload
         const bytes = new Uint8Array(await data.imageFile.arrayBuffer());
         imageBlob = ExternalBlob.fromBytes(bytes);
       } else if (data.keepExistingImage && data.existingImage) {
-        // Keep the existing image blob
         imageBlob = data.existingImage;
       }
-      // else imageBlob stays null (clears the image)
 
       return actor.editArtwork(
         data.id,
@@ -194,6 +248,7 @@ export function useUploadLogo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['logo'] });
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
     },
   });
 }
@@ -209,6 +264,7 @@ export function useUploadCoverImage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coverImage'] });
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
     },
   });
 }
@@ -224,6 +280,7 @@ export function useUploadArtistPortrait() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artistPortrait'] });
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
     },
   });
 }
@@ -241,6 +298,71 @@ export function useUpdateMediaContacts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mediaContacts'] });
+      queryClient.invalidateQueries({ queryKey: ['adminPrincipal'] });
+    },
+  });
+}
+
+// ── Gallery queries & mutations ──
+
+export function useGetGalleryImages() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<GalleryImage[]>({
+    queryKey: ['galleryImages'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listGalleryImages();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAddGalleryImage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      file: File;
+      onProgress?: (pct: number) => void;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      const bytes = new Uint8Array(await data.file.arrayBuffer());
+      let blob = ExternalBlob.fromBytes(bytes);
+      if (data.onProgress) {
+        blob = blob.withUploadProgress(data.onProgress);
+      }
+      const result = await actor.addGalleryImage({
+        blob,
+        filename: data.file.name,
+        mimeType: data.file.type || 'image/jpeg',
+      });
+      if (result.__kind__ === 'err') {
+        throw new Error(result.err);
+      }
+      return result.ok;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
+    },
+  });
+}
+
+export function useDeleteGalleryImage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      const result = await actor.deleteGalleryImage(id);
+      if (result.__kind__ === 'err') {
+        throw new Error(result.err);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
     },
   });
 }

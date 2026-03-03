@@ -1,49 +1,77 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [
-    "Admin panel: updating details and uploading images causes issues"
+  "summary": "Website project with admin panel and gallery section. Admin access is claimed via a 6-digit backend code (131104). Gallery section displays artwork with unlimited uploads and a 15MB max image size, manageable via the admin panel.",
+  "architectural_notes": [
+    "Admin access is granted via a secret 6-digit code (131104) stored in the backend",
+    "Gallery image uploads have no count limit but a maximum file size of 15MB per image"
   ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-investigate-and-fix-the-failed-to-update-contacts-error-in-the-admin-panel-contacts-tab-ensure-that-saving-whatsapp-number-and-instagram-profile-url-changes-calls-the-correct-backend-mutation-handles-errors-gracefully-and-shows-a-success-toast-on-completion",
-      "title": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-investigate-and-fix-image-upload-failures-in-the-admin-panel-site-media-tab-and-projects-tab-ensure-that-uploading-logo-cover-image-artist-portrait-and-project-images-correctly-encodes-the-blob-data-calls-the-appropriate-backend-update-functions-and-completes-without-error",
-      "title": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
+      "id": "feature-update-the-adminstatusbanner-and-admin-claim-flow-in-the-adminpanel-to-replace-the-current-first-caller-wins-claim-admin-access-button-with-a-form-that-prompts-for-a-6-digit-code-when-the-user-submits-the-code-call-the-new-claimadminwithcode-backend-function-show-a-success-message-on-approval-and-a-clear-error-message-if-the-code-is-wrong-or-an-admin-already-exists",
+      "title": "Update the AdminStatusBanner and admin claim flow in the AdminPanel to replace the current first-caller-wins \"Claim Admin Access\" button with a form that prompts for a 6-digit code. When the user submits the code, call the new `claimAdminWithCode` backend function. Show a success message on approval and a clear error message if the code is wrong or an admin already exists.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-audit-the-frontend-react-query-mutation-hooks-in-usequeries-ts-for-updating-media-contacts-and-uploading-images-ensure-the-mutation-functions-correctly-serialize-arguments-call-the-actor-methods-with-the-right-parameter-types-and-invalidate-relevant-queries-on-success",
-      "title": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "id": "feature-add-a-gallery-section-to-the-public-portfolio-page-portfoliopage-tsx-that-displays-artwork-images-fetched-from-the-backend-the-section-should-be-accessible-via-navigation-render-images-in-a-responsive-masonry-or-grid-layout-and-support-a-lightbox-fullscreen-view-on-click-this-section-should-be-distinct-from-the-existing-featuredprojects-section-and-be-labeled-gallery-in-the-navigation",
+      "title": "Add a Gallery section to the public portfolio page (`PortfolioPage.tsx`) that displays artwork images fetched from the backend. The section should be accessible via navigation, render images in a responsive masonry or grid layout, and support a lightbox/fullscreen view on click. This section should be distinct from the existing FeaturedProjects section and be labeled \"Gallery\" in the navigation.",
       "reqIds": [
-        "REQ-4"
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-gallery-tab-in-the-adminpanel-page-that-allows-the-admin-to-upload-new-artwork-images-and-delete-existing-ones-the-upload-input-must-accept-image-files-up-to-15mb-show-a-preview-grid-of-all-currently-uploaded-gallery-images-with-individual-delete-buttons-show-clear-error-feedback-if-a-file-exceeds-15mb-this-tab-should-only-be-accessible-when-the-user-is-authenticated-as-admin",
+      "title": "Add a Gallery tab in the AdminPanel page that allows the admin to upload new artwork images and delete existing ones. The upload input must accept image files up to 15MB. Show a preview grid of all currently uploaded gallery images with individual delete buttons. Show clear error feedback if a file exceeds 15MB. This tab should only be accessible when the user is authenticated as admin.",
+      "reqIds": [
+        "REQ-5"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
+      "id": "AR-1",
+      "summary": "Register as admin using 6-digit unique code (131104) for permanent authorized admin access",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add a gallery section to display artwork on the website",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
       "id": "AR-3",
-      "summary": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
+      "summary": "Allow gallery images to be uploaded/managed from the admin panel with no limit on number of uploads and a max image size of 15MB",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add a backend function `claimAdminWithCode(code: Text) : async Result<Text, Text>` that accepts a 6-digit registration code. If the code matches the hardcoded value \"131104\" and no admin principal is registered yet, permanently register the caller's principal as the admin. If an admin is already registered, return an error. This replaces or extends the existing first-caller-wins admin initialization so that admin access is only granted when the correct code is provided.",
       "reqIds": [
-        "REQ-3"
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Add backend support for a dedicated gallery collection. Implement `addGalleryImage(imageData: Blob, filename: Text, mimeType: Text) : async Result<Nat, Text>` and `getGalleryImages() : async [GalleryImage]` and `deleteGalleryImage(id: Nat) : async Result<(), Text>`. There must be no enforced limit on the number of gallery images. Each image must have an enforced maximum blob size of 15MB (15,728,640 bytes); uploads exceeding this size must return an error. Only the registered admin principal may add or delete gallery images.",
+      "reqIds": [
+        "REQ-4"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Admin Panel: Contact update and image upload failures",
+  "gameProjectType": "none",
+  "projectName": "Khudrang Kalakaar Portfolio",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

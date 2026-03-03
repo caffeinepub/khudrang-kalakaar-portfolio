@@ -1,12 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Admin Panel's "Failed to update contacts" error and image upload failures in the Site Media and Projects tabs.
+**Goal:** Add secure admin registration via a 6-digit code and a Gallery section with full admin management for the Khudrang Kalakaar Portfolio.
 
 **Planned changes:**
-- Audit and fix the backend Motoko actor's update functions for media contacts (WhatsApp number, Instagram URL) and blob assets (logo, cover image, artist portrait, project images) to ensure correct argument types, stable storage persistence, and proper success/error return variants.
-- Audit and fix the frontend React Query mutation hooks in `useQueries.ts` for updating contacts and uploading images — ensuring correct argument serialization, File/Blob to Nat8 array conversion, and query invalidation on success.
-- Fix the Contacts tab "Save Changes" flow so it correctly calls the backend mutation, shows a success toast on completion, and displays a descriptive error message on failure.
-- Fix image upload flows in Site Media and Projects tabs so uploads succeed, the updated images are reflected on the portfolio page, and appropriate success/error notifications are shown.
+- Add a `claimAdminWithCode(code: Text)` backend function that accepts only the hardcoded code "131104", registers the caller as permanent admin if no admin exists yet, and rejects all other attempts
+- Replace the existing "Claim Admin Access" button in the AdminPanel with a 6-digit code input form that calls the new backend function and shows success/error feedback
+- Add backend gallery functions: `addGalleryImage` (max 15MB per image, admin only), `getGalleryImages` (public), and `deleteGalleryImage` (admin only), with no limit on number of images, all persisting across upgrades
+- Add a public Gallery section to the portfolio page with a navigation anchor, responsive grid/masonry layout, lightbox/fullscreen on click, loading skeleton, and empty state
+- Add a Gallery tab in the AdminPanel for uploading (with client-side 15MB pre-validation) and deleting artwork images, with a preview grid and per-image delete buttons
 
-**User-visible outcome:** Admin Panel users can successfully update WhatsApp number and Instagram URL from the Contacts tab, and upload/replace logo, cover image, artist portrait, and project images without errors. Success and error feedback is shown for all operations.
+**User-visible outcome:** The owner can securely claim admin access using a private 6-digit code, then upload and manage artwork images in a dedicated Gallery tab in the admin panel, while visitors can browse the gallery in a responsive grid with fullscreen lightbox view on the public portfolio page.

@@ -2,33 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-investigate-and-fix-the-failed-to-update-contacts-error-in-the-admin-panel-contacts-tab-ensure-that-saving-whatsapp-number-and-instagram-profile-url-changes-calls-the-correct-backend-mutation-handles-errors-gracefully-and-shows-a-success-toast-on-completion",
-      "featureTitle": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
+      "featureId": "feature-update-the-adminstatusbanner-and-admin-claim-flow-in-the-adminpanel-to-replace-the-current-first-caller-wins-claim-admin-access-button-with-a-form-that-prompts-for-a-6-digit-code-when-the-user-submits-the-code-call-the-new-claimadminwithcode-backend-function-show-a-success-message-on-approval-and-a-clear-error-message-if-the-code-is-wrong-or-an-admin-already-exists",
+      "featureTitle": "Update the AdminStatusBanner and admin claim flow in the AdminPanel to replace the current first-caller-wins \"Claim Admin Access\" button with a form that prompts for a 6-digit code. When the user submits the code, call the new `claimAdminWithCode` backend function. Show a success message on approval and a clear error message if the code is wrong or an admin already exists.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminPanel.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "qr-code@1.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-investigate-and-fix-image-upload-failures-in-the-admin-panel-site-media-tab-and-projects-tab-ensure-that-uploading-logo-cover-image-artist-portrait-and-project-images-correctly-encodes-the-blob-data-calls-the-appropriate-backend-update-functions-and-completes-without-error",
-      "featureTitle": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/AdminPanel.tsx"
       ],
       "components": [
@@ -48,10 +24,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-audit-the-frontend-react-query-mutation-hooks-in-usequeries-ts-for-updating-media-contacts-and-uploading-images-ensure-the-mutation-functions-correctly-serialize-arguments-call-the-actor-methods-with-the-right-parameter-types-and-invalidate-relevant-queries-on-success",
-      "featureTitle": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "featureId": "feature-add-a-gallery-section-to-the-public-portfolio-page-portfoliopage-tsx-that-displays-artwork-images-fetched-from-the-backend-the-section-should-be-accessible-via-navigation-render-images-in-a-responsive-masonry-or-grid-layout-and-support-a-lightbox-fullscreen-view-on-click-this-section-should-be-distinct-from-the-existing-featuredprojects-section-and-be-labeled-gallery-in-the-navigation",
+      "featureTitle": "Add a Gallery section to the public portfolio page (`PortfolioPage.tsx`) that displays artwork images fetched from the backend. The section should be accessible via navigation, render images in a responsive masonry or grid layout, and support a lightbox/fullscreen view on click. This section should be distinct from the existing FeaturedProjects section and be labeled \"Gallery\" in the navigation.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/GallerySection.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/PortfolioPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -65,7 +43,30 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-gallery-tab-in-the-adminpanel-page-that-allows-the-admin-to-upload-new-artwork-images-and-delete-existing-ones-the-upload-input-must-accept-image-files-up-to-15mb-show-a-preview-grid-of-all-currently-uploaded-gallery-images-with-individual-delete-buttons-show-clear-error-feedback-if-a-file-exceeds-15mb-this-tab-should-only-be-accessible-when-the-user-is-authenticated-as-admin",
+      "featureTitle": "Add a Gallery tab in the AdminPanel page that allows the admin to upload new artwork images and delete existing ones. The upload input must accept image files up to 15MB. Show a preview grid of all currently uploaded gallery images with individual delete buttons. Show clear error feedback if a file exceeds 15MB. This tab should only be accessible when the user is authenticated as admin.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminPanel.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
       ],
       "confidence": "high"
     }

@@ -7,12 +7,19 @@ import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
+  let MAX_GALLERY_IMAGE_SIZE = 15_728_640; // 15MB in bytes
+
   public type UserProfile = {
     name : Text;
+  };
+
+  public type GalleryImage = {
+    id : Nat;
+    blob : Storage.ExternalBlob;
+    filename : Text;
+    mimeType : Text;
   };
 
   public type Artwork = {
@@ -29,20 +36,98 @@ actor {
   };
 
   let artworks = Map.empty<Nat, Artwork>();
+  let galleryImages = Map.empty<Nat, GalleryImage>();
   var nextArtworkId = 0;
+  var nextGalleryImageId = 0;
   var logo : ?Storage.ExternalBlob = null;
   var coverImage : ?Storage.ExternalBlob = null;
   var artistPortrait : ?Storage.ExternalBlob = null;
   var mediaContacts : ?MediaContacts = null;
+  var adminPrincipal : ?Principal = null;
 
   let userProfiles = Map.empty<Principal, UserProfile>();
   let accessControlState = AccessControl.initState();
 
-  // ── Authorization Mixin ──
   include MixinAuthorization(accessControlState);
-
-  // ── Storage Mixin (for general storage functions) ──
   include MixinStorage();
+
+  public query func getAdminPrincipal() : async ?Principal {
+    adminPrincipal;
+  };
+
+  // ── Claim Admin with Code ──
+  public shared ({ caller }) func claimAdminWithCode(code : Text) : async {
+    #ok : Text;
+    #err : Text;
+  } {
+    switch (adminPrincipal) {
+      case (null) {
+        if (code == "131104") {
+          adminPrincipal := ?caller;
+          #ok("Admin rights successfully claimed.");
+        } else {
+          #err("Invalid code. Please contact the artist for the correct code.");
+        };
+      };
+      case (?existingAdmin) {
+        #err(
+          "Admin rights have already been claimed by principal " # existingAdmin.toText() # "."
+        );
+      };
+    };
+  };
+
+  // ── Gallery Functions ──
+  public type AddGalleryImageArgs = {
+    blob : Storage.ExternalBlob;
+    filename : Text;
+    mimeType : Text;
+  };
+
+  public query func listGalleryImages() : async [GalleryImage] {
+    galleryImages.values().toArray();
+  };
+
+  public query func findGalleryImage(id : Nat) : async ?GalleryImage {
+    galleryImages.get(id);
+  };
+
+  public shared ({ caller }) func addGalleryImage(args : AddGalleryImageArgs) : async {
+    #ok : Nat;
+    #err : Text;
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can upload images to the gallery.");
+    };
+
+    let newGalleryImage : GalleryImage = {
+      id = nextGalleryImageId;
+      blob = args.blob;
+      filename = args.filename;
+      mimeType = args.mimeType;
+    };
+    galleryImages.add(nextGalleryImageId, newGalleryImage);
+
+    let currentId = nextGalleryImageId;
+    nextGalleryImageId += 1;
+    #ok(currentId);
+  };
+
+  public shared ({ caller }) func deleteGalleryImage(id : Nat) : async {
+    #ok : ();
+    #err : Text;
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete gallery images.");
+    };
+
+    if (galleryImages.containsKey(id)) {
+      galleryImages.remove(id);
+      #ok(());
+    } else {
+      #err("Gallery image with id " # id.toText() # " not found.");
+    };
+  };
 
   // ── User Profile Functions ──
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -196,4 +281,3 @@ actor {
     };
   };
 };
-

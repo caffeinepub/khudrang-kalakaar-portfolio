@@ -19,12 +19,23 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const AddGalleryImageArgs = IDL.Record({
+  'blob' : ExternalBlob,
+  'mimeType' : IDL.Text,
+  'filename' : IDL.Text,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const GalleryImage = IDL.Record({
+  'id' : IDL.Nat,
+  'blob' : ExternalBlob,
+  'mimeType' : IDL.Text,
+  'filename' : IDL.Text,
+});
 export const Artwork = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
@@ -66,13 +77,30 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addGalleryImage' : IDL.Func(
+      [AddGalleryImageArgs],
+      [IDL.Variant({ 'ok' : IDL.Nat, 'err' : IDL.Text })],
+      [],
+    ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'claimAdminWithCode' : IDL.Func(
+      [IDL.Text],
+      [IDL.Variant({ 'ok' : IDL.Text, 'err' : IDL.Text })],
+      [],
+    ),
   'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
+  'deleteGalleryImage' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
+      [],
+    ),
   'editArtwork' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
       [],
       [],
     ),
+  'findGalleryImage' : IDL.Func([IDL.Nat], [IDL.Opt(GalleryImage)], ['query']),
+  'getAdminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
   'getAllArtworks' : IDL.Func([], [IDL.Vec(Artwork)], ['query']),
   'getArtistPortrait' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
   'getArtwork' : IDL.Func([IDL.Nat], [IDL.Opt(Artwork)], ['query']),
@@ -88,6 +116,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listGalleryImages' : IDL.Func([], [IDL.Vec(GalleryImage)], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
@@ -114,12 +143,23 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const AddGalleryImageArgs = IDL.Record({
+    'blob' : ExternalBlob,
+    'mimeType' : IDL.Text,
+    'filename' : IDL.Text,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const GalleryImage = IDL.Record({
+    'id' : IDL.Nat,
+    'blob' : ExternalBlob,
+    'mimeType' : IDL.Text,
+    'filename' : IDL.Text,
+  });
   const Artwork = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
@@ -161,13 +201,34 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addGalleryImage' : IDL.Func(
+        [AddGalleryImageArgs],
+        [IDL.Variant({ 'ok' : IDL.Nat, 'err' : IDL.Text })],
+        [],
+      ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'claimAdminWithCode' : IDL.Func(
+        [IDL.Text],
+        [IDL.Variant({ 'ok' : IDL.Text, 'err' : IDL.Text })],
+        [],
+      ),
     'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
+    'deleteGalleryImage' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text })],
+        [],
+      ),
     'editArtwork' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
         [],
         [],
       ),
+    'findGalleryImage' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(GalleryImage)],
+        ['query'],
+      ),
+    'getAdminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     'getAllArtworks' : IDL.Func([], [IDL.Vec(Artwork)], ['query']),
     'getArtistPortrait' : IDL.Func([], [IDL.Opt(ExternalBlob)], ['query']),
     'getArtwork' : IDL.Func([IDL.Nat], [IDL.Opt(Artwork)], ['query']),
@@ -183,6 +244,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listGalleryImages' : IDL.Func([], [IDL.Vec(GalleryImage)], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),

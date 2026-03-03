@@ -1,56 +1,66 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-03T05:21:07.139Z",
+  "generatedAt": "2026-03-03T05:55:48.706Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 5,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
+        "summary": "Add a backend function `claimAdminWithCode(code: Text) : async Result<Text, Text>` that accepts a 6-digit registration code. If the code matches the hardcoded value \"131104\" and no admin principal is registered yet, permanently register the caller's principal as the admin. If an admin is already registered, return an error. This replaces or extends the existing first-caller-wins admin initialization so that admin access is only granted when the correct code is provided.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-4",
-        "summary": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+        "id": "REQ-2",
+        "summary": "Update the AdminStatusBanner and admin claim flow in the AdminPanel to replace the current first-caller-wins \"Claim Admin Access\" button with a form that prompts for a 6-digit code. When the user submits the code, call the new `claimAdminWithCode` backend function. Show a success message on approval and a clear error message if the code is wrong or an admin already exists.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add a Gallery section to the public portfolio page (`PortfolioPage.tsx`) that displays artwork images fetched from the backend. The section should be accessible via navigation, render images in a responsive masonry or grid layout, and support a lightbox/fullscreen view on click. This section should be distinct from the existing FeaturedProjects section and be labeled \"Gallery\" in the navigation.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/GallerySection.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PortfolioPage.tsx",
+          "frontend/src/components/Navigation.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/GallerySection.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PortfolioPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Add backend support for a dedicated gallery collection. Implement `addGalleryImage(imageData: Blob, filename: Text, mimeType: Text) : async Result<Nat, Text>` and `getGalleryImages() : async [GalleryImage]` and `deleteGalleryImage(id: Nat) : async Result<(), Text>`. There must be no enforced limit on the number of gallery images. Each image must have an enforced maximum blob size of 15MB (15,728,640 bytes); uploads exceeding this size must return an error. Only the registered admin principal may add or delete gallery images.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add a Gallery tab in the AdminPanel page that allows the admin to upload new artwork images and delete existing ones. The upload input must accept image files up to 15MB. Show a preview grid of all currently uploaded gallery images with individual delete buttons. Show clear error feedback if a file exceeds 15MB. This tab should only be accessible when the user is authenticated as admin.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminPanel.tsx",
           "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
+          "frontend/src/pages/AdminPanel.tsx",
           "frontend/src/hooks/useQueries.ts"
         ]
       }
@@ -58,17 +68,19 @@
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/ArtworkGallery.tsx",
+    "frontend/src/components/GallerySection.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminPanel.tsx",
+    "frontend/src/pages/PortfolioPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

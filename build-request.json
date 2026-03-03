@@ -1,94 +1,127 @@
 {
   "kind": "build_request",
-  "title": "Fix Admin Panel: Contact update and image upload failures",
+  "title": "Admin registration via 6-digit code + Gallery section with admin management",
+  "projectName": "Khudrang Kalakaar Portfolio",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Failed to update contacts.",
-          "updating the details and uploading the image in Admin panel doesn't create any issues"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Clicking 'Save Changes' on the Contacts tab successfully persists the WhatsApp number and Instagram URL to the backend.",
-        "A success toast/notification is shown when contacts are saved successfully.",
-        "If the save fails, a descriptive error message is displayed instead of a generic failure toast.",
-        "The Contacts tab does not show 'Failed to update contacts' when valid data is submitted."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "uploading the image in Admin panel doesn't create any issues"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Uploading a logo, cover image, or portrait image in the Site Media tab succeeds and the new image is reflected on the portfolio page.",
-        "Uploading or replacing a project image in the Projects tab succeeds without error.",
-        "A success notification is shown after a successful image upload.",
-        "An informative error message is shown if an image upload fails, without crashing the Admin Panel."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
+      "text": "Add a backend function `claimAdminWithCode(code: Text) : async Result<Text, Text>` that accepts a 6-digit registration code. If the code matches the hardcoded value \"131104\" and no admin principal is registered yet, permanently register the caller's principal as the admin. If an admin is already registered, return an error. This replaces or extends the existing first-caller-wins admin initialization so that admin access is only granted when the correct code is provided.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "updating the details and uploading the image in Admin panel doesn't create any issues"
+          "Register as admin at the back-end by a 6 Digit unique code so I can claim to be authorised Admin access in the website data permanently",
+          "Code is 131104"
         ]
       },
       "acceptanceCriteria": [
-        "The backend exposes working update functions for media contacts (WhatsApp, Instagram) that persist changes to stable storage.",
-        "The backend exposes working update functions for blob assets (logo, cover, portrait, artwork images) that accept and store Blob/[Nat8] data.",
-        "All update functions return a success or error variant that the frontend can distinguish.",
-        "No type mismatch errors occur between frontend actor calls and backend function signatures."
+        "Calling claimAdminWithCode(\"131104\") when no admin is set registers the caller as permanent admin and returns a success message.",
+        "Calling claimAdminWithCode(\"131104\") a second time (admin already set) returns an error.",
+        "Calling claimAdminWithCode with any other code (e.g. \"000000\") always returns an error and does not set admin.",
+        "The registered admin principal persists across canister upgrades."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "id": "REQ-2",
+      "text": "Update the AdminStatusBanner and admin claim flow in the AdminPanel to replace the current first-caller-wins \"Claim Admin Access\" button with a form that prompts for a 6-digit code. When the user submits the code, call the new `claimAdminWithCode` backend function. Show a success message on approval and a clear error message if the code is wrong or an admin already exists.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "updating the details and uploading the image in Admin panel doesn't create any issues"
+          "Register as admin at the back-end by a 6 Digit unique code so I can claim to be authorised Admin access in the website data permanently",
+          "Code is 131104"
         ]
       },
       "acceptanceCriteria": [
-        "The useUpdateContacts (or equivalent) mutation hook correctly passes WhatsApp and Instagram values to the backend actor.",
-        "Image upload mutation hooks correctly convert File/Blob objects to the Nat8 array format expected by the backend.",
-        "On successful mutation, the relevant queries (contacts, logo, cover, portrait, artworks) are invalidated so the UI reflects the latest data.",
-        "Mutation error states are captured and surfaced to the Admin Panel UI."
+        "The admin claim UI shows a 6-digit code input field instead of a bare button.",
+        "Submitting the correct code (131104) successfully registers the user as admin and updates the UI to show admin status.",
+        "Submitting a wrong code displays a clear error message.",
+        "If admin is already registered, the claim form is hidden and the panel shows the authenticated admin's status."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a Gallery section to the public portfolio page (`PortfolioPage.tsx`) that displays artwork images fetched from the backend. The section should be accessible via navigation, render images in a responsive masonry or grid layout, and support a lightbox/fullscreen view on click. This section should be distinct from the existing FeaturedProjects section and be labeled \"Gallery\" in the navigation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "add a gallery section in the website to display my artwork"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A Gallery section is visible on the public portfolio page with its own navigation anchor.",
+        "Gallery images are fetched from the backend and displayed in a responsive grid or masonry layout.",
+        "Clicking an image opens a fullscreen lightbox view.",
+        "The section shows a loading skeleton while images are being fetched.",
+        "The section gracefully shows an empty state if no gallery images have been uploaded."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add backend support for a dedicated gallery collection. Implement `addGalleryImage(imageData: Blob, filename: Text, mimeType: Text) : async Result<Nat, Text>` and `getGalleryImages() : async [GalleryImage]` and `deleteGalleryImage(id: Nat) : async Result<(), Text>`. There must be no enforced limit on the number of gallery images. Each image must have an enforced maximum blob size of 15MB (15,728,640 bytes); uploads exceeding this size must return an error. Only the registered admin principal may add or delete gallery images.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "there is no limits on artwork upload in gallery section",
+          "maximum size of the image should be 15MB"
+        ]
+      },
+      "acceptanceCriteria": [
+        "addGalleryImage stores the image blob and returns its unique ID on success.",
+        "addGalleryImage rejects any image blob exceeding 15MB with a descriptive error.",
+        "addGalleryImage called by a non-admin principal returns an unauthorized error.",
+        "getGalleryImages returns all stored gallery images for any caller.",
+        "deleteGalleryImage removes the image by ID when called by the admin; returns error for non-admin or missing ID.",
+        "There is no upper limit on the number of images that can be stored.",
+        "Gallery image state persists across canister upgrades."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add a Gallery tab in the AdminPanel page that allows the admin to upload new artwork images and delete existing ones. The upload input must accept image files up to 15MB. Show a preview grid of all currently uploaded gallery images with individual delete buttons. Show clear error feedback if a file exceeds 15MB. This tab should only be accessible when the user is authenticated as admin.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "this gallery section image can be also updated in admin panel section",
+          "there is no limits on artwork upload in gallery section",
+          "maximum size of the image should be 15MB"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A \"Gallery\" tab is present in the AdminPanel alongside existing tabs.",
+        "The Gallery tab shows a file upload control accepting image files.",
+        "Attempting to upload a file larger than 15MB shows a clear client-side error before sending to the backend.",
+        "Uploaded images appear in a preview grid immediately after successful upload.",
+        "Each gallery image in the preview grid has a delete button that removes it after confirmation.",
+        "The tab is only accessible/functional when the user is logged in as admin."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Preserve existing stable storage and data model in the backend; do not drop or rename existing fields."
+    "The admin registration code must be hardcoded as \"131104\" in the backend — it must never be changeable via any API or frontend UI.",
+    "Only one admin principal may ever be registered; the code can only be used once.",
+    "Gallery image uploads must enforce a 15MB maximum size limit on both the frontend (pre-validation) and the backend (enforced rejection).",
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Redesigning the Admin Panel UI layout or visual styling.",
-    "Adding new admin features beyond fixing existing contact update and image upload flows.",
-    "Changing the authentication mechanism (Internet Identity)."
+    "Allowing the admin code to be changed or reset via any UI or API.",
+    "Supporting multiple admin accounts.",
+    "Adding pagination or filtering to the gallery on the public page.",
+    "Changing any existing artwork/project management features beyond what is required for the new gallery."
   ],
   "imageRequirements": {
     "required": [],

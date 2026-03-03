@@ -1,66 +1,79 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Admin Panel: Contact update and image upload failures",
+  "title": "Admin registration via 6-digit code + Gallery section with admin management",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Fix 'Failed to update contacts' error in Admin Panel Contacts tab by ensuring correct mutation calls, error handling, and success feedback",
-      "acceptanceCriteria": [
-        "Clicking 'Save Changes' on the Contacts tab successfully persists the WhatsApp number and Instagram URL to the backend.",
-        "A success toast/notification is shown when contacts are saved successfully.",
-        "If the save fails, a descriptive error message is displayed instead of a generic failure toast.",
-        "The Contacts tab does not show 'Failed to update contacts' when valid data is submitted."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Audit and fix the useUpdateMediaContacts mutation hook to ensure it correctly passes whatsappNumber and instagramProfile string arguments to actor.updateMediaContacts(), handles promise resolution/rejection, and returns proper success/error states to the calling component."
-        },
-        {
-          "path": "frontend/src/pages/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "Fix the Contacts tab's Save Changes button handler to correctly invoke the useUpdateMediaContacts mutation with the current form state (whatsappNumber, instagramProfile), handle mutation errors gracefully by displaying a descriptive error toast (not generic 'Failed to update contacts'), and show a success toast on successful save. Ensure the mutation is awaited and error boundaries are in place."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Fix image upload failures in Admin Panel (Site Media and Projects tabs) by ensuring correct blob encoding and backend method invocation",
+      "summary": "Replace first-caller-wins admin claim UI with a 6-digit code input form that calls claimAdminWithCode backend function",
       "acceptanceCriteria": [
-        "Uploading a logo, cover image, or portrait image in the Site Media tab succeeds and the new image is reflected on the portfolio page.",
-        "Uploading or replacing a project image in the Projects tab succeeds without error.",
-        "A success notification is shown after a successful image upload.",
-        "An informative error message is shown if an image upload fails, without crashing the Admin Panel."
+        "The admin claim UI shows a 6-digit code input field instead of a bare button.",
+        "Submitting the correct code (131104) successfully registers the user as admin and updates the UI to show admin status.",
+        "Submitting a wrong code displays a clear error message.",
+        "If admin is already registered, the claim form is hidden and the panel shows the authenticated admin's status."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Audit and fix the image upload mutation hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUploadArtwork, useEditArtwork) to ensure File/Blob objects are correctly converted to ExternalBlob instances using ExternalBlob.fromBytes(await file.arrayBuffer()) before passing to backend actor methods. Verify the component's usage instructions for ExternalBlob handling before implementing. Ensure mutations invalidate the relevant queries (logo, cover, portrait, artworks) on success so the UI updates immediately."
-        },
-        {
           "path": "frontend/src/pages/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Fix the Site Media tab's image upload handlers (logo, cover, portrait) and the Projects tab's artwork image upload/edit handlers to correctly invoke the corresponding mutation hooks with ExternalBlob-wrapped file data. Ensure each handler awaits the mutation, catches errors with descriptive messages displayed via toast notifications, and shows a success toast on completion. Verify that file inputs are properly wired to trigger uploads and that uploaded images are reflected in preview thumbnails after successful upload."
+          "description": "Replace the AdminStatusBanner's single 'Claim Admin Access' button with a form containing a 6-digit code input field and a submit button. When submitted, call the backend's claimAdminWithCode method with the entered code. Display success toast on approval and error toast with the backend's error message if the code is wrong or admin already exists. Hide the claim form and show admin status when an admin is already registered."
         }
       ]
     },
     {
-      "id": "REQ-4",
-      "summary": "Audit frontend React Query mutation hooks for correct argument serialization and query invalidation",
+      "id": "REQ-3",
+      "summary": "Add a public Gallery section to the portfolio page displaying artwork images from the backend with responsive grid layout and lightbox view",
       "acceptanceCriteria": [
-        "The useUpdateContacts (or equivalent) mutation hook correctly passes WhatsApp and Instagram values to the backend actor.",
-        "Image upload mutation hooks correctly convert File/Blob objects to the Nat8 array format expected by the backend.",
-        "On successful mutation, the relevant queries (contacts, logo, cover, portrait, artworks) are invalidated so the UI reflects the latest data.",
-        "Mutation error states are captured and surfaced to the Admin Panel UI."
+        "A Gallery section is visible on the public portfolio page with its own navigation anchor.",
+        "Gallery images are fetched from the backend and displayed in a responsive grid or masonry layout.",
+        "Clicking an image opens a fullscreen lightbox view.",
+        "The section shows a loading skeleton while images are being fetched.",
+        "The section gracefully shows an empty state if no gallery images have been uploaded."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/GallerySection.tsx",
+          "operation": "create",
+          "description": "Create a new GallerySection component that fetches gallery images using a React Query hook calling listGalleryImages(). Render images in a responsive masonry or grid layout using Tailwind classes. Each image should use the ExternalBlob's getDirectURL() method to display the image. Implement click handlers that open a lightbox dialog (using shadcn/ui Dialog component) showing the clicked image in fullscreen. Show skeleton loaders while images are loading. Display an empty state message with an icon if no images are returned."
+        },
+        {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Perform a comprehensive audit of all mutation hooks in useQueries.ts: ensure useUpdateMediaContacts passes string arguments correctly; ensure all image upload hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUploadArtwork, useEditArtwork) convert File/Blob to ExternalBlob using ExternalBlob.fromBytes(await file.arrayBuffer()); verify each mutation's onSuccess callback invalidates the correct queryKey(s) (e.g., ['mediaContacts'], ['logo'], ['coverImage'], ['artistPortrait'], ['artworks']); ensure mutation errors are captured and thrown/returned so the calling component can display them. Verify the component's usage instructions for ExternalBlob before implementing."
+          "description": "Add a new React Query hook useGetGalleryImages that calls actor.listGalleryImages() with queryKey ['galleryImages']. Return the query result including isLoading and error states for use in GallerySection."
+        },
+        {
+          "path": "frontend/src/pages/PortfolioPage.tsx",
+          "operation": "modify",
+          "description": "Import and render the new GallerySection component between the FeaturedProjects section and the ContactSection. Wrap it in a section element with id='gallery' to enable navigation anchor linking."
+        },
+        {
+          "path": "frontend/src/components/Navigation.tsx",
+          "operation": "modify",
+          "description": "Add a new navigation link labeled 'Gallery' that scrolls to the #gallery anchor. Insert it in the navigation menu between the existing 'Projects' and 'Contact' links. Ensure the scroll-spy logic includes 'gallery' in the sections array so the link highlights when the Gallery section is in view."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add a Gallery management tab in AdminPanel for uploading new artwork images (up to 15MB) and deleting existing ones",
+      "acceptanceCriteria": [
+        "A 'Gallery' tab is present in the AdminPanel alongside existing tabs.",
+        "The Gallery tab shows a file upload control accepting image files.",
+        "Attempting to upload a file larger than 15MB shows a clear client-side error before sending to the backend.",
+        "Uploaded images appear in a preview grid immediately after successful upload.",
+        "Each gallery image in the preview grid has a delete button that removes it after confirmation.",
+        "The tab is only accessible/functional when the user is logged in as admin."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Add a new 'Gallery' tab to the AdminPanel tabs array. In the Gallery tab content, render a file upload input that accepts image types (image/*). Add client-side validation that checks file size before upload and shows an error toast if the file exceeds 15MB (15,728,640 bytes). When a valid file is selected, convert it to an ExternalBlob using ExternalBlob.fromBytes() and call the backend's addGalleryImage method with the blob, filename, and mimeType. Show upload progress using withUploadProgress(). Below the upload control, fetch and display all gallery images in a responsive grid using the useGetGalleryImages hook. Each image card should show a thumbnail (using getDirectURL()) and a delete button. On delete click, show a confirmation dialog, then call deleteGalleryImage with the image ID and invalidate the gallery images query to refresh the list."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add mutation hooks useAddGalleryImage and useDeleteGalleryImage. useAddGalleryImage should call actor.addGalleryImage() and invalidate the ['galleryImages'] query on success. useDeleteGalleryImage should call actor.deleteGalleryImage() with the image ID and invalidate the ['galleryImages'] query on success. Both mutations should handle errors appropriately and return them to the calling component."
         }
       ]
     }

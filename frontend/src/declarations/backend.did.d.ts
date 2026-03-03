@@ -10,6 +10,11 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AddGalleryImageArgs {
+  'blob' : ExternalBlob,
+  'mimeType' : string,
+  'filename' : string,
+}
 export interface Artwork {
   'id' : bigint,
   'title' : string,
@@ -18,6 +23,12 @@ export interface Artwork {
   'location' : [] | [string],
 }
 export type ExternalBlob = Uint8Array;
+export interface GalleryImage {
+  'id' : bigint,
+  'blob' : ExternalBlob,
+  'mimeType' : string,
+  'filename' : string,
+}
 export interface MediaContacts {
   'instagramProfile' : string,
   'whatsappNumber' : string,
@@ -54,12 +65,29 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addGalleryImage' : ActorMethod<
+    [AddGalleryImageArgs],
+    { 'ok' : bigint } |
+      { 'err' : string }
+  >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'claimAdminWithCode' : ActorMethod<
+    [string],
+    { 'ok' : string } |
+      { 'err' : string }
+  >,
   'deleteArtwork' : ActorMethod<[bigint], undefined>,
+  'deleteGalleryImage' : ActorMethod<
+    [bigint],
+    { 'ok' : null } |
+      { 'err' : string }
+  >,
   'editArtwork' : ActorMethod<
     [bigint, string, string, [] | [ExternalBlob], [] | [string]],
     undefined
   >,
+  'findGalleryImage' : ActorMethod<[bigint], [] | [GalleryImage]>,
+  'getAdminPrincipal' : ActorMethod<[], [] | [Principal]>,
   'getAllArtworks' : ActorMethod<[], Array<Artwork>>,
   'getArtistPortrait' : ActorMethod<[], [] | [ExternalBlob]>,
   'getArtwork' : ActorMethod<[bigint], [] | [Artwork]>,
@@ -71,6 +99,7 @@ export interface _SERVICE {
   'getMyRole' : ActorMethod<[], string>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listGalleryImages' : ActorMethod<[], Array<GalleryImage>>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateMediaContacts' : ActorMethod<[string, string], undefined>,
   'uploadArtistPortrait' : ActorMethod<[ExternalBlob], undefined>,
