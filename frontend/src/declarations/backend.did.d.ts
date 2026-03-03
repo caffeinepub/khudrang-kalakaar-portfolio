@@ -71,6 +71,7 @@ export interface _SERVICE {
   'getMediaContacts' : ActorMethod<[], [] | [MediaContacts]>,
   'getMyRole' : ActorMethod<[], string>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'initializeWithPassword' : ActorMethod<[string], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'loginWithPassword' : ActorMethod<[string, string], boolean>,
   'logout' : ActorMethod<[], undefined>,

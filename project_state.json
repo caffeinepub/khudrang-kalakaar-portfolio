@@ -1,22 +1,42 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
-  "known_issues": [],
+  "summary": "Web project with admin panel supporting login-based access for making changes and uploading images.",
+  "architectural_notes": [
+    "Admin panel authentication: username + password login grants access to make changes and upload images"
+  ],
+  "known_issues": [
+    "Unauthorised admin login error occurring at back-end preventing admin panel access"
+  ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-unauthorized-only-admins-can-perform-this-action-error-that-appears-in-the-admin-panel-when-logged-in-admin-users-attempt-to-upload-site-images-logo-cover-hero-image-or-save-social-links-whatsapp-number-instagram-url-the-backend-must-correctly-recognize-the-session-established-by-the-client-side-adminauth-utilities-and-allow-these-mutations-to-proceed-without-returning-an-authorization-error",
-      "title": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
+      "id": "feature-update-the-frontend-admin-authentication-flow-so-that-after-a-successful-username-password-login-all-subsequent-backend-calls-to-admin-restricted-endpoints-upload-artwork-edit-content-upload-images-save-social-media-contacts-are-authorized-correctly-ensure-the-session-token-or-credential-established-at-login-is-passed-along-with-every-admin-backend-call",
+      "title": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
       "reqIds": [
-        "REQ-1"
+        "REQ-2"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix admin authorization error in Admin Panel",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix unauthorised admin login error at back-end; username and password should be sufficient to access admin panel for making changes and uploading images",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Khudrang Kalakaar Portfolio",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,10 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the "Unauthorized: Only admins can perform this action" error in the Admin Panel so that logged-in admin users can successfully upload site images and save social links.
+**Goal:** Fix the admin authentication system so that username and password credentials alone are sufficient to access and operate the admin panel.
 
 **Planned changes:**
-- Fix the backend authorization check so it correctly recognizes the session established by the client-side adminAuth utilities when admin mutations are called (logo upload, cover/hero image upload, save social links).
-- Ensure unauthenticated or non-admin users still receive the unauthorized error.
+- Fix the backend `loginAdmin` function to grant admin access based solely on a valid username/password pair, removing any Internet Identity or principal-based requirement
+- Ensure all admin-gated backend functions (artwork upload, image upload, content edits, social/media contact saves) accept calls authorized via username/password login
+- Update the frontend admin authentication flow so the session token from a successful login is passed along with every subsequent admin backend call
+- Ensure failed or missing sessions redirect the user back to the login page
 
-**User-visible outcome:** After logging in with valid admin credentials, the admin can upload a logo, upload a cover/hero image, and save WhatsApp/Instagram social links in the Admin Panel without seeing the "Unauthorized: Only admins can perform this action" error banner.
+**User-visible outcome:** After entering the correct username and password on the AdminLogin page, the admin is redirected to the AdminPanel and can upload artwork, edit content, and save contacts without encountering any "Unauthorized" errors.

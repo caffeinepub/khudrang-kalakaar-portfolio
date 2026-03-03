@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-unauthorized-only-admins-can-perform-this-action-error-that-appears-in-the-admin-panel-when-logged-in-admin-users-attempt-to-upload-site-images-logo-cover-hero-image-or-save-social-links-whatsapp-number-instagram-url-the-backend-must-correctly-recognize-the-session-established-by-the-client-side-adminauth-utilities-and-allow-these-mutations-to-proceed-without-returning-an-authorization-error",
-      "featureTitle": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
+      "featureId": "feature-update-the-frontend-admin-authentication-flow-so-that-after-a-successful-username-password-login-all-subsequent-backend-calls-to-admin-restricted-endpoints-upload-artwork-edit-content-upload-images-save-social-media-contacts-are-authorized-correctly-ensure-the-session-token-or-credential-established-at-login-is-passed-along-with-every-admin-backend-call",
+      "featureTitle": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
       "files": [
         "frontend/src/hooks/useQueries.ts",
         "frontend/src/lib/adminAuth.ts",
+        "frontend/src/pages/AdminLogin.tsx",
         "frontend/src/pages/AdminPanel.tsx"
       ],
       "components": [
@@ -21,7 +22,7 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-2"
       ],
       "confidence": "high"
     }

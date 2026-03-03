@@ -1,38 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin authorization error in Admin Panel",
+  "title": "Fix unauthorized admin login error — allow username/password authentication for admin panel access",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Fix the 'Unauthorized: Only admins can perform this action' error by ensuring the backend recognizes the admin session established through loginWithPassword when performing image uploads and social link updates",
+      "id": "REQ-2",
+      "summary": "Update the frontend admin authentication flow to properly pass credentials to backend and handle admin session for all subsequent admin operations",
       "acceptanceCriteria": [
-        "After logging in with valid admin credentials (DeepakKumawat / Kinnu*0613), uploading a logo image in the Site Images tab succeeds without showing the unauthorized error.",
-        "After logging in with valid admin credentials, uploading a cover/hero image succeeds without showing the unauthorized error.",
-        "After logging in with valid admin credentials, saving social links (WhatsApp number and Instagram URL) succeeds without showing the unauthorized error.",
-        "The unauthorized error banner does not appear in the Admin Panel for any action performed by a correctly authenticated admin session.",
-        "Unauthenticated or non-admin users still receive the unauthorized error when attempting admin actions."
+        "After logging in with correct username and password on the AdminLogin page, the user is redirected to the AdminPanel without any 'Unauthorized' error.",
+        "Uploading artwork images, editing site media, and saving social/media contacts in the AdminPanel all succeed without triggering an unauthorized error.",
+        "The admin session created by username/password login is recognized by the backend for all admin operations.",
+        "If the session is expired or missing, the user is redirected to the login page."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActor.ts",
+          "path": "frontend/src/pages/AdminLogin.tsx",
           "operation": "modify",
-          "description": "After successful loginWithPassword call in the admin initialization flow, ensure the actor instance is properly authenticated for subsequent admin mutations. Verify that the backend session persists across actor method calls within the same browser session."
-        },
-        {
-          "path": "frontend/src/pages/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "Add error handling and retry logic for authentication failures. If uploadLogo, uploadCoverImage, uploadArtistPortrait, or updateMediaContacts mutations fail with an 'Unauthorized' error, attempt to re-authenticate using loginWithPassword with the stored credentials before retrying the operation. Display user-friendly error messages distinguishing between authorization failures and other errors."
+          "description": "Replace client-side credential validation with a backend call to loginWithPassword. On successful login, store the authenticated session state and redirect to AdminPanel. Remove references to adminAuth utilities (validateCredentials, createSession) and instead rely on the backend's password-based authentication mechanism. Ensure error messages display backend authentication failures appropriately."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Enhance the mutation hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUpdateMediaContacts) to include onError handlers that detect authorization failures. When an 'Unauthorized' error occurs, trigger a silent re-authentication flow using the actor's loginWithPassword capability before invalidating queries or showing error toasts."
+          "description": "Update the useLoginWithPassword hook to properly handle the backend loginWithPassword response. Ensure that after a successful password login, the actor is configured to include the authenticated session for all subsequent admin requests. Add error handling for unauthorized responses and provide clear feedback to the UI."
+        },
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Remove client-side session validation logic (validateSession, clearSession). Instead, rely on backend admin checks via the isCallerAdmin query. If the user is not authorized by the backend, redirect to the admin login page. Ensure all admin operations (artwork upload/edit/delete, media uploads, contact updates) properly handle backend authorization errors and display user-friendly messages."
         },
         {
           "path": "frontend/src/lib/adminAuth.ts",
           "operation": "modify",
-          "description": "Add a helper function getStoredCredentials() that retrieves the admin username and password hash from the session used during login. This allows the frontend to re-authenticate with the backend if the session expires or is lost between mutations."
+          "description": "Deprecate or remove client-side credential validation and session management functions (validateCredentials, createSession, validateSession, clearSession). These functions are no longer needed since authentication is now fully handled by the backend. Keep only utility functions if they are still referenced elsewhere, but mark them as deprecated."
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Ensure the actor hook properly maintains the authenticated identity after a successful loginWithPassword call. The actor must consistently use the authenticated principal for all subsequent backend calls, not fall back to anonymous. Add logic to invalidate cached queries when the authentication state changes (login or logout)."
         }
       ]
     }

@@ -1,28 +1,37 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-03T03:18:09.071Z",
+  "generatedAt": "2026-03-03T04:13:53.547Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
+    "total": 2,
     "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
+        "summary": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useActor.ts",
-          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/pages/AdminLogin.tsx",
           "frontend/src/hooks/useQueries.ts",
-          "frontend/src/lib/adminAuth.ts"
+          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/lib/adminAuth.ts",
+          "frontend/src/hooks/useActor.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/pages/AdminLogin.tsx",
           "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminPanel.tsx",
           "frontend/src/lib/adminAuth.ts"
         ]
       }
@@ -30,12 +39,18 @@
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/lib/adminAuth.ts",
+    "frontend/src/pages/AdminLogin.tsx",
     "frontend/src/pages/AdminPanel.tsx",
     "project_state.json",
     "scratch/component-selection.json",

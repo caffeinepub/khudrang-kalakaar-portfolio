@@ -1,24 +1,53 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-03-03T03:18:09.069Z",
-  "summary": "The diff implements a backend loginWithPassword function that assigns the admin role to the caller's principal, a frontend useLoginWithPassword mutation hook, and updates AdminPanel.tsx to call actor.loginWithPassword() after the actor is ready, gating mutations behind backendAuthReady. The adminAuth.ts utility is updated with a getAdminCredentials() helper. Together these changes address REQ-1 by linking the client-side session to backend principal-based authorization. All five acceptance criteria appear covered: authenticated admin can upload logo, cover image, and save social links; the unauthorized banner is suppressed for valid sessions; and unauthenticated users still hit the guard in the backend.",
-  "missing_requirements": [],
+  "generatedAt": "2026-03-03T04:13:53.545Z",
+  "summary": "The diff implements both REQ-1 and REQ-2 largely as specified. The backend gains a loginWithPassword function that accepts username+password and assigns an admin role without requiring Internet Identity. The frontend gains session management, an updated AdminLogin page, and admin mutations that call ensureAdminAuth before each operation. One concern: credentials are hardcoded in plaintext in frontend/src/lib/adminAuth.ts, and session expiry redirect is only enforced on page load. Overall coverage is strong.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "If the session is expired or missing, the user is redirected to the login page.",
+      "reason": "Session expiry is only checked on AdminPanel mount via a useEffect guard. If the session expires mid-session while the page is still open, admin mutations still fire ensureAdminAuth using hardcoded credentials from adminAuth.ts rather than redirecting the user to the login page. There is no runtime check during mutation failures that redirects to login on session expiry.",
+      "evidence": [
+        "frontend/src/pages/AdminPanel.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/lib/adminAuth.ts"
+      ]
+    }
+  ],
   "hallucinated_features": [
     {
-      "description": "A resetPassword function was added to the backend allowing an authenticated admin to change the admin password.",
-      "reason": "The BuildRequest explicitly lists 'Adding new admin features beyond fixing the authorization error' as a non-goal. resetPassword is a new admin feature not requested in REQ-1.",
+      "description": "Admin credentials (username and password) are hardcoded in plaintext in frontend/src/lib/adminAuth.ts as constants (ADMIN_USERNAME = 'DeepakKumawat', ADMIN_PASSWORD = 'Deepak@123'), and ensureAdminAuth uses these hardcoded values instead of the user-entered credentials from the login form.",
+      "reason": "The build request does not specify hardcoding credentials client-side. This introduces a pattern where every admin mutation re-authenticates with hardcoded credentials regardless of what the user typed, which was not requested.",
+      "evidence": [
+        "frontend/src/lib/adminAuth.ts",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "description": "A backend/migration.mo module was added to handle actor state migration, introducing adminUsernames (a Map of Principal to Text) and renaming ADMIN_PASSWORD_HASH to adminPasswordHash.",
+      "reason": "The build request does not mention any migration module or schema migration requirement. This is additional infrastructure not requested.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "An initializeWithPassword function was added to the backend to bootstrap the first admin after deployment.",
+      "reason": "The build request does not request a bootstrapping or initialization function. The requirement only asks to fix loginWithPassword to accept username and password without Internet Identity.",
       "evidence": [
         "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.82,
+  "confidence": 0.78,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/lib/adminAuth.ts",
+    "frontend/src/pages/AdminLogin.tsx",
     "frontend/src/pages/AdminPanel.tsx",
     "project_state.json"
   ]

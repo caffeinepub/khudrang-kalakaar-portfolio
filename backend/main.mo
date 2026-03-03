@@ -1,7 +1,5 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
-import Nat32 "mo:core/Nat32";
-import Char "mo:core/Char";
 import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
@@ -9,10 +7,10 @@ import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
-
-
-actor {
+(with migration = Migration.run)
+actor self {
   public type UserProfile = {
     name : Text;
   };
@@ -26,12 +24,6 @@ actor {
     imageFileName : ?Text;
   };
 
-  type TextContent = {
-    artistName : Text;
-    tagline : Text;
-    bio : Text;
-  };
-
   type MediaContacts = {
     whatsappNumber : Text;
     instagramProfile : Text;
@@ -39,33 +31,27 @@ actor {
 
   let artworks = Map.empty<Nat, Artwork>();
   let userProfiles = Map.empty<Principal, UserProfile>();
-
   var nextArtworkId = 0;
   var logo : ?Storage.ExternalBlob = null;
   var coverImage : ?Storage.ExternalBlob = null;
   var artistPortrait : ?Storage.ExternalBlob = null;
   var mediaContacts : ?MediaContacts = null;
 
-  // Authorization state is part of the actor state, this must always be checked!
+  let adminUsernames = Map.empty<Principal, Text>();
+  var isInitialized = false;
+
+  var adminPasswordHash = "a228e6675ba23a33";
+  let ADMIN_USERNAME = "DeepakKumawat";
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // ── Admin credentials (hardcoded for DeepakKumawat) ──
-
-  // Password is stored as a SHA-256 hex hash using the simple hashPassword primitive below.
-  // Computed with hashPassword("Kinnu*0613") and manually embedded as a hex string.
-  let ADMIN_USERNAME : Text = "DeepakKumawat";
-  let ADMIN_PASSWORD_HASH : Text = "a228e6675ba23a33";
-
-  // Simple djb2-style hash for password verification (deterministic, Motoko-native).
-  // For a production system a proper cryptographic hash library should be used.
   func hashPassword(password : Text) : Text {
     var h : Nat = 5381;
     for (c in password.chars()) {
       let code = c.toNat32().toNat();
       h := ((h * 33) + code) % 0xFFFFFFFFFFFFFFFF;
     };
-    // Encode as hex string
     let hexChars = [
       "0",
       "1",
@@ -86,9 +72,9 @@ actor {
     ];
     var result = "";
     var remaining = h;
-    var digits = 0;
     if (remaining == 0) { return "0" };
     var temp = remaining;
+    var digits = 0;
     while (temp > 0) {
       digits += 1;
       temp /= 16;
@@ -103,44 +89,65 @@ actor {
     result;
   };
 
-  // Password-based admin login: verifies credentials and assigns the #admin role to the caller.
-  public shared ({ caller }) func loginWithPassword(username : Text, password : Text) : async Bool {
-    if (username != ADMIN_USERNAME) { Runtime.trap("Invalid credentials : Wrong username") };
-    let attemptHash = hashPassword(password);
-    if (attemptHash != ADMIN_PASSWORD_HASH) { Runtime.trap("Invalid credentials : Wrong password") };
+  // Initialize admin (password setup required).
+  // Called only once, to bootstrap the very first admin after the actor is deployed.
+  public shared ({ caller }) func initializeWithPassword(password : Text) : async () {
+    if (not isInitialized) {
+      let passwordHash = hashPassword(password);
+      adminPasswordHash := passwordHash;
+      adminUsernames.add(caller, ADMIN_USERNAME);
+      isInitialized := true;
+      // Use the actor's own privileged principal to assign admin role to the caller
+      AccessControl.assignRole(accessControlState, Principal.fromActor(self), caller, #admin);
+    } else {
+      Runtime.trap("Initialization has already happened. Please use newly created password next time during login");
+    };
+  };
 
-    // Credentials are valid — elevate the caller's role to #admin so that
-    // subsequent admin-guarded calls succeed for this principal.
-    AccessControl.assignRole(accessControlState, caller, caller, #admin);
+  // Login with username+password credentials to obtain admin role.
+  // No Internet Identity or principal-based check required beyond valid credentials.
+  public shared ({ caller }) func loginWithPassword(username : Text, password : Text) : async Bool {
+    let isKnownAdmin = (username == ADMIN_USERNAME and adminPasswordHash == hashPassword(password));
+    if (not isKnownAdmin) {
+      Runtime.trap("Invalid admin credentials. You are not authorized to perform these actions!");
+    };
+    // Use the actor's own privileged principal to assign admin role to the caller
+    AccessControl.assignRole(accessControlState, Principal.fromActor(self), caller, #admin);
     true;
   };
 
-  // ── Reset admin password (admin only) ───────────────────────────
+  // Reset admin password (admin-only)
   public shared ({ caller }) func resetPassword(
     adminIdentifier : Text,
     oldPassword : Text,
     newPassword : Text,
   ) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
-      Runtime.trap("Unauthorized: Only admins can change the admin password");
+      Runtime.trap("Unauthorized: Only admins can change admin password");
     };
     if (ADMIN_USERNAME != adminIdentifier) {
-      Runtime.trap("Resetting password is only possible for the current admin onwards");
+      Runtime.trap("Unauthorized: Resetting password is only possible for the current admin");
     };
-    if (hashPassword(oldPassword) != ADMIN_PASSWORD_HASH) {
+    if (not isAdminPasswordValid(oldPassword)) {
       Runtime.trap("Unauthorized: Incorrect old password");
     };
     if (newPassword.size() < 8) {
       Runtime.trap("Password must be at least 8 characters");
     };
-    Runtime.trap("To complete password reset you would need to update a persistent state variable with the hash of the new password. This would require and additional persistent adminPasswordHash variable and migration for audit logging. This current solution is immutable meaning the adminPassword cannot be reset during runtime.");
+    adminPasswordHash := hashPassword(newPassword);
   };
 
+  func isAdminPasswordValid(password : Text) : Bool {
+    hashPassword(password) == adminPasswordHash;
+  };
+
+  // Logout: demote caller back to guest
   public shared ({ caller }) func logout() : async () {
-    AccessControl.assignRole(accessControlState, caller, caller, #guest);
+    // Use the actor's own privileged principal to assign guest role to the caller
+    AccessControl.assignRole(accessControlState, Principal.fromActor(self), caller, #guest);
   };
 
-  // ── User profile functions ───────────────────────────────────────
+  // ── User profile functions ──
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view their own profile");
@@ -162,7 +169,7 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // ── Artwork functions ────────────────────────────────────────────
+  // ── Artwork functions ──
   public shared ({ caller }) func uploadArtwork(
     title : Text,
     description : Text,
@@ -173,7 +180,6 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
-
     let artwork : Artwork = {
       id = nextArtworkId;
       title;
@@ -182,7 +188,6 @@ actor {
       imageFormat = format;
       imageFileName = fileName;
     };
-
     artworks.add(nextArtworkId, artwork);
     nextArtworkId += 1;
     artwork.id;
@@ -199,23 +204,21 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
-
     switch (artworks.get(id)) {
-      case (null) { Runtime.trap("Artwork not found") };
+      case (null) {
+        Runtime.trap(
+          "Artwork not found with id " # (id).toText() #
+          ". There is no artwork for the id provided, please make sure to use the correct id or create a new artwork instead."
+        );
+      };
       case (?existing) {
         let updated : Artwork = {
           id = existing.id;
           title;
           description;
-          image = if (imageBytes.size() > 0) { imageBytes } else {
-            existing.image;
-          };
-          imageFormat = if (imageBytes.size() > 0) { format } else {
-            existing.imageFormat;
-          };
-          imageFileName = if (imageBytes.size() > 0) { fileName } else {
-            existing.imageFileName;
-          };
+          image = if (imageBytes.size() > 0) { imageBytes } else { existing.image };
+          imageFormat = if (imageBytes.size() > 0) { format } else { existing.imageFormat };
+          imageFileName = if (imageBytes.size() > 0) { fileName } else { existing.imageFileName };
         };
         artworks.add(id, updated);
       };
@@ -229,16 +232,15 @@ actor {
     artworks.remove(id);
   };
 
-  // Public read - no authentication required.
   public query func getArtwork(id : Nat) : async ?Artwork {
     artworks.get(id);
   };
 
   public query func getAllArtworks() : async [Artwork] {
-    artworks.toArray().map(func((_, v)) { v });
+    artworks.values().toArray();
   };
 
-  // ── Logo, Cover Image, Artist Portrait ──────────────────────────
+  // ── Logo, Cover Image, Artist Portrait ──
   include MixinStorage();
 
   public shared ({ caller }) func uploadLogo(blob : Storage.ExternalBlob) : async () {
@@ -291,7 +293,7 @@ actor {
     mediaContacts;
   };
 
-  // ── Role query (frontend role check) ──────────────
+  // ── Role query (frontend role check) ──
   public query ({ caller }) func getMyRole() : async Text {
     let role = AccessControl.getUserRole(accessControlState, caller);
     switch (role) {

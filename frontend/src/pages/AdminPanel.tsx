@@ -1,26 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useActor } from '../hooks/useActor';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
-  LogOut,
   Upload,
-  Trash2,
-  Edit3,
   Image,
-  Share2,
+  Phone,
+  Instagram,
+  LogOut,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
   Loader2,
-  Shield,
-  CheckCircle2,
   AlertCircle,
+  CheckCircle,
 } from 'lucide-react';
+import { useActor } from '../hooks/useActor';
+import { validateSession, clearSession } from '../lib/adminAuth';
 import {
   useGetAllArtworks,
+  useGetLogo,
+  useGetCoverImage,
+  useGetArtistPortrait,
+  useGetMediaContacts,
   useUploadArtwork,
   useEditArtwork,
   useDeleteArtwork,
@@ -28,245 +30,147 @@ import {
   useUploadCoverImage,
   useUploadArtistPortrait,
   useUpdateMediaContacts,
-  useMediaContacts,
 } from '../hooks/useQueries';
-import { isAdminSessionValid, clearAdminSession, getAdminCredentials } from '../lib/adminAuth';
+import { ExternalBlob } from '../backend';
+import { toast } from 'sonner';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ArtworkFormData {
+// ── Types ──
+interface ArtworkForm {
   title: string;
   description: string;
   imageFile: File | null;
+  imagePreview: string | null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const emptyForm = (): ArtworkForm => ({
+  title: '',
+  description: '',
+  imageFile: null,
+  imagePreview: null,
+});
 
+// ── Helpers ──
 function fileToUint8Array(file: File): Promise<Uint8Array<ArrayBuffer>> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) =>
-      resolve(new Uint8Array(e.target?.result as ArrayBuffer) as Uint8Array<ArrayBuffer>);
+    reader.onload = (e) => {
+      const result = e.target!.result as ArrayBuffer;
+      resolve(new Uint8Array(result) as Uint8Array<ArrayBuffer>);
+    };
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);
   });
 }
 
-function isUnauthorizedError(err: unknown): boolean {
-  const msg = (err as any)?.message || String(err);
-  return msg.toLowerCase().includes('unauthorized') || msg.toLowerCase().includes('only admins');
+function getErrorMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes('Unauthorized') || msg.includes('not authorized') || msg.includes('Invalid admin')) {
+    return 'Authorization failed. Please log out and log in again.';
+  }
+  return msg.length > 120 ? msg.slice(0, 120) + '…' : msg;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ── Sub-components ──
 
-function ArtworkCard({
-  artwork,
-  onEdit,
-  onDelete,
-  isDeleting,
-}: {
-  artwork: any;
-  onEdit: (artwork: any) => void;
-  onDelete: (id: bigint) => void;
-  isDeleting: boolean;
-}) {
-  const imageUrl = React.useMemo(() => {
-    if (!artwork.image || artwork.image.length === 0) return null;
-    const blob = new Blob([new Uint8Array(artwork.image)], {
-      type: artwork.imageFormat || 'image/jpeg',
-    });
-    return URL.createObjectURL(blob);
-  }, [artwork.image, artwork.imageFormat]);
-
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="bg-white border border-warm-border rounded-xl overflow-hidden shadow-sm hover:shadow-warm transition-shadow">
-      {imageUrl ? (
-        <img src={imageUrl} alt={artwork.title} className="w-full h-40 object-cover" />
-      ) : (
-        <div className="w-full h-40 bg-cream flex items-center justify-center">
-          <Image className="w-8 h-8 text-charcoal-light" />
-        </div>
-      )}
-      <div className="p-4">
-        <h3 className="font-semibold text-charcoal text-sm truncate">{artwork.title}</h3>
-        <p className="text-charcoal-medium text-xs mt-1 line-clamp-2">{artwork.description}</p>
-        <div className="flex gap-2 mt-3">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onEdit(artwork)}
-            className="flex-1 text-charcoal border-warm-border hover:bg-cream hover:text-terracotta"
-          >
-            <Edit3 className="w-3 h-3 mr-1" /> Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => onDelete(artwork.id)}
-            disabled={isDeleting}
-            className="flex-1"
-          >
-            {isDeleting ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <>
-                <Trash2 className="w-3 h-3 mr-1" /> Delete
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+    <div className="mb-6">
+      <h2 className="font-playfair text-2xl font-bold text-charcoal">{title}</h2>
+      {subtitle && <p className="text-charcoal/60 text-sm mt-1">{subtitle}</p>}
     </div>
   );
 }
 
 function ImageUploadCard({
-  title,
-  description,
-  progress,
+  label,
+  currentUrl,
   onUpload,
-  isPending,
+  isLoading,
+  accept = 'image/*',
 }: {
-  title: string;
-  description: string;
-  progress: number;
+  label: string;
+  currentUrl?: string | null;
   onUpload: (file: File) => void;
-  isPending: boolean;
+  isLoading: boolean;
+  accept?: string;
 }) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onUpload(file);
-  };
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   return (
-    <div className="bg-white border border-warm-border rounded-2xl p-6 shadow-sm">
-      <h3 className="font-display text-base font-bold text-charcoal mb-1">{title}</h3>
-      <p className="text-charcoal-medium text-sm mb-4">{description}</p>
-      <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-warm-border rounded-xl cursor-pointer hover:border-terracotta hover:bg-terracotta/5 transition-colors">
-        {isPending ? (
-          <div className="text-center p-4">
-            <Loader2 className="w-8 h-8 text-terracotta mx-auto mb-2 animate-spin" />
-            <p className="text-sm text-charcoal-medium font-medium">
-              Uploading… {progress > 0 ? `${progress}%` : ''}
-            </p>
-          </div>
-        ) : (
-          <div className="text-center p-4">
-            <Upload className="w-8 h-8 text-charcoal-light mx-auto mb-2" />
-            <p className="text-sm text-charcoal-medium font-medium">Click to upload</p>
-            <p className="text-xs text-charcoal-light mt-1">PNG, JPG, WEBP</p>
-          </div>
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleChange}
-          disabled={isPending}
+    <div className="bg-white rounded-xl border border-cream-dark p-5 shadow-warm-sm">
+      <p className="font-medium text-charcoal mb-3">{label}</p>
+      {currentUrl && (
+        <img
+          src={currentUrl}
+          alt={label}
+          className="w-full h-40 object-cover rounded-lg mb-3 border border-cream-dark"
         />
-      </label>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onUpload(file);
+          e.target.value = '';
+        }}
+      />
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={isLoading}
+        className="w-full flex items-center justify-center gap-2 bg-terracotta/10 hover:bg-terracotta/20 text-terracotta border border-terracotta/30 rounded-lg py-2 text-sm font-medium transition-colors disabled:opacity-50"
+      >
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        {isLoading ? 'Uploading…' : 'Choose & Upload'}
+      </button>
     </div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ── Main Component ──
 
 export default function AdminPanel() {
   const navigate = useNavigate();
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor: _actor } = useActor();
 
-  // Auth guard — check local session
-  const [authChecked, setAuthChecked] = useState(false);
-
-  // Backend auth state — tracks whether loginWithPassword has been called
-  const [backendAuthReady, setBackendAuthReady] = useState(false);
-  const [backendAuthError, setBackendAuthError] = useState<string | null>(null);
-  const backendAuthAttempted = useRef(false);
-
+  // Guard: require valid session
   useEffect(() => {
-    if (!isAdminSessionValid()) {
+    if (!validateSession()) {
       navigate({ to: '/admin-login' });
-    } else {
-      setAuthChecked(true);
     }
-  }, []);
+  }, [navigate]);
 
-  // Once the actor is ready, call loginWithPassword to authenticate with the backend
-  useEffect(() => {
-    if (!actor || actorFetching || !authChecked || backendAuthAttempted.current) return;
-
-    backendAuthAttempted.current = true;
-    const { username, password } = getAdminCredentials();
-
-    actor
-      .loginWithPassword(username, password)
-      .then(() => {
-        setBackendAuthReady(true);
-        setBackendAuthError(null);
-      })
-      .catch((err: unknown) => {
-        const msg = (err as any)?.message || String(err);
-        setBackendAuthError(`Backend authentication failed: ${msg}`);
-        setBackendAuthReady(false);
-      });
-  }, [actor, actorFetching, authChecked]);
-
-  /**
-   * Re-authenticates with the backend if a mutation fails with an Unauthorized error.
-   * Returns true if re-auth succeeded.
-   */
-  const reAuthIfNeeded = async (err: unknown): Promise<boolean> => {
-    if (!isUnauthorizedError(err) || !actor) return false;
-    try {
-      const { username, password } = getAdminCredentials();
-      await actor.loginWithPassword(username, password);
-      setBackendAuthReady(true);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleLogout = () => {
-    if (actor) {
-      actor.logout().catch(() => {/* ignore */});
-    }
-    clearAdminSession();
-    navigate({ to: '/admin-login' });
-  };
-
-  // ── Data hooks ──────────────────────────────────────────────────
+  // Data queries
   const { data: artworks = [], isLoading: artworksLoading } = useGetAllArtworks();
-  const { data: mediaContacts, isLoading: contactsLoading } = useMediaContacts();
+  const { data: logoBlob } = useGetLogo();
+  const { data: coverBlob } = useGetCoverImage();
+  const { data: portraitBlob } = useGetArtistPortrait();
+  const { data: mediaContacts } = useGetMediaContacts();
 
-  // ── Mutation hooks ──────────────────────────────────────────────
-  const uploadArtwork = useUploadArtwork();
-  const editArtwork = useEditArtwork();
-  const deleteArtwork = useDeleteArtwork();
-  const uploadLogo = useUploadLogo();
-  const uploadCoverImage = useUploadCoverImage();
-  const uploadArtistPortrait = useUploadArtistPortrait();
-  const updateMediaContacts = useUpdateMediaContacts();
+  // Mutations
+  const uploadArtworkMutation = useUploadArtwork();
+  const editArtworkMutation = useEditArtwork();
+  const deleteArtworkMutation = useDeleteArtwork();
+  const uploadLogoMutation = useUploadLogo();
+  const uploadCoverMutation = useUploadCoverImage();
+  const uploadPortraitMutation = useUploadArtistPortrait();
+  const updateContactsMutation = useUpdateMediaContacts();
 
-  // ── Artwork form state ──────────────────────────────────────────
-  const [artworkForm, setArtworkForm] = useState<ArtworkFormData>({
-    title: '',
-    description: '',
-    imageFile: null,
-  });
-  const [editingArtwork, setEditingArtwork] = useState<any | null>(null);
-  const [artworkPreview, setArtworkPreview] = useState<string | null>(null);
+  // Artwork form state
+  const [artworkForm, setArtworkForm] = useState<ArtworkForm>(emptyForm());
+  const [editingId, setEditingId] = useState<bigint | null>(null);
+  const [showArtworkForm, setShowArtworkForm] = useState(false);
 
-  // ── Media contacts state ────────────────────────────────────────
+  // Media contacts state
   const [whatsapp, setWhatsapp] = useState('');
   const [instagram, setInstagram] = useState('');
 
-  // ── Image upload progress ───────────────────────────────────────
-  const [logoProgress, setLogoProgress] = useState(0);
-  const [coverProgress, setCoverProgress] = useState(0);
-  const [portraitProgress, setPortraitProgress] = useState(0);
+  // Active tab
+  const [activeTab, setActiveTab] = useState<'artworks' | 'media' | 'contacts'>('artworks');
 
-  // Populate media contacts form
+  // Populate contacts form when data loads
   useEffect(() => {
     if (mediaContacts) {
       setWhatsapp(mediaContacts.whatsappNumber);
@@ -274,37 +178,31 @@ export default function AdminPanel() {
     }
   }, [mediaContacts]);
 
-  // ── Artwork handlers ────────────────────────────────────────────
+  const handleLogout = () => {
+    clearSession();
+    navigate({ to: '/admin-login' });
+  };
+
+  // ── Artwork handlers ──
 
   const handleArtworkImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setArtworkForm((prev) => ({ ...prev, imageFile: file }));
-    const url = URL.createObjectURL(file);
-    setArtworkPreview(url);
+    const preview = URL.createObjectURL(file);
+    setArtworkForm((f) => ({ ...f, imageFile: file, imagePreview: preview }));
   };
 
-  const handleStartEdit = (artwork: any) => {
-    setEditingArtwork(artwork);
-    setArtworkForm({ title: artwork.title, description: artwork.description, imageFile: null });
-    setArtworkPreview(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingArtwork(null);
-    setArtworkForm({ title: '', description: '', imageFile: null });
-    setArtworkPreview(null);
-  };
-
-  const handleSaveArtwork = async () => {
+  const handleArtworkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!artworkForm.title.trim()) {
-      toast.error('Please enter a title for the artwork.');
+      toast.error('Please enter a title.');
       return;
     }
 
     try {
-      if (editingArtwork) {
-        let imageBytes = new Uint8Array(0) as Uint8Array<ArrayBuffer>;
+      if (editingId !== null) {
+        // Edit existing
+        let imageBytes = new Uint8Array(new ArrayBuffer(0)) as Uint8Array<ArrayBuffer>;
         let format: string | null = null;
         let fileName: string | null = null;
         if (artworkForm.imageFile) {
@@ -312,522 +210,429 @@ export default function AdminPanel() {
           format = artworkForm.imageFile.type || null;
           fileName = artworkForm.imageFile.name || null;
         }
-        const params = {
-          id: editingArtwork.id,
+        await editArtworkMutation.mutateAsync({
+          id: editingId,
           title: artworkForm.title,
           description: artworkForm.description,
           imageBytes,
           format,
           fileName,
-        };
-        try {
-          await editArtwork.mutateAsync(params);
-        } catch (err) {
-          if (await reAuthIfNeeded(err)) {
-            await editArtwork.mutateAsync(params);
-          } else {
-            throw err;
-          }
-        }
+        });
         toast.success('Artwork updated successfully!');
-        handleCancelEdit();
       } else {
+        // New artwork
         if (!artworkForm.imageFile) {
-          toast.error('Please select an image for the artwork.');
+          toast.error('Please select an image.');
           return;
         }
         const imageBytes = await fileToUint8Array(artworkForm.imageFile);
-        const params = {
+        await uploadArtworkMutation.mutateAsync({
           title: artworkForm.title,
           description: artworkForm.description,
           imageBytes,
           format: artworkForm.imageFile.type || null,
           fileName: artworkForm.imageFile.name || null,
-        };
-        try {
-          await uploadArtwork.mutateAsync(params);
-        } catch (err) {
-          if (await reAuthIfNeeded(err)) {
-            await uploadArtwork.mutateAsync(params);
-          } else {
-            throw err;
-          }
-        }
+        });
         toast.success('Artwork uploaded successfully!');
-        setArtworkForm({ title: '', description: '', imageFile: null });
-        setArtworkPreview(null);
       }
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save artwork.');
+      setArtworkForm(emptyForm());
+      setEditingId(null);
+      setShowArtworkForm(false);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
+  };
+
+  const handleEditArtwork = (artwork: { id: bigint; title: string; description: string }) => {
+    setEditingId(artwork.id);
+    setArtworkForm({
+      title: artwork.title,
+      description: artwork.description,
+      imageFile: null,
+      imagePreview: null,
+    });
+    setShowArtworkForm(true);
   };
 
   const handleDeleteArtwork = async (id: bigint) => {
+    if (!confirm('Delete this artwork? This cannot be undone.')) return;
     try {
-      try {
-        await deleteArtwork.mutateAsync(id);
-      } catch (err) {
-        if (await reAuthIfNeeded(err)) {
-          await deleteArtwork.mutateAsync(id);
-        } else {
-          throw err;
-        }
-      }
+      await deleteArtworkMutation.mutateAsync(id);
       toast.success('Artwork deleted.');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to delete artwork.');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
   };
 
-  // ── Image upload handlers ───────────────────────────────────────
+  // ── Media upload handlers ──
 
-  const handleImageUpload = async (
-    file: File,
-    mutate: (params: { bytes: Uint8Array<ArrayBuffer>; onProgress?: (pct: number) => void }) => Promise<void>,
-    setProgress: (p: number) => void,
-    label: string
-  ) => {
+  const handleLogoUpload = async (file: File) => {
     try {
       const bytes = await fileToUint8Array(file);
-      const params = {
-        bytes,
-        onProgress: (pct: number) => setProgress(pct),
-      };
-      try {
-        await mutate(params);
-      } catch (err) {
-        if (await reAuthIfNeeded(err)) {
-          await mutate(params);
-        } else {
-          throw err;
-        }
-      }
-      setProgress(0);
-      toast.success(`${label} uploaded successfully!`);
-    } catch (err: any) {
-      setProgress(0);
-      toast.error(err?.message || `Failed to upload ${label}.`);
+      const blob = ExternalBlob.fromBytes(bytes);
+      await uploadLogoMutation.mutateAsync(blob);
+      toast.success('Logo updated!');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
   };
 
-  // ── Media contacts handler ──────────────────────────────────────
-
-  const handleSaveMediaContacts = async () => {
-    const params = {
-      whatsappNumber: whatsapp,
-      instagramProfile: instagram,
-    };
+  const handleCoverUpload = async (file: File) => {
     try {
-      try {
-        await updateMediaContacts.mutateAsync(params);
-      } catch (err) {
-        if (await reAuthIfNeeded(err)) {
-          await updateMediaContacts.mutateAsync(params);
-        } else {
-          throw err;
-        }
-      }
-      toast.success('Social media links saved successfully!');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save social media links.');
+      const bytes = await fileToUint8Array(file);
+      const blob = ExternalBlob.fromBytes(bytes);
+      await uploadCoverMutation.mutateAsync(blob);
+      toast.success('Cover image updated!');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
   };
 
-  // ── Loading / auth guard ────────────────────────────────────────
+  const handlePortraitUpload = async (file: File) => {
+    try {
+      const bytes = await fileToUint8Array(file);
+      const blob = ExternalBlob.fromBytes(bytes);
+      await uploadPortraitMutation.mutateAsync(blob);
+      toast.success('Artist portrait updated!');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
 
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-terracotta mx-auto mb-4" />
-          <p className="text-charcoal-medium font-medium">Verifying admin access…</p>
-        </div>
-      </div>
-    );
-  }
+  // ── Contacts handler ──
 
-  // Show loading while actor is initializing or backend auth is in progress
-  if (actorFetching || (!backendAuthReady && !backendAuthError)) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-terracotta mx-auto mb-4" />
-          <p className="text-charcoal-medium font-medium">Connecting to backend…</p>
-        </div>
-      </div>
-    );
-  }
+  const handleContactsSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateContactsMutation.mutateAsync({
+        whatsappNumber: whatsapp,
+        instagramProfile: instagram,
+      });
+      toast.success('Contact details saved!');
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
 
-  // ── Render ──────────────────────────────────────────────────────
+  const isArtworkMutating =
+    uploadArtworkMutation.isPending ||
+    editArtworkMutation.isPending ||
+    deleteArtworkMutation.isPending;
+
+  const tabs = [
+    { id: 'artworks' as const, label: 'Artworks', icon: Image },
+    { id: 'media' as const, label: 'Site Media', icon: Upload },
+    { id: 'contacts' as const, label: 'Contacts', icon: Phone },
+  ];
 
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
-      <header className="bg-white border-b border-warm-border shadow-sm sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-terracotta flex items-center justify-center">
-              <Shield className="w-5 h-5 text-cream" />
-            </div>
-            <div>
-              <h1 className="font-display text-xl font-bold text-charcoal">Admin Panel</h1>
-              <p className="text-xs text-charcoal-medium">Portfolio Management</p>
-            </div>
+      <header className="bg-charcoal text-cream shadow-warm-md sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="font-playfair text-xl font-bold">Khudrang Kalakaar</h1>
+            <p className="text-cream/60 text-xs">Admin Panel</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-charcoal-medium bg-green-50 border border-green-200 rounded-full px-3 py-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-              <span className="text-green-700 font-medium">kumawatdeepak2004@gmail.com</span>
-            </div>
-            <a
-              href="/"
-              className="text-sm text-charcoal-medium hover:text-terracotta transition-colors hidden sm:block font-medium"
-            >
-              View Site
-            </a>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="border-warm-border text-charcoal font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-cream/70 hover:text-cream transition-colors text-sm"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {/* Backend auth error banner */}
-        {backendAuthError && (
-          <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-red-700 text-sm font-semibold">Backend Authentication Error</p>
-              <p className="text-red-600 text-xs mt-0.5">{backendAuthError}</p>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Tabs */}
+        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-warm-sm border border-cream-dark mb-8 w-fit">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === id
+                  ? 'bg-terracotta text-cream shadow-warm-sm'
+                  : 'text-charcoal/60 hover:text-charcoal hover:bg-cream/60'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Artworks Tab ── */}
+        {activeTab === 'artworks' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <SectionHeader
+                title="Artwork Gallery"
+                subtitle="Manage your portfolio artworks"
+              />
               <button
-                className="mt-2 text-xs text-red-700 underline font-medium"
                 onClick={() => {
-                  backendAuthAttempted.current = false;
-                  setBackendAuthError(null);
-                  setBackendAuthReady(false);
-                  if (actor) {
-                    const { username, password } = getAdminCredentials();
-                    actor
-                      .loginWithPassword(username, password)
-                      .then(() => {
-                        setBackendAuthReady(true);
-                        setBackendAuthError(null);
-                      })
-                      .catch((err: unknown) => {
-                        const msg = (err as any)?.message || String(err);
-                        setBackendAuthError(`Backend authentication failed: ${msg}`);
-                      });
-                  }
+                  setArtworkForm(emptyForm());
+                  setEditingId(null);
+                  setShowArtworkForm(true);
                 }}
+                className="flex items-center gap-2 bg-terracotta text-cream px-4 py-2 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors shadow-warm-sm"
               >
-                Retry authentication
+                <Plus className="w-4 h-4" />
+                Add Artwork
               </button>
+            </div>
+
+            {/* Artwork Form */}
+            {showArtworkForm && (
+              <div className="bg-white rounded-xl border border-cream-dark p-6 mb-6 shadow-warm-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-playfair text-lg font-semibold text-charcoal">
+                    {editingId !== null ? 'Edit Artwork' : 'Add New Artwork'}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setShowArtworkForm(false);
+                      setArtworkForm(emptyForm());
+                      setEditingId(null);
+                    }}
+                    className="text-charcoal/40 hover:text-charcoal transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <form onSubmit={handleArtworkSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal/80 mb-1">Title *</label>
+                    <input
+                      type="text"
+                      value={artworkForm.title}
+                      onChange={(e) => setArtworkForm((f) => ({ ...f, title: e.target.value }))}
+                      placeholder="Artwork title"
+                      className="w-full px-3 py-2 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal/80 mb-1">Description</label>
+                    <textarea
+                      value={artworkForm.description}
+                      onChange={(e) => setArtworkForm((f) => ({ ...f, description: e.target.value }))}
+                      placeholder="Describe this artwork…"
+                      rows={3}
+                      className="w-full px-3 py-2 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal/80 mb-1">
+                      Image {editingId === null ? '*' : '(leave blank to keep existing)'}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleArtworkImageChange}
+                      className="w-full text-sm text-charcoal/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-terracotta/10 file:text-terracotta file:font-medium hover:file:bg-terracotta/20 cursor-pointer"
+                    />
+                    {artworkForm.imagePreview && (
+                      <img
+                        src={artworkForm.imagePreview}
+                        alt="Preview"
+                        className="mt-2 h-32 w-auto rounded-lg border border-cream-dark object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isArtworkMutating}
+                      className="flex items-center gap-2 bg-terracotta text-cream px-5 py-2 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-50 shadow-warm-sm"
+                    >
+                      {isArtworkMutating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4" />
+                      )}
+                      {isArtworkMutating ? 'Saving…' : 'Save Artwork'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowArtworkForm(false);
+                        setArtworkForm(emptyForm());
+                        setEditingId(null);
+                      }}
+                      className="px-5 py-2 rounded-lg text-sm font-medium text-charcoal/60 hover:text-charcoal border border-cream-dark hover:bg-cream/60 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Artworks Grid */}
+            {artworksLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-terracotta" />
+              </div>
+            ) : artworks.length === 0 ? (
+              <div className="text-center py-16 text-charcoal/40">
+                <Image className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>No artworks yet. Add your first artwork!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {artworks.map((artwork) => {
+                  const imgBlob = new Blob([new Uint8Array(artwork.image)], {
+                    type: artwork.imageFormat || 'image/jpeg',
+                  });
+                  const imageUrl = URL.createObjectURL(imgBlob);
+                  return (
+                    <div
+                      key={artwork.id.toString()}
+                      className="bg-white rounded-xl border border-cream-dark overflow-hidden shadow-warm-sm group"
+                    >
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={artwork.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-playfair font-semibold text-charcoal truncate">{artwork.title}</h3>
+                        {artwork.description && (
+                          <p className="text-charcoal/55 text-sm mt-1 line-clamp-2">{artwork.description}</p>
+                        )}
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => handleEditArtwork(artwork)}
+                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gold/10 text-charcoal border border-gold/20 hover:bg-gold/20 transition-colors font-medium"
+                          >
+                            <Edit className="w-3 h-3" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteArtwork(artwork.id)}
+                            disabled={deleteArtworkMutation.isPending}
+                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors font-medium disabled:opacity-50"
+                          >
+                            {deleteArtworkMutation.isPending ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Site Media Tab ── */}
+        {activeTab === 'media' && (
+          <div>
+            <SectionHeader
+              title="Site Media"
+              subtitle="Update logo, cover image, and artist portrait"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <ImageUploadCard
+                label="Logo"
+                currentUrl={logoBlob ? logoBlob.getDirectURL() : null}
+                onUpload={handleLogoUpload}
+                isLoading={uploadLogoMutation.isPending}
+              />
+              <ImageUploadCard
+                label="Cover / Hero Image"
+                currentUrl={coverBlob ? coverBlob.getDirectURL() : null}
+                onUpload={handleCoverUpload}
+                isLoading={uploadCoverMutation.isPending}
+              />
+              <ImageUploadCard
+                label="Artist Portrait"
+                currentUrl={portraitBlob ? portraitBlob.getDirectURL() : null}
+                onUpload={handlePortraitUpload}
+                isLoading={uploadPortraitMutation.isPending}
+              />
             </div>
           </div>
         )}
 
-        <Tabs defaultValue="gallery" className="space-y-6">
-          <TabsList className="bg-white border border-warm-border rounded-xl p-1 shadow-sm flex-wrap h-auto gap-1">
-            <TabsTrigger
-              value="gallery"
-              className="data-[state=active]:bg-terracotta data-[state=active]:text-cream text-charcoal rounded-lg font-medium"
-            >
-              <Image className="w-4 h-4 mr-2" />
-              Gallery
-            </TabsTrigger>
-            <TabsTrigger
-              value="site-images"
-              className="data-[state=active]:bg-terracotta data-[state=active]:text-cream text-charcoal rounded-lg font-medium"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Site Images
-            </TabsTrigger>
-            <TabsTrigger
-              value="social-links"
-              className="data-[state=active]:bg-terracotta data-[state=active]:text-cream text-charcoal rounded-lg font-medium"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Social Links
-            </TabsTrigger>
-          </TabsList>
-
-          {/* ── Gallery Tab ── */}
-          <TabsContent value="gallery" className="space-y-6">
-            {/* Add / Edit Form */}
-            <div className="bg-white border border-warm-border rounded-2xl p-6 shadow-sm">
-              <h2 className="font-display text-lg font-bold text-charcoal mb-5">
-                {editingArtwork ? 'Edit Artwork' : 'Add New Artwork'}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="artwork-title" className="text-charcoal font-semibold text-sm">
-                      Title *
-                    </Label>
-                    <Input
-                      id="artwork-title"
-                      value={artworkForm.title}
-                      onChange={(e) =>
-                        setArtworkForm((prev) => ({ ...prev, title: e.target.value }))
-                      }
-                      placeholder="Artwork title"
-                      className="mt-1 border-warm-border text-charcoal placeholder:text-charcoal-light focus:border-terracotta bg-white"
-                    />
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="artwork-description"
-                      className="text-charcoal font-semibold text-sm"
-                    >
-                      Description
-                    </Label>
-                    <Textarea
-                      id="artwork-description"
-                      value={artworkForm.description}
-                      onChange={(e) =>
-                        setArtworkForm((prev) => ({ ...prev, description: e.target.value }))
-                      }
-                      placeholder="Describe this artwork…"
-                      rows={4}
-                      className="mt-1 border-warm-border text-charcoal placeholder:text-charcoal-light focus:border-terracotta resize-none bg-white"
-                    />
-                  </div>
+        {/* ── Contacts Tab ── */}
+        {activeTab === 'contacts' && (
+          <div>
+            <SectionHeader
+              title="Social & Contact Details"
+              subtitle="Update WhatsApp and Instagram information"
+            />
+            <div className="bg-white rounded-xl border border-cream-dark p-6 shadow-warm-sm max-w-lg">
+              <form onSubmit={handleContactsSave} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-charcoal/80 mb-1.5">
+                    <span className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-terracotta" />
+                      WhatsApp Number
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3 py-2.5 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
+                  />
                 </div>
                 <div>
-                  <Label className="text-charcoal font-semibold text-sm">
-                    {editingArtwork ? 'Replace Image (optional)' : 'Image *'}
-                  </Label>
-                  <label className="mt-1 flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-warm-border rounded-xl cursor-pointer hover:border-terracotta hover:bg-terracotta/5 transition-colors">
-                    {artworkPreview ? (
-                      <img
-                        src={artworkPreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-xl"
-                      />
-                    ) : (
-                      <div className="text-center p-4">
-                        <Upload className="w-8 h-8 text-charcoal-light mx-auto mb-2" />
-                        <p className="text-sm text-charcoal-medium font-medium">Click to upload image</p>
-                        <p className="text-xs text-charcoal-light mt-1">PNG, JPG, WEBP</p>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleArtworkImageChange}
-                    />
-                  </label>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-5">
-                <Button
-                  onClick={handleSaveArtwork}
-                  disabled={
-                    uploadArtwork.isPending ||
-                    editArtwork.isPending ||
-                    !backendAuthReady
-                  }
-                  className="bg-terracotta hover:bg-terracotta/90 text-cream font-semibold disabled:opacity-60"
-                >
-                  {uploadArtwork.isPending || editArtwork.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Saving…
-                    </>
-                  ) : editingArtwork ? (
-                    'Update Artwork'
-                  ) : (
-                    'Upload Artwork'
-                  )}
-                </Button>
-                {editingArtwork && (
-                  <Button
-                    variant="outline"
-                    onClick={handleCancelEdit}
-                    className="border-warm-border text-charcoal hover:bg-cream"
-                  >
-                    Cancel
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Artwork Grid */}
-            <div className="bg-white border border-warm-border rounded-2xl p-6 shadow-sm">
-              <h2 className="font-display text-lg font-bold text-charcoal mb-5">
-                Artwork Gallery
-                <span className="ml-2 text-sm font-normal text-charcoal-medium">
-                  ({artworks.length} items)
-                </span>
-              </h2>
-              {artworksLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="rounded-xl overflow-hidden">
-                      <div className="w-full h-40 bg-cream animate-pulse" />
-                      <div className="p-4 space-y-2">
-                        <div className="h-4 bg-cream rounded animate-pulse" />
-                        <div className="h-3 bg-cream rounded w-3/4 animate-pulse" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : artworks.length === 0 ? (
-                <div className="text-center py-16">
-                  <Image className="w-12 h-12 text-charcoal-light mx-auto mb-3" />
-                  <p className="text-charcoal-medium font-medium">No artworks yet</p>
-                  <p className="text-charcoal-light text-sm mt-1">
-                    Add your first artwork using the form above.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {artworks.map((artwork) => (
-                    <ArtworkCard
-                      key={String(artwork.id)}
-                      artwork={artwork}
-                      onEdit={handleStartEdit}
-                      onDelete={handleDeleteArtwork}
-                      isDeleting={deleteArtwork.isPending}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* ── Site Images Tab ── */}
-          <TabsContent value="site-images" className="space-y-6">
-            <div className="bg-white border border-warm-border rounded-2xl p-6 shadow-sm">
-              <h2 className="font-display text-lg font-bold text-charcoal mb-1">Site Images</h2>
-              <p className="text-charcoal-medium text-sm mb-6">
-                Upload images that appear across your portfolio website.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ImageUploadCard
-                  title="Logo"
-                  description="Your brand logo displayed in the navigation and footer."
-                  progress={logoProgress}
-                  isPending={uploadLogo.isPending}
-                  onUpload={(file) =>
-                    handleImageUpload(
-                      file,
-                      uploadLogo.mutateAsync,
-                      setLogoProgress,
-                      'Logo'
-                    )
-                  }
-                />
-                <ImageUploadCard
-                  title="Cover / Hero Image"
-                  description="The full-screen background image on the homepage hero section."
-                  progress={coverProgress}
-                  isPending={uploadCoverImage.isPending}
-                  onUpload={(file) =>
-                    handleImageUpload(
-                      file,
-                      uploadCoverImage.mutateAsync,
-                      setCoverProgress,
-                      'Cover image'
-                    )
-                  }
-                />
-                <ImageUploadCard
-                  title="Artist Portrait"
-                  description="Your professional photo shown in the About section."
-                  progress={portraitProgress}
-                  isPending={uploadArtistPortrait.isPending}
-                  onUpload={(file) =>
-                    handleImageUpload(
-                      file,
-                      uploadArtistPortrait.mutateAsync,
-                      setPortraitProgress,
-                      'Artist portrait'
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* ── Social Links Tab ── */}
-          <TabsContent value="social-links" className="space-y-6">
-            <div className="bg-white border border-warm-border rounded-2xl p-6 shadow-sm">
-              <h2 className="font-display text-lg font-bold text-charcoal mb-1">
-                Social Media &amp; Contact
-              </h2>
-              <p className="text-charcoal-medium text-sm mb-6">
-                Update your WhatsApp number and Instagram profile link.
-              </p>
-              {contactsLoading ? (
-                <div className="space-y-4">
-                  <div className="h-10 bg-cream rounded-lg animate-pulse" />
-                  <div className="h-10 bg-cream rounded-lg animate-pulse" />
-                </div>
-              ) : (
-                <div className="space-y-5 max-w-lg">
-                  <div>
-                    <Label
-                      htmlFor="whatsapp"
-                      className="text-charcoal font-semibold text-sm"
-                    >
-                      WhatsApp Number
-                    </Label>
-                    <Input
-                      id="whatsapp"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder="+91 98765 43210"
-                      className="mt-1 border-warm-border text-charcoal placeholder:text-charcoal-light focus:border-terracotta bg-white"
-                    />
-                    <p className="text-xs text-charcoal-light mt-1">
-                      Include country code (e.g., +91 for India)
-                    </p>
-                  </div>
-                  <div>
-                    <Label
-                      htmlFor="instagram"
-                      className="text-charcoal font-semibold text-sm"
-                    >
+                  <label className="block text-sm font-medium text-charcoal/80 mb-1.5">
+                    <span className="flex items-center gap-2">
+                      <Instagram className="w-4 h-4 text-terracotta" />
                       Instagram Profile URL
-                    </Label>
-                    <Input
-                      id="instagram"
-                      value={instagram}
-                      onChange={(e) => setInstagram(e.target.value)}
-                      placeholder="https://www.instagram.com/yourhandle"
-                      className="mt-1 border-warm-border text-charcoal placeholder:text-charcoal-light focus:border-terracotta bg-white"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleSaveMediaContacts}
-                    disabled={updateMediaContacts.isPending || !backendAuthReady}
-                    className="bg-terracotta hover:bg-terracotta/90 text-cream font-semibold disabled:opacity-60"
-                  >
-                    {updateMediaContacts.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving…
-                      </>
-                    ) : (
-                      'Save Social Links'
-                    )}
-                  </Button>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    placeholder="https://instagram.com/yourprofile"
+                    className="w-full px-3 py-2.5 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
+                  />
                 </div>
-              )}
+                <button
+                  type="submit"
+                  disabled={updateContactsMutation.isPending}
+                  className="flex items-center gap-2 bg-terracotta text-cream px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-50 shadow-warm-sm"
+                >
+                  {updateContactsMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  {updateContactsMutation.isPending ? 'Saving…' : 'Save Changes'}
+                </button>
+                {updateContactsMutation.isSuccess && (
+                  <p className="flex items-center gap-2 text-sm text-green-600">
+                    <CheckCircle className="w-4 h-4" />
+                    Saved successfully!
+                  </p>
+                )}
+                {updateContactsMutation.isError && (
+                  <p className="flex items-center gap-2 text-sm text-red-600">
+                    <AlertCircle className="w-4 h-4" />
+                    {getErrorMessage(updateContactsMutation.error)}
+                  </p>
+                )}
+              </form>
             </div>
-          </TabsContent>
-        </Tabs>
-      </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

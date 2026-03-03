@@ -1,38 +1,57 @@
 {
   "kind": "build_request",
-  "title": "Fix admin authorization error in Admin Panel",
+  "title": "Fix unauthorized admin login error — allow username/password authentication for admin panel access",
+  "projectName": "Khudrang Kalakaar Portfolio",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the 'Unauthorized: Only admins can perform this action' error that appears in the Admin Panel when logged-in admin users attempt to upload site images (logo, cover/hero image) or save social links (WhatsApp number, Instagram URL). The backend must correctly recognize the session established by the client-side adminAuth utilities and allow these mutations to proceed without returning an authorization error.",
-      "target": "both",
+      "text": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-3"
         ],
         "quotes": [
-          "Unauthorized: Only admins can perform this action"
+          "solve the error of unauthorised admin login at the back-end",
+          "Username and password details are enough to make changes and upload images in website through admin panel"
         ]
       },
       "acceptanceCriteria": [
-        "After logging in with valid admin credentials (DeepakKumawat / Kinnu*0613), uploading a logo image in the Site Images tab succeeds without showing the unauthorized error.",
-        "After logging in with valid admin credentials, uploading a cover/hero image succeeds without showing the unauthorized error.",
-        "After logging in with valid admin credentials, saving social links (WhatsApp number and Instagram URL) succeeds without showing the unauthorized error.",
-        "The unauthorized error banner does not appear in the Admin Panel for any action performed by a correctly authenticated admin session.",
-        "Unauthenticated or non-admin users still receive the unauthorized error when attempting admin actions."
+        "Calling the backend login function with the correct username and password hash returns a successful admin authorization result (not an 'Unauthorized' error).",
+        "All admin-gated backend functions (artwork upload, image upload, content edits) succeed when called after a valid username/password login without requiring an Internet Identity principal.",
+        "Incorrect credentials still return an authorization error."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "Username and password details are enough to make changes and upload images in website through admin panel"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After logging in with correct username and password on the AdminLogin page, the user is redirected to the AdminPanel without any 'Unauthorized' error.",
+        "Uploading artwork images, editing site media, and saving social/media contacts in the AdminPanel all succeed without triggering an unauthorized error.",
+        "The admin session created by username/password login is recognized by the backend for all admin operations.",
+        "If the session is expired or missing, the user is redirected to the login page."
       ]
     }
   ],
   "constraints": [
-    "Do not change the admin credentials (username: DeepakKumawat, password: Kinnu*0613).",
-    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Keep all Motoko logic in the single backend/main.mo actor."
+    "Do not remove or replace the existing username/password-based login mechanism — it must remain the sole requirement for admin access.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All Motoko logic must remain in backend/main.mo as a single actor."
   ],
   "nonGoals": [
-    "Adding new admin features beyond fixing the authorization error.",
-    "Changing the visual design or layout of the Admin Panel.",
-    "Implementing Internet Identity-based authentication."
+    "Adding Internet Identity as a requirement for admin login.",
+    "Changing the public-facing portfolio design or layout.",
+    "Adding new admin features beyond fixing existing upload and content editing functionality."
   ],
   "imageRequirements": {
     "required": [],

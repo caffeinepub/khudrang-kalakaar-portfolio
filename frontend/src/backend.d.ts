@@ -48,6 +48,7 @@ export interface backendInterface {
     getMediaContacts(): Promise<MediaContacts | null>;
     getMyRole(): Promise<string>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    initializeWithPassword(password: string): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     loginWithPassword(username: string, password: string): Promise<boolean>;
     logout(): Promise<void>;

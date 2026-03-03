@@ -1,79 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { ExternalBlob } from '../backend';
-import type { Artwork, MediaContacts, UserProfile } from '../backend';
+import { getAdminCredentials } from '../lib/adminAuth';
 
-// ── User Profile ────────────────────────────────────────────────────────────
-
-export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  const query = useQuery<UserProfile | null>({
-    queryKey: ['currentUserProfile'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getCallerUserProfile();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
+// Helper: authenticate as admin before any admin operation
+async function ensureAdminAuth(actor: NonNullable<ReturnType<typeof useActor>['actor']>): Promise<void> {
+  const { username, password } = getAdminCredentials();
+  await actor.loginWithPassword(username, password);
 }
 
-export function useSaveCallerUserProfile() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (profile: UserProfile) => {
-      if (!actor) throw new Error('Actor not available');
-      await actor.saveCallerUserProfile(profile);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-    },
-  });
-}
-
-// ── Admin Check ─────────────────────────────────────────────────────────────
-
-export function useIsCallerAdmin() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['isCallerAdmin'],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// ── Backend Login (password-based admin auth) ────────────────────────────────
-
-export function useLoginWithPassword() {
-  const { actor } = useActor();
-
-  return useMutation({
-    mutationFn: async (params: { username: string; password: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.loginWithPassword(params.username, params.password);
-    },
-  });
-}
-
-// ── Artworks ────────────────────────────────────────────────────────────────
+// ── Public queries ──
 
 export function useGetAllArtworks() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Artwork[]>({
+  return useQuery({
     queryKey: ['artworks'],
     queryFn: async () => {
       if (!actor) return [];
@@ -83,12 +24,107 @@ export function useGetAllArtworks() {
   });
 }
 
+export function useGetLogo() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['logo'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getLogo();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetCoverImage() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['coverImage'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getCoverImage();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetArtistPortrait() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['artistPortrait'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getArtistPortrait();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetMediaContacts() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['mediaContacts'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getMediaContacts();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Alias for backwards compatibility with components that import useMediaContacts
+export const useMediaContacts = useGetMediaContacts;
+
+// ── Text content stub (backend no longer exposes text content) ──
+// Returns null data so components gracefully fall back to defaults.
+
+export function useTextContent() {
+  return useQuery<{ artistName: string; tagline: string; bio: string } | null>({
+    queryKey: ['textContent'],
+    queryFn: async () => null,
+    enabled: false,
+  });
+}
+
+export function useUpdateTextContent() {
+  return useMutation({
+    mutationFn: async (_params: { artistName: string; tagline: string; bio: string }) => {
+      // no-op: backend no longer supports text content updates
+    },
+  });
+}
+
+// ── Admin: login ──
+
+export function useLoginWithPassword() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.loginWithPassword(username, password);
+    },
+  });
+}
+
+// ── Admin: artwork mutations ──
+
 export function useUploadArtwork() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
+    mutationFn: async ({
+      title,
+      description,
+      imageBytes,
+      format,
+      fileName,
+    }: {
       title: string;
       description: string;
       imageBytes: Uint8Array<ArrayBuffer>;
@@ -96,14 +132,8 @@ export function useUploadArtwork() {
       fileName: string | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      const id = await actor.uploadArtwork(
-        params.title,
-        params.description,
-        params.imageBytes,
-        params.format,
-        params.fileName
-      );
-      return id;
+      await ensureAdminAuth(actor);
+      return actor.uploadArtwork(title, description, imageBytes, format, fileName);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artworks'] });
@@ -116,7 +146,14 @@ export function useEditArtwork() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
+    mutationFn: async ({
+      id,
+      title,
+      description,
+      imageBytes,
+      format,
+      fileName,
+    }: {
       id: bigint;
       title: string;
       description: string;
@@ -125,14 +162,8 @@ export function useEditArtwork() {
       fileName: string | null;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.editArtwork(
-        params.id,
-        params.title,
-        params.description,
-        params.imageBytes,
-        params.format,
-        params.fileName
-      );
+      await ensureAdminAuth(actor);
+      return actor.editArtwork(id, title, description, imageBytes, format, fileName);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artworks'] });
@@ -147,7 +178,8 @@ export function useDeleteArtwork() {
   return useMutation({
     mutationFn: async (id: bigint) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.deleteArtwork(id);
+      await ensureAdminAuth(actor);
+      return actor.deleteArtwork(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artworks'] });
@@ -155,55 +187,21 @@ export function useDeleteArtwork() {
   });
 }
 
-// ── Logo ────────────────────────────────────────────────────────────────────
-
-export function useGetLogo() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ExternalBlob | null>({
-    queryKey: ['logo'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getLogo();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
+// ── Admin: media uploads ──
 
 export function useUploadLogo() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
-      bytes: Uint8Array<ArrayBuffer>;
-      onProgress?: (pct: number) => void;
-    }) => {
+    mutationFn: async (blob: ExternalBlob) => {
       if (!actor) throw new Error('Actor not available');
-      let blob = ExternalBlob.fromBytes(params.bytes);
-      if (params.onProgress) {
-        blob = blob.withUploadProgress(params.onProgress);
-      }
-      await actor.uploadLogo(blob);
+      await ensureAdminAuth(actor);
+      return actor.uploadLogo(blob);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['logo'] });
     },
-  });
-}
-
-// ── Cover Image ─────────────────────────────────────────────────────────────
-
-export function useGetCoverImage() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ExternalBlob | null>({
-    queryKey: ['coverImage'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getCoverImage();
-    },
-    enabled: !!actor && !isFetching,
   });
 }
 
@@ -212,35 +210,14 @@ export function useUploadCoverImage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
-      bytes: Uint8Array<ArrayBuffer>;
-      onProgress?: (pct: number) => void;
-    }) => {
+    mutationFn: async (blob: ExternalBlob) => {
       if (!actor) throw new Error('Actor not available');
-      let blob = ExternalBlob.fromBytes(params.bytes);
-      if (params.onProgress) {
-        blob = blob.withUploadProgress(params.onProgress);
-      }
-      await actor.uploadCoverImage(blob);
+      await ensureAdminAuth(actor);
+      return actor.uploadCoverImage(blob);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coverImage'] });
     },
-  });
-}
-
-// ── Artist Portrait ─────────────────────────────────────────────────────────
-
-export function useGetArtistPortrait() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ExternalBlob | null>({
-    queryKey: ['artistPortrait'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getArtistPortrait();
-    },
-    enabled: !!actor && !isFetching,
   });
 }
 
@@ -249,16 +226,10 @@ export function useUploadArtistPortrait() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
-      bytes: Uint8Array<ArrayBuffer>;
-      onProgress?: (pct: number) => void;
-    }) => {
+    mutationFn: async (blob: ExternalBlob) => {
       if (!actor) throw new Error('Actor not available');
-      let blob = ExternalBlob.fromBytes(params.bytes);
-      if (params.onProgress) {
-        blob = blob.withUploadProgress(params.onProgress);
-      }
-      await actor.uploadArtistPortrait(blob);
+      await ensureAdminAuth(actor);
+      return actor.uploadArtistPortrait(blob);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['artistPortrait'] });
@@ -266,55 +237,26 @@ export function useUploadArtistPortrait() {
   });
 }
 
-// ── Media Contacts ──────────────────────────────────────────────────────────
-
-export function useMediaContacts() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<MediaContacts | null>({
-    queryKey: ['mediaContacts'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getMediaContacts();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
+// ── Admin: media contacts ──
 
 export function useUpdateMediaContacts() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
+    mutationFn: async ({
+      whatsappNumber,
+      instagramProfile,
+    }: {
       whatsappNumber: string;
       instagramProfile: string;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateMediaContacts(params.whatsappNumber, params.instagramProfile);
+      await ensureAdminAuth(actor);
+      return actor.updateMediaContacts(whatsappNumber, instagramProfile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mediaContacts'] });
-    },
-  });
-}
-
-// ── Stub for components that still import useTextContent ────────────────────
-// The backend no longer exposes getTextContent/updateTextContent.
-// These stubs return empty/no-op values so existing callers don't break.
-
-export function useTextContent() {
-  return useQuery<{ artistName: string; tagline: string; bio: string } | null>({
-    queryKey: ['textContent'],
-    queryFn: async () => null,
-    enabled: false,
-  });
-}
-
-export function useUpdateTextContent() {
-  return useMutation({
-    mutationFn: async (_params: { artistName: string; tagline: string; bio: string }) => {
-      // no-op: backend no longer supports text content updates
     },
   });
 }
