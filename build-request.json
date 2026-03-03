@@ -1,57 +1,94 @@
 {
   "kind": "build_request",
-  "title": "Fix unauthorized admin login error — allow username/password authentication for admin panel access",
-  "projectName": "Khudrang Kalakaar Portfolio",
+  "title": "Fix Admin Panel: Contact update and image upload failures",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
-      "target": "backend",
+      "text": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "solve the error of unauthorised admin login at the back-end",
-          "Username and password details are enough to make changes and upload images in website through admin panel"
+          "Failed to update contacts.",
+          "updating the details and uploading the image in Admin panel doesn't create any issues"
         ]
       },
       "acceptanceCriteria": [
-        "Calling the backend login function with the correct username and password hash returns a successful admin authorization result (not an 'Unauthorized' error).",
-        "All admin-gated backend functions (artwork upload, image upload, content edits) succeed when called after a valid username/password login without requiring an Internet Identity principal.",
-        "Incorrect credentials still return an authorization error."
+        "Clicking 'Save Changes' on the Contacts tab successfully persists the WhatsApp number and Instagram URL to the backend.",
+        "A success toast/notification is shown when contacts are saved successfully.",
+        "If the save fails, a descriptive error message is displayed instead of a generic failure toast.",
+        "The Contacts tab does not show 'Failed to update contacts' when valid data is submitted."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
-      "target": "frontend",
+      "text": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "Username and password details are enough to make changes and upload images in website through admin panel"
+          "uploading the image in Admin panel doesn't create any issues"
         ]
       },
       "acceptanceCriteria": [
-        "After logging in with correct username and password on the AdminLogin page, the user is redirected to the AdminPanel without any 'Unauthorized' error.",
-        "Uploading artwork images, editing site media, and saving social/media contacts in the AdminPanel all succeed without triggering an unauthorized error.",
-        "The admin session created by username/password login is recognized by the backend for all admin operations.",
-        "If the session is expired or missing, the user is redirected to the login page."
+        "Uploading a logo, cover image, or portrait image in the Site Media tab succeeds and the new image is reflected on the portfolio page.",
+        "Uploading or replacing a project image in the Projects tab succeeds without error.",
+        "A success notification is shown after a successful image upload.",
+        "An informative error message is shown if an image upload fails, without crashing the Admin Panel."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "updating the details and uploading the image in Admin panel doesn't create any issues"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The backend exposes working update functions for media contacts (WhatsApp, Instagram) that persist changes to stable storage.",
+        "The backend exposes working update functions for blob assets (logo, cover, portrait, artwork images) that accept and store Blob/[Nat8] data.",
+        "All update functions return a success or error variant that the frontend can distinguish.",
+        "No type mismatch errors occur between frontend actor calls and backend function signatures."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "updating the details and uploading the image in Admin panel doesn't create any issues"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The useUpdateContacts (or equivalent) mutation hook correctly passes WhatsApp and Instagram values to the backend actor.",
+        "Image upload mutation hooks correctly convert File/Blob objects to the Nat8 array format expected by the backend.",
+        "On successful mutation, the relevant queries (contacts, logo, cover, portrait, artworks) are invalidated so the UI reflects the latest data.",
+        "Mutation error states are captured and surfaced to the Admin Panel UI."
       ]
     }
   ],
   "constraints": [
-    "Do not remove or replace the existing username/password-based login mechanism — it must remain the sole requirement for admin access.",
     "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "All Motoko logic must remain in backend/main.mo as a single actor."
+    "Preserve existing stable storage and data model in the backend; do not drop or rename existing fields."
   ],
   "nonGoals": [
-    "Adding Internet Identity as a requirement for admin login.",
-    "Changing the public-facing portfolio design or layout.",
-    "Adding new admin features beyond fixing existing upload and content editing functionality."
+    "Redesigning the Admin Panel UI layout or visual styling.",
+    "Adding new admin features beyond fixing existing contact update and image upload flows.",
+    "Changing the authentication mechanism (Internet Identity)."
   ],
   "imageRequirements": {
     "required": [],

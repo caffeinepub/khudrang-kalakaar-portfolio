@@ -2,12 +2,33 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-admin-authentication-flow-so-that-after-a-successful-username-password-login-all-subsequent-backend-calls-to-admin-restricted-endpoints-upload-artwork-edit-content-upload-images-save-social-media-contacts-are-authorized-correctly-ensure-the-session-token-or-credential-established-at-login-is-passed-along-with-every-admin-backend-call",
-      "featureTitle": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
+      "featureId": "feature-investigate-and-fix-the-failed-to-update-contacts-error-in-the-admin-panel-contacts-tab-ensure-that-saving-whatsapp-number-and-instagram-profile-url-changes-calls-the-correct-backend-mutation-handles-errors-gracefully-and-shows-a-success-toast-on-completion",
+      "featureTitle": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
       "files": [
         "frontend/src/hooks/useQueries.ts",
-        "frontend/src/lib/adminAuth.ts",
-        "frontend/src/pages/AdminLogin.tsx",
+        "frontend/src/pages/AdminPanel.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-investigate-and-fix-image-upload-failures-in-the-admin-panel-site-media-tab-and-projects-tab-ensure-that-uploading-logo-cover-image-artist-portrait-and-project-images-correctly-encodes-the-blob-data-calls-the-appropriate-backend-update-functions-and-completes-without-error",
+      "featureTitle": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/AdminPanel.tsx"
       ],
       "components": [
@@ -23,6 +44,28 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-audit-the-frontend-react-query-mutation-hooks-in-usequeries-ts-for-updating-media-contacts-and-uploading-images-ensure-the-mutation-functions-correctly-serialize-arguments-call-the-actor-methods-with-the-right-parameter-types-and-invalidate-relevant-queries-on-success",
+      "featureTitle": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

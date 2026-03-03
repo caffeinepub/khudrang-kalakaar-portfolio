@@ -24,15 +24,14 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const Artwork = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
-  'imageFileName' : IDL.Opt(IDL.Text),
-  'imageFormat' : IDL.Opt(IDL.Text),
   'description' : IDL.Text,
-  'image' : IDL.Vec(IDL.Nat8),
+  'image' : IDL.Opt(ExternalBlob),
+  'location' : IDL.Opt(IDL.Text),
 });
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const MediaContacts = IDL.Record({
   'instagramProfile' : IDL.Text,
@@ -70,14 +69,7 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
   'editArtwork' : IDL.Func(
-      [
-        IDL.Nat,
-        IDL.Text,
-        IDL.Text,
-        IDL.Vec(IDL.Nat8),
-        IDL.Opt(IDL.Text),
-        IDL.Opt(IDL.Text),
-      ],
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
       [],
       [],
     ),
@@ -95,22 +87,12 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
-  'initializeWithPassword' : IDL.Func([IDL.Text], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'loginWithPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
-  'logout' : IDL.Func([], [], []),
-  'resetPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
   'uploadArtwork' : IDL.Func(
-      [
-        IDL.Text,
-        IDL.Text,
-        IDL.Vec(IDL.Nat8),
-        IDL.Opt(IDL.Text),
-        IDL.Opt(IDL.Text),
-      ],
+      [IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
       [IDL.Nat],
       [],
     ),
@@ -137,15 +119,14 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const Artwork = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
-    'imageFileName' : IDL.Opt(IDL.Text),
-    'imageFormat' : IDL.Opt(IDL.Text),
     'description' : IDL.Text,
-    'image' : IDL.Vec(IDL.Nat8),
+    'image' : IDL.Opt(ExternalBlob),
+    'location' : IDL.Opt(IDL.Text),
   });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const MediaContacts = IDL.Record({
     'instagramProfile' : IDL.Text,
@@ -183,14 +164,7 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteArtwork' : IDL.Func([IDL.Nat], [], []),
     'editArtwork' : IDL.Func(
-        [
-          IDL.Nat,
-          IDL.Text,
-          IDL.Text,
-          IDL.Vec(IDL.Nat8),
-          IDL.Opt(IDL.Text),
-          IDL.Opt(IDL.Text),
-        ],
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
         [],
         [],
       ),
@@ -208,22 +182,12 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
-    'initializeWithPassword' : IDL.Func([IDL.Text], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'loginWithPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
-    'logout' : IDL.Func([], [], []),
-    'resetPassword' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateMediaContacts' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'uploadArtistPortrait' : IDL.Func([ExternalBlob], [], []),
     'uploadArtwork' : IDL.Func(
-        [
-          IDL.Text,
-          IDL.Text,
-          IDL.Vec(IDL.Nat8),
-          IDL.Opt(IDL.Text),
-          IDL.Opt(IDL.Text),
-        ],
+        [IDL.Text, IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(IDL.Text)],
         [IDL.Nat],
         [],
       ),

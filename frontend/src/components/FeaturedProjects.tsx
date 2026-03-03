@@ -1,85 +1,93 @@
-import React from 'react';
+import { useGetAllArtworks } from '../hooks/useQueries';
 import ProjectSection from './ProjectSection';
 
-const PROJECTS = [
+const STATIC_PROJECTS = [
   {
-    number: '01',
-    title: 'Café Mural — Jaipur',
+    title: 'Café Mural — Vibrant Wall Art',
     description:
-      'A vibrant floor-to-ceiling mural for a boutique café in Jaipur, blending Rajasthani folk motifs with contemporary abstract forms. The 40-foot installation became the café\'s signature visual identity.',
-    location: 'Jaipur, Rajasthan',
+      'A lively mural installation for a modern café, blending abstract patterns with cultural motifs to create an immersive dining experience.',
     image: '/assets/generated/project-cafe.dim_1200x800.png',
-    imageAlt: 'Café mural artwork',
-    reverse: false,
   },
   {
-    number: '02',
-    title: 'Fort Resort — Jodhpur',
+    title: 'Fort Resort — Heritage Murals',
     description:
-      'Heritage-inspired wall art for a luxury fort resort, celebrating the royal history of Jodhpur through intricate hand-painted panels. Each room tells a different chapter of Rajputana heritage.',
-    location: 'Jodhpur, Rajasthan',
+      'Intricate heritage-inspired murals for a luxury fort resort, celebrating Rajasthani art traditions with contemporary finesse.',
     image: '/assets/generated/project-fort-resort.dim_1200x800.png',
-    imageAlt: 'Fort resort artwork',
-    reverse: true,
   },
   {
-    number: '03',
-    title: 'Boutique Hotel — Udaipur',
+    title: 'Hotel Lobby — Statement Artwork',
     description:
-      'A complete interior art program for a lakeside boutique hotel, featuring custom canvas paintings, textured accent walls, and hand-painted ceiling medallions throughout the property.',
-    location: 'Udaipur, Rajasthan',
+      'A grand statement artwork for a five-star hotel lobby, combining gold leaf accents with hand-painted motifs for a lasting impression.',
     image: '/assets/generated/project-hotel.dim_1200x800.png',
-    imageAlt: 'Hotel interior artwork',
-    reverse: false,
   },
   {
-    number: '04',
-    title: 'Overbridge Art — Ajmer',
+    title: 'Overbridge — Public Art Installation',
     description:
-      'A large-scale public art installation on an urban overbridge, transforming a grey concrete structure into a colorful celebration of local culture, history, and community pride.',
-    location: 'Ajmer, Rajasthan',
+      'A large-scale public art installation on an urban overbridge, transforming a functional structure into a vibrant community landmark.',
     image: '/assets/generated/project-overbridge.dim_1200x800.png',
-    imageAlt: 'Overbridge public art',
-    reverse: true,
   },
   {
-    number: '05',
-    title: 'Restaurant Interior — Kota',
+    title: 'Restaurant — Thematic Interior',
     description:
-      'Full interior decoration for a fine-dining restaurant, combining hand-painted murals, custom furniture art, and ambient lighting design to create an immersive dining experience.',
-    location: 'Kota, Rajasthan',
+      'A thematic interior mural series for a fine-dining restaurant, weaving local folklore and culinary heritage into every brushstroke.',
     image: '/assets/generated/project-restaurant.dim_1200x800.png',
-    imageAlt: 'Restaurant interior',
-    reverse: false,
   },
 ];
 
 export default function FeaturedProjects() {
+  const { data: artworks } = useGetAllArtworks();
+
+  // Build a map from title to location for dynamic location lookup
+  const locationMap: Record<string, string> = {};
+  if (artworks) {
+    for (const artwork of artworks) {
+      if (artwork.location) {
+        locationMap[artwork.title] = artwork.location;
+      }
+    }
+  }
+
+  // Also try to match by index order if artworks exist
+  const artworksByIndex = artworks ? [...artworks].sort((a, b) => Number(a.id) - Number(b.id)) : [];
+
   return (
-    <section id="projects" className="section-padding bg-cream">
-      <div className="max-w-6xl mx-auto">
+    <section id="projects" className="py-20 lg:py-28 bg-cream">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-end mb-14">
-          <div>
-            <span className="text-terracotta text-sm font-semibold tracking-[0.25em] uppercase">
-              Featured Work
-            </span>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold text-charcoal mt-2 leading-tight">
-              Selected{' '}
-              <em className="not-italic text-terracotta">Projects</em>
-            </h2>
-            <div className="w-16 h-1 bg-terracotta mt-4 rounded-full" />
-          </div>
-          <p className="text-charcoal/65 text-base sm:text-lg leading-relaxed lg:text-right">
-            A selection of landmark projects that showcase the breadth and depth of artistic vision — from intimate café murals to grand public installations.
+        <div className="text-center mb-16">
+          <p className="font-inter text-terracotta font-semibold text-sm uppercase tracking-widest mb-3">
+            Our Work
+          </p>
+          <h2 className="font-playfair font-bold text-4xl lg:text-5xl text-charcoal leading-tight">
+            Featured{' '}
+            <em className="text-terracotta not-italic">Projects</em>
+          </h2>
+          <p className="mt-4 font-inter text-charcoal/65 max-w-2xl mx-auto leading-relaxed">
+            A curated selection of our most impactful mural and wall art installations across
+            Rajasthan and beyond.
           </p>
         </div>
 
-        {/* Projects */}
-        <div className="space-y-16">
-          {PROJECTS.map((project) => (
-            <ProjectSection key={project.number} {...project} />
-          ))}
+        {/* Projects List */}
+        <div className="flex flex-col gap-10">
+          {STATIC_PROJECTS.map((project, index) => {
+            // Try to find location: first by title match, then by index
+            const locationByTitle = locationMap[project.title];
+            const locationByIndex = artworksByIndex[index]?.location;
+            const location = locationByTitle || locationByIndex || undefined;
+
+            return (
+              <ProjectSection
+                key={project.title}
+                title={project.title}
+                description={project.description}
+                image={project.image}
+                location={location}
+                reversed={index % 2 !== 0}
+                index={index}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

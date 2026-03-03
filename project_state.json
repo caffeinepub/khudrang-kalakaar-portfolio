@@ -1,42 +1,49 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Web project with admin panel supporting login-based access for making changes and uploading images.",
-  "architectural_notes": [
-    "Admin panel authentication: username + password login grants access to make changes and upload images"
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [
-    "Unauthorised admin login error occurring at back-end preventing admin panel access"
+    "Admin panel: updating details and uploading images causes issues"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-frontend-admin-authentication-flow-so-that-after-a-successful-username-password-login-all-subsequent-backend-calls-to-admin-restricted-endpoints-upload-artwork-edit-content-upload-images-save-social-media-contacts-are-authorized-correctly-ensure-the-session-token-or-credential-established-at-login-is-passed-along-with-every-admin-backend-call",
-      "title": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
+      "id": "feature-investigate-and-fix-the-failed-to-update-contacts-error-in-the-admin-panel-contacts-tab-ensure-that-saving-whatsapp-number-and-instagram-profile-url-changes-calls-the-correct-backend-mutation-handles-errors-gracefully-and-shows-a-success-toast-on-completion",
+      "title": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-image-upload-failures-in-the-admin-panel-site-media-tab-and-projects-tab-ensure-that-uploading-logo-cover-image-artist-portrait-and-project-images-correctly-encodes-the-blob-data-calls-the-appropriate-backend-update-functions-and-completes-without-error",
+      "title": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-audit-the-frontend-react-query-mutation-hooks-in-usequeries-ts-for-updating-media-contacts-and-uploading-images-ensure-the-mutation-functions-correctly-serialize-arguments-call-the-actor-methods-with-the-right-parameter-types-and-invalidate-relevant-queries-on-success",
+      "title": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Fix unauthorised admin login error at back-end; username and password should be sufficient to access admin panel for making changes and uploading images",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
+      "id": "AR-3",
+      "summary": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
       "reqIds": [
-        "REQ-1"
+        "REQ-3"
       ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Khudrang Kalakaar Portfolio",
+  "projectName": "Fix Admin Panel: Contact update and image upload failures",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

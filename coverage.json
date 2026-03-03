@@ -1,38 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-03-03T04:13:53.547Z",
+  "generatedAt": "2026-03-03T05:21:07.139Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the backend admin authentication so that username and password credentials are sufficient to grant admin access. The backend `loginAdmin` (or equivalent) function must accept a username+password pair and return a valid admin session/role without requiring Internet Identity or any additional principal-based check. Admin role must persist for the duration of the session.",
+        "summary": "Investigate and fix the 'Failed to update contacts' error in the Admin Panel Contacts tab. Ensure that saving WhatsApp Number and Instagram Profile URL changes calls the correct backend mutation, handles errors gracefully, and shows a success toast on completion.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Investigate and fix image upload failures in the Admin Panel (Site Media tab and Projects tab). Ensure that uploading logo, cover image, artist portrait, and project images correctly encodes the blob data, calls the appropriate backend update functions, and completes without error.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/AdminPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Audit the backend Motoko actor's update functions for media contacts and blob storage (logo, cover, portrait, artwork images) to ensure they are correctly defined, accept the right argument types, and are accessible to authenticated callers. Fix any type mismatches or missing authorization checks causing call failures.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-2",
-        "summary": "Update the frontend admin authentication flow so that after a successful username/password login, all subsequent backend calls to admin-restricted endpoints (upload artwork, edit content, upload images, save social/media contacts) are authorized correctly. Ensure the session token or credential established at login is passed along with every admin backend call.",
+        "id": "REQ-4",
+        "summary": "Audit the frontend React Query mutation hooks in useQueries.ts for updating media contacts and uploading images. Ensure the mutation functions correctly serialize arguments, call the actor methods with the right parameter types, and invalidate relevant queries on success.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminLogin.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/lib/adminAuth.ts",
-          "frontend/src/hooks/useActor.ts"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminLogin.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/lib/adminAuth.ts"
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
@@ -49,8 +68,6 @@
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/adminAuth.ts",
-    "frontend/src/pages/AdminLogin.tsx",
     "frontend/src/pages/AdminPanel.tsx",
     "project_state.json",
     "scratch/component-selection.json",

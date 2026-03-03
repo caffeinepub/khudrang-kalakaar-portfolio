@@ -1,31 +1,21 @@
-import React from 'react';
-import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/sonner';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
-
-// Pages
+import { Toaster } from '@/components/ui/sonner';
 import PortfolioPage from './pages/PortfolioPage';
-import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
 
-// Root layout
 const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <Toaster richColors position="top-right" />
-    </>
-  ),
+  component: () => <Outlet />,
 });
 
 const indexRoute = createRoute({
@@ -58,10 +48,11 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ThemeProvider>
+        <Toaster richColors position="top-right" />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

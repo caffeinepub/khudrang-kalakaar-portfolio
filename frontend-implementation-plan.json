@@ -1,42 +1,66 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix unauthorized admin login error — allow username/password authentication for admin panel access",
+  "title": "Fix Admin Panel: Contact update and image upload failures",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Update the frontend admin authentication flow to properly pass credentials to backend and handle admin session for all subsequent admin operations",
+      "id": "REQ-1",
+      "summary": "Fix 'Failed to update contacts' error in Admin Panel Contacts tab by ensuring correct mutation calls, error handling, and success feedback",
       "acceptanceCriteria": [
-        "After logging in with correct username and password on the AdminLogin page, the user is redirected to the AdminPanel without any 'Unauthorized' error.",
-        "Uploading artwork images, editing site media, and saving social/media contacts in the AdminPanel all succeed without triggering an unauthorized error.",
-        "The admin session created by username/password login is recognized by the backend for all admin operations.",
-        "If the session is expired or missing, the user is redirected to the login page."
+        "Clicking 'Save Changes' on the Contacts tab successfully persists the WhatsApp number and Instagram URL to the backend.",
+        "A success toast/notification is shown when contacts are saved successfully.",
+        "If the save fails, a descriptive error message is displayed instead of a generic failure toast.",
+        "The Contacts tab does not show 'Failed to update contacts' when valid data is submitted."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminLogin.tsx",
-          "operation": "modify",
-          "description": "Replace client-side credential validation with a backend call to loginWithPassword. On successful login, store the authenticated session state and redirect to AdminPanel. Remove references to adminAuth utilities (validateCredentials, createSession) and instead rely on the backend's password-based authentication mechanism. Ensure error messages display backend authentication failures appropriately."
-        },
-        {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the useLoginWithPassword hook to properly handle the backend loginWithPassword response. Ensure that after a successful password login, the actor is configured to include the authenticated session for all subsequent admin requests. Add error handling for unauthorized responses and provide clear feedback to the UI."
+          "description": "Audit and fix the useUpdateMediaContacts mutation hook to ensure it correctly passes whatsappNumber and instagramProfile string arguments to actor.updateMediaContacts(), handles promise resolution/rejection, and returns proper success/error states to the calling component."
         },
         {
           "path": "frontend/src/pages/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Remove client-side session validation logic (validateSession, clearSession). Instead, rely on backend admin checks via the isCallerAdmin query. If the user is not authorized by the backend, redirect to the admin login page. Ensure all admin operations (artwork upload/edit/delete, media uploads, contact updates) properly handle backend authorization errors and display user-friendly messages."
+          "description": "Fix the Contacts tab's Save Changes button handler to correctly invoke the useUpdateMediaContacts mutation with the current form state (whatsappNumber, instagramProfile), handle mutation errors gracefully by displaying a descriptive error toast (not generic 'Failed to update contacts'), and show a success toast on successful save. Ensure the mutation is awaited and error boundaries are in place."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Fix image upload failures in Admin Panel (Site Media and Projects tabs) by ensuring correct blob encoding and backend method invocation",
+      "acceptanceCriteria": [
+        "Uploading a logo, cover image, or portrait image in the Site Media tab succeeds and the new image is reflected on the portfolio page.",
+        "Uploading or replacing a project image in the Projects tab succeeds without error.",
+        "A success notification is shown after a successful image upload.",
+        "An informative error message is shown if an image upload fails, without crashing the Admin Panel."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Audit and fix the image upload mutation hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUploadArtwork, useEditArtwork) to ensure File/Blob objects are correctly converted to ExternalBlob instances using ExternalBlob.fromBytes(await file.arrayBuffer()) before passing to backend actor methods. Verify the component's usage instructions for ExternalBlob handling before implementing. Ensure mutations invalidate the relevant queries (logo, cover, portrait, artworks) on success so the UI updates immediately."
         },
         {
-          "path": "frontend/src/lib/adminAuth.ts",
+          "path": "frontend/src/pages/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Deprecate or remove client-side credential validation and session management functions (validateCredentials, createSession, validateSession, clearSession). These functions are no longer needed since authentication is now fully handled by the backend. Keep only utility functions if they are still referenced elsewhere, but mark them as deprecated."
-        },
+          "description": "Fix the Site Media tab's image upload handlers (logo, cover, portrait) and the Projects tab's artwork image upload/edit handlers to correctly invoke the corresponding mutation hooks with ExternalBlob-wrapped file data. Ensure each handler awaits the mutation, catches errors with descriptive messages displayed via toast notifications, and shows a success toast on completion. Verify that file inputs are properly wired to trigger uploads and that uploaded images are reflected in preview thumbnails after successful upload."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Audit frontend React Query mutation hooks for correct argument serialization and query invalidation",
+      "acceptanceCriteria": [
+        "The useUpdateContacts (or equivalent) mutation hook correctly passes WhatsApp and Instagram values to the backend actor.",
+        "Image upload mutation hooks correctly convert File/Blob objects to the Nat8 array format expected by the backend.",
+        "On successful mutation, the relevant queries (contacts, logo, cover, portrait, artworks) are invalidated so the UI reflects the latest data.",
+        "Mutation error states are captured and surfaced to the Admin Panel UI."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/hooks/useActor.ts",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure the actor hook properly maintains the authenticated identity after a successful loginWithPassword call. The actor must consistently use the authenticated principal for all subsequent backend calls, not fall back to anonymous. Add logic to invalidate cached queries when the authentication state changes (login or logout)."
+          "description": "Perform a comprehensive audit of all mutation hooks in useQueries.ts: ensure useUpdateMediaContacts passes string arguments correctly; ensure all image upload hooks (useUploadLogo, useUploadCoverImage, useUploadArtistPortrait, useUploadArtwork, useEditArtwork) convert File/Blob to ExternalBlob using ExternalBlob.fromBytes(await file.arrayBuffer()); verify each mutation's onSuccess callback invalidates the correct queryKey(s) (e.g., ['mediaContacts'], ['logo'], ['coverImage'], ['artistPortrait'], ['artworks']); ensure mutation errors are captured and thrown/returned so the calling component can display them. Verify the component's usage instructions for ExternalBlob before implementing."
         }
       ]
     }

@@ -1,638 +1,663 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import {
-  Upload,
-  Image,
-  Phone,
-  Instagram,
-  LogOut,
-  Plus,
-  Edit,
-  Trash2,
-  Save,
-  X,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-} from 'lucide-react';
-import { useActor } from '../hooks/useActor';
-import { validateSession, clearSession } from '../lib/adminAuth';
+import { toast } from 'sonner';
+import { Loader2, Upload, Trash2, Edit2, X, Check, MapPin, LogOut, Image as ImageIcon } from 'lucide-react';
 import {
   useGetAllArtworks,
-  useGetLogo,
-  useGetCoverImage,
-  useGetArtistPortrait,
-  useGetMediaContacts,
   useUploadArtwork,
   useEditArtwork,
   useDeleteArtwork,
+  useGetMediaContacts,
+  useUpdateMediaContacts,
   useUploadLogo,
   useUploadCoverImage,
   useUploadArtistPortrait,
-  useUpdateMediaContacts,
 } from '../hooks/useQueries';
+import type { Artwork } from '../backend';
 import { ExternalBlob } from '../backend';
-import { toast } from 'sonner';
 
-// ── Types ──
-interface ArtworkForm {
+type Tab = 'artworks' | 'media' | 'contacts';
+
+interface EditingArtwork {
+  id: bigint;
   title: string;
   description: string;
-  imageFile: File | null;
-  imagePreview: string | null;
+  location: string;
+  newImageFile?: File;
+  existingImage?: ExternalBlob;
 }
 
-const emptyForm = (): ArtworkForm => ({
-  title: '',
-  description: '',
-  imageFile: null,
-  imagePreview: null,
-});
-
-// ── Helpers ──
-function fileToUint8Array(file: File): Promise<Uint8Array<ArrayBuffer>> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target!.result as ArrayBuffer;
-      resolve(new Uint8Array(result) as Uint8Array<ArrayBuffer>);
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
+async function fileToExternalBlob(file: File): Promise<ExternalBlob> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  return ExternalBlob.fromBytes(bytes);
 }
-
-function getErrorMessage(err: unknown): string {
-  const msg = err instanceof Error ? err.message : String(err);
-  if (msg.includes('Unauthorized') || msg.includes('not authorized') || msg.includes('Invalid admin')) {
-    return 'Authorization failed. Please log out and log in again.';
-  }
-  return msg.length > 120 ? msg.slice(0, 120) + '…' : msg;
-}
-
-// ── Sub-components ──
-
-function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div className="mb-6">
-      <h2 className="font-playfair text-2xl font-bold text-charcoal">{title}</h2>
-      {subtitle && <p className="text-charcoal/60 text-sm mt-1">{subtitle}</p>}
-    </div>
-  );
-}
-
-function ImageUploadCard({
-  label,
-  currentUrl,
-  onUpload,
-  isLoading,
-  accept = 'image/*',
-}: {
-  label: string;
-  currentUrl?: string | null;
-  onUpload: (file: File) => void;
-  isLoading: boolean;
-  accept?: string;
-}) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-
-  return (
-    <div className="bg-white rounded-xl border border-cream-dark p-5 shadow-warm-sm">
-      <p className="font-medium text-charcoal mb-3">{label}</p>
-      {currentUrl && (
-        <img
-          src={currentUrl}
-          alt={label}
-          className="w-full h-40 object-cover rounded-lg mb-3 border border-cream-dark"
-        />
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) onUpload(file);
-          e.target.value = '';
-        }}
-      />
-      <button
-        onClick={() => inputRef.current?.click()}
-        disabled={isLoading}
-        className="w-full flex items-center justify-center gap-2 bg-terracotta/10 hover:bg-terracotta/20 text-terracotta border border-terracotta/30 rounded-lg py-2 text-sm font-medium transition-colors disabled:opacity-50"
-      >
-        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-        {isLoading ? 'Uploading…' : 'Choose & Upload'}
-      </button>
-    </div>
-  );
-}
-
-// ── Main Component ──
 
 export default function AdminPanel() {
   const navigate = useNavigate();
-  const { actor: _actor } = useActor();
+  const [activeTab, setActiveTab] = useState<Tab>('artworks');
 
-  // Guard: require valid session
-  useEffect(() => {
-    if (!validateSession()) {
-      navigate({ to: '/admin-login' });
-    }
-  }, [navigate]);
+  // Artworks state
+  const { data: artworks, isLoading: artworksLoading } = useGetAllArtworks();
+  const uploadArtwork = useUploadArtwork();
+  const editArtwork = useEditArtwork();
+  const deleteArtwork = useDeleteArtwork();
 
-  // Data queries
-  const { data: artworks = [], isLoading: artworksLoading } = useGetAllArtworks();
-  const { data: logoBlob } = useGetLogo();
-  const { data: coverBlob } = useGetCoverImage();
-  const { data: portraitBlob } = useGetArtistPortrait();
-  const { data: mediaContacts } = useGetMediaContacts();
+  // New artwork form
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newLocation, setNewLocation] = useState('');
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const newImageRef = useRef<HTMLInputElement>(null);
 
-  // Mutations
-  const uploadArtworkMutation = useUploadArtwork();
-  const editArtworkMutation = useEditArtwork();
-  const deleteArtworkMutation = useDeleteArtwork();
-  const uploadLogoMutation = useUploadLogo();
-  const uploadCoverMutation = useUploadCoverImage();
-  const uploadPortraitMutation = useUploadArtistPortrait();
-  const updateContactsMutation = useUpdateMediaContacts();
-
-  // Artwork form state
-  const [artworkForm, setArtworkForm] = useState<ArtworkForm>(emptyForm());
+  // Editing state
   const [editingId, setEditingId] = useState<bigint | null>(null);
-  const [showArtworkForm, setShowArtworkForm] = useState(false);
+  const [editForm, setEditForm] = useState<EditingArtwork | null>(null);
+  const editImageRef = useRef<HTMLInputElement>(null);
 
   // Media contacts state
+  const { data: mediaContacts } = useGetMediaContacts();
+  const updateMediaContacts = useUpdateMediaContacts();
   const [whatsapp, setWhatsapp] = useState('');
   const [instagram, setInstagram] = useState('');
 
-  // Active tab
-  const [activeTab, setActiveTab] = useState<'artworks' | 'media' | 'contacts'>('artworks');
-
-  // Populate contacts form when data loads
+  // Sync contacts form from fetched data
   useEffect(() => {
     if (mediaContacts) {
-      setWhatsapp(mediaContacts.whatsappNumber);
-      setInstagram(mediaContacts.instagramProfile);
+      setWhatsapp(mediaContacts.whatsappNumber || '');
+      setInstagram(mediaContacts.instagramProfile || '');
     }
   }, [mediaContacts]);
 
+  // Logo/Cover/Portrait upload hooks
+  const uploadLogo = useUploadLogo();
+  const uploadCoverImage = useUploadCoverImage();
+  const uploadArtistPortrait = useUploadArtistPortrait();
+
+  // Logo/Cover/Portrait file state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [portraitFile, setPortraitFile] = useState<File | null>(null);
+  const logoRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const portraitRef = useRef<HTMLInputElement>(null);
+
   const handleLogout = () => {
-    clearSession();
-    navigate({ to: '/admin-login' });
+    navigate({ to: '/' });
   };
 
   // ── Artwork handlers ──
-
-  const handleArtworkImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setArtworkForm((f) => ({ ...f, imageFile: file, imagePreview: preview }));
-  };
-
-  const handleArtworkSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!artworkForm.title.trim()) {
-      toast.error('Please enter a title.');
+  const handleUploadArtwork = async () => {
+    if (!newTitle.trim()) {
+      toast.error('Please provide a title.');
       return;
     }
-
     try {
-      if (editingId !== null) {
-        // Edit existing
-        let imageBytes = new Uint8Array(new ArrayBuffer(0)) as Uint8Array<ArrayBuffer>;
-        let format: string | null = null;
-        let fileName: string | null = null;
-        if (artworkForm.imageFile) {
-          imageBytes = await fileToUint8Array(artworkForm.imageFile);
-          format = artworkForm.imageFile.type || null;
-          fileName = artworkForm.imageFile.name || null;
-        }
-        await editArtworkMutation.mutateAsync({
-          id: editingId,
-          title: artworkForm.title,
-          description: artworkForm.description,
-          imageBytes,
-          format,
-          fileName,
-        });
-        toast.success('Artwork updated successfully!');
-      } else {
-        // New artwork
-        if (!artworkForm.imageFile) {
-          toast.error('Please select an image.');
-          return;
-        }
-        const imageBytes = await fileToUint8Array(artworkForm.imageFile);
-        await uploadArtworkMutation.mutateAsync({
-          title: artworkForm.title,
-          description: artworkForm.description,
-          imageBytes,
-          format: artworkForm.imageFile.type || null,
-          fileName: artworkForm.imageFile.name || null,
-        });
-        toast.success('Artwork uploaded successfully!');
-      }
-      setArtworkForm(emptyForm());
-      setEditingId(null);
-      setShowArtworkForm(false);
-    } catch (err) {
-      toast.error(getErrorMessage(err));
+      await uploadArtwork.mutateAsync({
+        title: newTitle.trim(),
+        description: newDescription.trim(),
+        imageFile: newImageFile,
+        location: newLocation.trim() || null,
+      });
+      toast.success('Project added successfully!');
+      setNewTitle('');
+      setNewDescription('');
+      setNewLocation('');
+      setNewImageFile(null);
+      if (newImageRef.current) newImageRef.current.value = '';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to add project: ${msg}`);
     }
   };
 
-  const handleEditArtwork = (artwork: { id: bigint; title: string; description: string }) => {
+  const startEditing = (artwork: Artwork) => {
     setEditingId(artwork.id);
-    setArtworkForm({
+    setEditForm({
+      id: artwork.id,
       title: artwork.title,
       description: artwork.description,
-      imageFile: null,
-      imagePreview: null,
+      location: artwork.location || '',
+      existingImage: artwork.image ?? undefined,
     });
-    setShowArtworkForm(true);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditForm(null);
+    if (editImageRef.current) editImageRef.current.value = '';
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm) return;
+    try {
+      await editArtwork.mutateAsync({
+        id: editForm.id,
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        imageFile: editForm.newImageFile ?? null,
+        keepExistingImage: !editForm.newImageFile,
+        existingImage: editForm.existingImage,
+        location: editForm.location.trim() || null,
+      });
+      toast.success('Project updated successfully!');
+      cancelEditing();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to update project: ${msg}`);
+    }
   };
 
   const handleDeleteArtwork = async (id: bigint) => {
-    if (!confirm('Delete this artwork? This cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete this project?')) return;
     try {
-      await deleteArtworkMutation.mutateAsync(id);
-      toast.success('Artwork deleted.');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    }
-  };
-
-  // ── Media upload handlers ──
-
-  const handleLogoUpload = async (file: File) => {
-    try {
-      const bytes = await fileToUint8Array(file);
-      const blob = ExternalBlob.fromBytes(bytes);
-      await uploadLogoMutation.mutateAsync(blob);
-      toast.success('Logo updated!');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    }
-  };
-
-  const handleCoverUpload = async (file: File) => {
-    try {
-      const bytes = await fileToUint8Array(file);
-      const blob = ExternalBlob.fromBytes(bytes);
-      await uploadCoverMutation.mutateAsync(blob);
-      toast.success('Cover image updated!');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    }
-  };
-
-  const handlePortraitUpload = async (file: File) => {
-    try {
-      const bytes = await fileToUint8Array(file);
-      const blob = ExternalBlob.fromBytes(bytes);
-      await uploadPortraitMutation.mutateAsync(blob);
-      toast.success('Artist portrait updated!');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
+      await deleteArtwork.mutateAsync(id);
+      toast.success('Project deleted.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to delete project: ${msg}`);
     }
   };
 
   // ── Contacts handler ──
-
-  const handleContactsSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdateContacts = async () => {
     try {
-      await updateContactsMutation.mutateAsync({
-        whatsappNumber: whatsapp,
-        instagramProfile: instagram,
+      await updateMediaContacts.mutateAsync({
+        whatsappNumber: whatsapp.trim(),
+        instagramProfile: instagram.trim(),
       });
-      toast.success('Contact details saved!');
-    } catch (err) {
-      toast.error(getErrorMessage(err));
+      toast.success('Contact info updated successfully!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to update contacts: ${msg}`);
     }
   };
 
-  const isArtworkMutating =
-    uploadArtworkMutation.isPending ||
-    editArtworkMutation.isPending ||
-    deleteArtworkMutation.isPending;
+  // ── Media upload handlers ──
+  const handleUploadLogo = async () => {
+    if (!logoFile) {
+      toast.error('Please select a logo image.');
+      return;
+    }
+    try {
+      const blob = await fileToExternalBlob(logoFile);
+      await uploadLogo.mutateAsync(blob);
+      toast.success('Logo uploaded successfully!');
+      setLogoFile(null);
+      if (logoRef.current) logoRef.current.value = '';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to upload logo: ${msg}`);
+    }
+  };
 
-  const tabs = [
-    { id: 'artworks' as const, label: 'Artworks', icon: Image },
-    { id: 'media' as const, label: 'Site Media', icon: Upload },
-    { id: 'contacts' as const, label: 'Contacts', icon: Phone },
-  ];
+  const handleUploadCover = async () => {
+    if (!coverFile) {
+      toast.error('Please select a cover image.');
+      return;
+    }
+    try {
+      const blob = await fileToExternalBlob(coverFile);
+      await uploadCoverImage.mutateAsync(blob);
+      toast.success('Cover image uploaded successfully!');
+      setCoverFile(null);
+      if (coverRef.current) coverRef.current.value = '';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to upload cover image: ${msg}`);
+    }
+  };
+
+  const handleUploadPortrait = async () => {
+    if (!portraitFile) {
+      toast.error('Please select a portrait image.');
+      return;
+    }
+    try {
+      const blob = await fileToExternalBlob(portraitFile);
+      await uploadArtistPortrait.mutateAsync(blob);
+      toast.success('Portrait uploaded successfully!');
+      setPortraitFile(null);
+      if (portraitRef.current) portraitRef.current.value = '';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Failed to upload portrait: ${msg}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
-      <header className="bg-charcoal text-cream shadow-warm-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-charcoal text-cream px-6 py-4 flex items-center justify-between shadow-warm-lg">
+        <div className="flex items-center gap-3">
+          <img
+            src="/assets/generated/logo-k.dim_200x200.png"
+            alt="Logo"
+            className="h-9 w-9 object-contain"
+          />
           <div>
-            <h1 className="font-playfair text-xl font-bold">Khudrang Kalakaar</h1>
-            <p className="text-cream/60 text-xs">Admin Panel</p>
+            <h1 className="font-playfair font-bold text-xl text-cream">Admin Panel</h1>
+            <p className="font-inter text-cream/60 text-xs">Khudrang Kalakaar</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-cream/70 hover:text-cream transition-colors text-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
         </div>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-cream/70 hover:text-cream transition-colors font-inter text-sm"
+        >
+          <LogOut size={16} />
+          Exit
+        </button>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-warm-sm border border-cream-dark mb-8 w-fit">
-          {tabs.map(({ id, label, icon: Icon }) => (
+      {/* Tabs */}
+      <div className="bg-white border-b border-cream-dark px-6">
+        <div className="flex gap-0 max-w-5xl mx-auto">
+          {(['artworks', 'media', 'contacts'] as Tab[]).map((tab) => (
             <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === id
-                  ? 'bg-terracotta text-cream shadow-warm-sm'
-                  : 'text-charcoal/60 hover:text-charcoal hover:bg-cream/60'
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-4 font-inter text-sm font-medium capitalize border-b-2 transition-colors ${
+                activeTab === tab
+                  ? 'border-terracotta text-terracotta'
+                  : 'border-transparent text-charcoal/60 hover:text-charcoal'
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              {tab === 'artworks' ? 'Projects' : tab === 'media' ? 'Site Media' : 'Contacts'}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* ── Artworks Tab ── */}
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {/* ── ARTWORKS TAB ── */}
         {activeTab === 'artworks' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <SectionHeader
-                title="Artwork Gallery"
-                subtitle="Manage your portfolio artworks"
-              />
+          <div className="space-y-8">
+            {/* Add New Artwork */}
+            <div className="bg-white rounded-2xl shadow-warm-md p-6">
+              <h2 className="font-playfair font-bold text-xl text-charcoal mb-5">
+                Add New Project
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="Project title"
+                    className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                  />
+                </div>
+                <div>
+                  <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                    Location
+                  </label>
+                  <div className="relative">
+                    <MapPin
+                      size={14}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-terracotta"
+                    />
+                    <input
+                      type="text"
+                      value={newLocation}
+                      onChange={(e) => setNewLocation(e.target.value)}
+                      placeholder="e.g. Ajmer, Rajasthan"
+                      className="w-full border border-cream-dark rounded-lg pl-8 pr-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                    />
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    placeholder="Project description"
+                    rows={3}
+                    className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 resize-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                    Image (optional)
+                  </label>
+                  <input
+                    ref={newImageRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
+                    className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none"
+                  />
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  setArtworkForm(emptyForm());
-                  setEditingId(null);
-                  setShowArtworkForm(true);
-                }}
-                className="flex items-center gap-2 bg-terracotta text-cream px-4 py-2 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors shadow-warm-sm"
+                onClick={handleUploadArtwork}
+                disabled={uploadArtwork.isPending}
+                className="mt-5 flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-60"
               >
-                <Plus className="w-4 h-4" />
-                Add Artwork
+                {uploadArtwork.isPending ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Upload size={16} />
+                )}
+                Add Project
               </button>
             </div>
 
-            {/* Artwork Form */}
-            {showArtworkForm && (
-              <div className="bg-white rounded-xl border border-cream-dark p-6 mb-6 shadow-warm-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-playfair text-lg font-semibold text-charcoal">
-                    {editingId !== null ? 'Edit Artwork' : 'Add New Artwork'}
-                  </h3>
-                  <button
-                    onClick={() => {
-                      setShowArtworkForm(false);
-                      setArtworkForm(emptyForm());
-                      setEditingId(null);
-                    }}
-                    className="text-charcoal/40 hover:text-charcoal transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+            {/* Existing Artworks */}
+            <div className="bg-white rounded-2xl shadow-warm-md p-6">
+              <h2 className="font-playfair font-bold text-xl text-charcoal mb-5">
+                Existing Projects
+              </h2>
+              {artworksLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 size={28} className="animate-spin text-terracotta" />
                 </div>
-                <form onSubmit={handleArtworkSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-charcoal/80 mb-1">Title *</label>
-                    <input
-                      type="text"
-                      value={artworkForm.title}
-                      onChange={(e) => setArtworkForm((f) => ({ ...f, title: e.target.value }))}
-                      placeholder="Artwork title"
-                      className="w-full px-3 py-2 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-charcoal/80 mb-1">Description</label>
-                    <textarea
-                      value={artworkForm.description}
-                      onChange={(e) => setArtworkForm((f) => ({ ...f, description: e.target.value }))}
-                      placeholder="Describe this artwork…"
-                      rows={3}
-                      className="w-full px-3 py-2 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30 resize-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-charcoal/80 mb-1">
-                      Image {editingId === null ? '*' : '(leave blank to keep existing)'}
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleArtworkImageChange}
-                      className="w-full text-sm text-charcoal/70 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-terracotta/10 file:text-terracotta file:font-medium hover:file:bg-terracotta/20 cursor-pointer"
-                    />
-                    {artworkForm.imagePreview && (
-                      <img
-                        src={artworkForm.imagePreview}
-                        alt="Preview"
-                        className="mt-2 h-32 w-auto rounded-lg border border-cream-dark object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      type="submit"
-                      disabled={isArtworkMutating}
-                      className="flex items-center gap-2 bg-terracotta text-cream px-5 py-2 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-50 shadow-warm-sm"
-                    >
-                      {isArtworkMutating ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Save className="w-4 h-4" />
-                      )}
-                      {isArtworkMutating ? 'Saving…' : 'Save Artwork'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowArtworkForm(false);
-                        setArtworkForm(emptyForm());
-                        setEditingId(null);
-                      }}
-                      className="px-5 py-2 rounded-lg text-sm font-medium text-charcoal/60 hover:text-charcoal border border-cream-dark hover:bg-cream/60 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* Artworks Grid */}
-            {artworksLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-8 h-8 animate-spin text-terracotta" />
-              </div>
-            ) : artworks.length === 0 ? (
-              <div className="text-center py-16 text-charcoal/40">
-                <Image className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>No artworks yet. Add your first artwork!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {artworks.map((artwork) => {
-                  const imgBlob = new Blob([new Uint8Array(artwork.image)], {
-                    type: artwork.imageFormat || 'image/jpeg',
-                  });
-                  const imageUrl = URL.createObjectURL(imgBlob);
-                  return (
+              ) : !artworks || artworks.length === 0 ? (
+                <p className="text-charcoal/50 font-inter text-sm text-center py-8">
+                  No projects yet. Add your first project above.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {artworks.map((artwork) => (
                     <div
-                      key={artwork.id.toString()}
-                      className="bg-white rounded-xl border border-cream-dark overflow-hidden shadow-warm-sm group"
+                      key={String(artwork.id)}
+                      className="border border-cream-dark rounded-xl overflow-hidden"
                     >
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={imageUrl}
-                          alt={artwork.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-playfair font-semibold text-charcoal truncate">{artwork.title}</h3>
-                        {artwork.description && (
-                          <p className="text-charcoal/55 text-sm mt-1 line-clamp-2">{artwork.description}</p>
-                        )}
-                        <div className="flex gap-2 mt-3">
-                          <button
-                            onClick={() => handleEditArtwork(artwork)}
-                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gold/10 text-charcoal border border-gold/20 hover:bg-gold/20 transition-colors font-medium"
-                          >
-                            <Edit className="w-3 h-3" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteArtwork(artwork.id)}
-                            disabled={deleteArtworkMutation.isPending}
-                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors font-medium disabled:opacity-50"
-                          >
-                            {deleteArtworkMutation.isPending ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-3 h-3" />
-                            )}
-                            Delete
-                          </button>
+                      {editingId === artwork.id && editForm ? (
+                        /* Edit Mode */
+                        <div className="p-5 bg-cream/30">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block font-inter text-xs font-medium text-charcoal/70 mb-1">
+                                Title
+                              </label>
+                              <input
+                                type="text"
+                                value={editForm.title}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, title: e.target.value })
+                                }
+                                className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                              />
+                            </div>
+                            <div>
+                              <label className="block font-inter text-xs font-medium text-charcoal/70 mb-1">
+                                Location
+                              </label>
+                              <div className="relative">
+                                <MapPin
+                                  size={14}
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-terracotta"
+                                />
+                                <input
+                                  type="text"
+                                  value={editForm.location}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, location: e.target.value })
+                                  }
+                                  placeholder="e.g. Ajmer, Rajasthan"
+                                  className="w-full border border-cream-dark rounded-lg pl-8 pr-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                                />
+                              </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block font-inter text-xs font-medium text-charcoal/70 mb-1">
+                                Description
+                              </label>
+                              <textarea
+                                value={editForm.description}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, description: e.target.value })
+                                }
+                                rows={3}
+                                className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 resize-none"
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="block font-inter text-xs font-medium text-charcoal/70 mb-1">
+                                Replace Image (optional — leave blank to keep existing)
+                              </label>
+                              <input
+                                ref={editImageRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    newImageFile: e.target.files?.[0],
+                                  })
+                                }
+                                className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-3 mt-4">
+                            <button
+                              onClick={handleSaveEdit}
+                              disabled={editArtwork.isPending}
+                              className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-60"
+                            >
+                              {editArtwork.isPending ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <Check size={14} />
+                              )}
+                              Save Changes
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="flex items-center gap-2 bg-cream-dark hover:bg-cream text-charcoal font-inter text-sm font-medium px-4 py-2 rounded-lg transition-colors border border-cream-dark"
+                            >
+                              <X size={14} />
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        /* View Mode */
+                        <div className="flex items-start gap-4 p-4">
+                          {artwork.image ? (
+                            <img
+                              src={artwork.image.getDirectURL()}
+                              alt={artwork.title}
+                              className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 bg-cream-dark rounded-lg flex-shrink-0 flex items-center justify-center">
+                              <ImageIcon size={24} className="text-charcoal/30" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-playfair font-semibold text-charcoal text-base truncate">
+                              {artwork.title}
+                            </h3>
+                            {artwork.location && (
+                              <p className="flex items-center gap-1 font-inter text-xs text-terracotta mt-0.5">
+                                <MapPin size={11} />
+                                {artwork.location}
+                              </p>
+                            )}
+                            {artwork.description && (
+                              <p className="font-inter text-xs text-charcoal/60 mt-1 line-clamp-2">
+                                {artwork.description}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => startEditing(artwork)}
+                              className="p-2 rounded-lg bg-cream hover:bg-cream-dark text-charcoal/70 hover:text-charcoal transition-colors"
+                              title="Edit"
+                            >
+                              <Edit2 size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteArtwork(artwork.id)}
+                              disabled={deleteArtwork.isPending}
+                              className="p-2 rounded-lg bg-cream hover:bg-red-50 text-charcoal/70 hover:text-red-600 transition-colors disabled:opacity-50"
+                              title="Delete"
+                            >
+                              {deleteArtwork.isPending ? (
+                                <Loader2 size={15} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={15} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* ── Site Media Tab ── */}
+        {/* ── SITE MEDIA TAB ── */}
         {activeTab === 'media' && (
-          <div>
-            <SectionHeader
-              title="Site Media"
-              subtitle="Update logo, cover image, and artist portrait"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <ImageUploadCard
-                label="Logo"
-                currentUrl={logoBlob ? logoBlob.getDirectURL() : null}
-                onUpload={handleLogoUpload}
-                isLoading={uploadLogoMutation.isPending}
-              />
-              <ImageUploadCard
-                label="Cover / Hero Image"
-                currentUrl={coverBlob ? coverBlob.getDirectURL() : null}
-                onUpload={handleCoverUpload}
-                isLoading={uploadCoverMutation.isPending}
-              />
-              <ImageUploadCard
-                label="Artist Portrait"
-                currentUrl={portraitBlob ? portraitBlob.getDirectURL() : null}
-                onUpload={handlePortraitUpload}
-                isLoading={uploadPortraitMutation.isPending}
-              />
+          <div className="space-y-6">
+            {/* Logo Upload */}
+            <div className="bg-white rounded-2xl shadow-warm-md p-6">
+              <h2 className="font-playfair font-bold text-xl text-charcoal mb-2">Logo</h2>
+              <p className="font-inter text-sm text-charcoal/60 mb-4">
+                Upload the site logo (displayed in the header and footer).
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                <input
+                  ref={logoRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                  className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none"
+                />
+                <button
+                  onClick={handleUploadLogo}
+                  disabled={!logoFile || uploadLogo.isPending}
+                  className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap"
+                >
+                  {uploadLogo.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Upload size={16} />
+                  )}
+                  Upload Logo
+                </button>
+              </div>
+            </div>
+
+            {/* Cover Image Upload */}
+            <div className="bg-white rounded-2xl shadow-warm-md p-6">
+              <h2 className="font-playfair font-bold text-xl text-charcoal mb-2">Cover Image</h2>
+              <p className="font-inter text-sm text-charcoal/60 mb-4">
+                Upload the hero/cover image shown at the top of the portfolio page.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                <input
+                  ref={coverRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                  className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none"
+                />
+                <button
+                  onClick={handleUploadCover}
+                  disabled={!coverFile || uploadCoverImage.isPending}
+                  className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap"
+                >
+                  {uploadCoverImage.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Upload size={16} />
+                  )}
+                  Upload Cover
+                </button>
+              </div>
+            </div>
+
+            {/* Artist Portrait Upload */}
+            <div className="bg-white rounded-2xl shadow-warm-md p-6">
+              <h2 className="font-playfair font-bold text-xl text-charcoal mb-2">
+                Artist Portrait
+              </h2>
+              <p className="font-inter text-sm text-charcoal/60 mb-4">
+                Upload the artist portrait shown in the About section.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                <input
+                  ref={portraitRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPortraitFile(e.target.files?.[0] || null)}
+                  className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none"
+                />
+                <button
+                  onClick={handleUploadPortrait}
+                  disabled={!portraitFile || uploadArtistPortrait.isPending}
+                  className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap"
+                >
+                  {uploadArtistPortrait.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Upload size={16} />
+                  )}
+                  Upload Portrait
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ── Contacts Tab ── */}
+        {/* ── CONTACTS TAB ── */}
         {activeTab === 'contacts' && (
-          <div>
-            <SectionHeader
-              title="Social & Contact Details"
-              subtitle="Update WhatsApp and Instagram information"
-            />
-            <div className="bg-white rounded-xl border border-cream-dark p-6 shadow-warm-sm max-w-lg">
-              <form onSubmit={handleContactsSave} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-charcoal/80 mb-1.5">
-                    <span className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-terracotta" />
-                      WhatsApp Number
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-3 py-2.5 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-charcoal/80 mb-1.5">
-                    <span className="flex items-center gap-2">
-                      <Instagram className="w-4 h-4 text-terracotta" />
-                      Instagram Profile URL
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="https://instagram.com/yourprofile"
-                    className="w-full px-3 py-2.5 border border-cream-dark rounded-lg text-charcoal placeholder-charcoal/30 focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta bg-cream/30"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={updateContactsMutation.isPending}
-                  className="flex items-center gap-2 bg-terracotta text-cream px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-50 shadow-warm-sm"
-                >
-                  {updateContactsMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  {updateContactsMutation.isPending ? 'Saving…' : 'Save Changes'}
-                </button>
-                {updateContactsMutation.isSuccess && (
-                  <p className="flex items-center gap-2 text-sm text-green-600">
-                    <CheckCircle className="w-4 h-4" />
-                    Saved successfully!
-                  </p>
+          <div className="bg-white rounded-2xl shadow-warm-md p-6 max-w-lg">
+            <h2 className="font-playfair font-bold text-xl text-charcoal mb-5">
+              Contact Information
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                  WhatsApp Number
+                </label>
+                <input
+                  type="text"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="+91 XXXXX XXXXX"
+                  className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                />
+              </div>
+              <div>
+                <label className="block font-inter text-sm font-medium text-charcoal mb-1">
+                  Instagram Profile
+                </label>
+                <input
+                  type="text"
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value)}
+                  placeholder="https://www.instagram.com/yourprofile"
+                  className="w-full border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                />
+              </div>
+              <button
+                onClick={handleUpdateContacts}
+                disabled={updateMediaContacts.isPending}
+                className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-inter text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-60"
+              >
+                {updateMediaContacts.isPending ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
                 )}
-                {updateContactsMutation.isError && (
-                  <p className="flex items-center gap-2 text-sm text-red-600">
-                    <AlertCircle className="w-4 h-4" />
-                    {getErrorMessage(updateContactsMutation.error)}
-                  </p>
-                )}
-              </form>
+                Save Changes
+              </button>
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

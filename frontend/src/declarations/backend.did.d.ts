@@ -13,10 +13,9 @@ import type { Principal } from '@icp-sdk/core/principal';
 export interface Artwork {
   'id' : bigint,
   'title' : string,
-  'imageFileName' : [] | [string],
-  'imageFormat' : [] | [string],
   'description' : string,
-  'image' : Uint8Array,
+  'image' : [] | [ExternalBlob],
+  'location' : [] | [string],
 }
 export type ExternalBlob = Uint8Array;
 export interface MediaContacts {
@@ -58,7 +57,7 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteArtwork' : ActorMethod<[bigint], undefined>,
   'editArtwork' : ActorMethod<
-    [bigint, string, string, Uint8Array, [] | [string], [] | [string]],
+    [bigint, string, string, [] | [ExternalBlob], [] | [string]],
     undefined
   >,
   'getAllArtworks' : ActorMethod<[], Array<Artwork>>,
@@ -71,16 +70,12 @@ export interface _SERVICE {
   'getMediaContacts' : ActorMethod<[], [] | [MediaContacts]>,
   'getMyRole' : ActorMethod<[], string>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'initializeWithPassword' : ActorMethod<[string], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'loginWithPassword' : ActorMethod<[string, string], boolean>,
-  'logout' : ActorMethod<[], undefined>,
-  'resetPassword' : ActorMethod<[string, string, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateMediaContacts' : ActorMethod<[string, string], undefined>,
   'uploadArtistPortrait' : ActorMethod<[ExternalBlob], undefined>,
   'uploadArtwork' : ActorMethod<
-    [string, string, Uint8Array, [] | [string], [] | [string]],
+    [string, string, [] | [ExternalBlob], [] | [string]],
     bigint
   >,
   'uploadCoverImage' : ActorMethod<[ExternalBlob], undefined>,

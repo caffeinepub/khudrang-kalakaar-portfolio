@@ -1,92 +1,99 @@
-import React from 'react';
-import { Paintbrush, Home, Building2, Palette, Layers, Sparkles } from 'lucide-react';
+import { Brush, Building2, Palette, Layers, Sparkles, PenTool } from 'lucide-react';
 
 const SERVICES = [
   {
-    icon: Paintbrush,
+    icon: Brush,
+    title: 'Wall Murals',
+    description:
+      'Custom hand-painted murals for homes, offices, and commercial spaces that transform blank walls into stunning visual narratives.',
     number: '01',
-    title: 'Wall Art & Murals',
-    description:
-      'Custom hand-painted murals and wall art that transform any space into a visual masterpiece.',
-  },
-  {
-    icon: Home,
-    number: '02',
-    title: 'Interior Decoration',
-    description:
-      'Comprehensive interior decoration services blending aesthetics with functionality for homes and offices.',
   },
   {
     icon: Building2,
-    number: '03',
-    title: 'Commercial Spaces',
+    title: 'Commercial Art',
     description:
-      'Artistic solutions for restaurants, hotels, and commercial establishments that leave lasting impressions.',
+      'Large-scale art installations for hotels, restaurants, and corporate spaces that reinforce brand identity and create memorable environments.',
+    number: '02',
   },
   {
     icon: Palette,
-    number: '04',
-    title: 'Canvas Paintings',
+    title: 'Interior Painting',
     description:
-      'Original canvas paintings crafted with passion — available as commissions or ready-to-hang pieces.',
+      'Expert interior painting services with premium finishes, texture work, and decorative techniques tailored to your aesthetic vision.',
+    number: '03',
   },
   {
     icon: Layers,
-    number: '05',
     title: 'Texture & Finish',
     description:
-      'Specialty texture work and decorative finishes that add depth and character to any surface.',
+      'Specialised texture applications including Venetian plaster, stucco, and custom finishes that add depth and character to any surface.',
+    number: '04',
   },
   {
     icon: Sparkles,
-    number: '06',
-    title: 'Custom Commissions',
+    title: 'Heritage Restoration',
     description:
-      'Bespoke artwork created to your vision — from concept to completion with your unique story.',
+      'Sensitive restoration of heritage murals and traditional Rajasthani art forms, preserving cultural legacy with modern conservation techniques.',
+    number: '05',
+  },
+  {
+    icon: PenTool,
+    title: 'Custom Illustrations',
+    description:
+      'Bespoke illustration and design services for signage, branding elements, and decorative art pieces crafted with meticulous attention to detail.',
+    number: '06',
   },
 ];
 
 export default function ServicesSection() {
   return (
-    <section id="services" className="section-padding bg-charcoal">
-      <div className="max-w-6xl mx-auto">
+    <section id="services" className="py-20 lg:py-28 bg-charcoal">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-14">
-          <span className="text-gold text-sm font-semibold tracking-[0.25em] uppercase">
-            What I Offer
-          </span>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-white mt-2">
-            Services
+        <div className="text-center mb-16">
+          <p className="font-inter text-gold font-semibold text-sm uppercase tracking-widest mb-3">
+            What We Offer
+          </p>
+          <h2 className="font-playfair font-bold text-4xl lg:text-5xl text-white leading-tight">
+            Our{' '}
+            <em className="text-terracotta not-italic">Services</em>
           </h2>
-          <div className="w-16 h-1 bg-terracotta mx-auto mt-4 rounded-full" />
+          <p className="mt-4 font-inter text-white/80 max-w-2xl mx-auto leading-relaxed">
+            From intimate home murals to grand public installations, we bring artistic excellence
+            to every project.
+          </p>
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SERVICES.map((service) => {
             const Icon = service.icon;
             return (
               <div
                 key={service.number}
-                className="group relative bg-white/5 hover:bg-terracotta/90 border border-white/10 hover:border-terracotta rounded-2xl p-6 transition-all duration-300 cursor-default overflow-hidden"
+                className="relative bg-charcoal-light border border-white/10 rounded-2xl p-8 overflow-hidden group hover:bg-terracotta transition-colors duration-300"
               >
-                {/* Number watermark */}
-                <span className="absolute top-3 right-4 font-display text-6xl font-bold text-white/10 group-hover:text-white/20 select-none transition-colors">
+                {/* Decorative Number */}
+                <span className="absolute top-4 right-6 font-playfair font-bold text-6xl text-white/10 group-hover:text-white/20 transition-colors select-none">
                   {service.number}
                 </span>
 
                 {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-terracotta/20 group-hover:bg-white/20 flex items-center justify-center mb-4 transition-colors">
-                  <Icon className="w-6 h-6 text-terracotta group-hover:text-white transition-colors" />
+                <div className="relative z-10 mb-5">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-terracotta/20 group-hover:bg-white/20 transition-colors">
+                    <Icon size={22} className="text-white" />
+                  </div>
                 </div>
 
-                {/* Text */}
-                <h3 className="font-display text-lg font-bold text-white mb-2 leading-snug">
-                  {service.title}
-                </h3>
-                <p className="text-white/85 group-hover:text-white text-sm leading-relaxed transition-colors">
-                  {service.description}
-                </p>
+                {/* Content */}
+                <div className="relative z-10">
+                  <h3 className="font-playfair font-bold text-xl text-white mb-3">
+                    {service.title}
+                  </h3>
+                  <p className="font-inter text-white/80 text-sm leading-relaxed group-hover:text-white/90 transition-colors">
+                    {service.description}
+                  </p>
+                </div>
               </div>
             );
           })}

@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the admin authentication system so that username and password credentials alone are sufficient to access and operate the admin panel.
+**Goal:** Fix the Admin Panel's "Failed to update contacts" error and image upload failures in the Site Media and Projects tabs.
 
 **Planned changes:**
-- Fix the backend `loginAdmin` function to grant admin access based solely on a valid username/password pair, removing any Internet Identity or principal-based requirement
-- Ensure all admin-gated backend functions (artwork upload, image upload, content edits, social/media contact saves) accept calls authorized via username/password login
-- Update the frontend admin authentication flow so the session token from a successful login is passed along with every subsequent admin backend call
-- Ensure failed or missing sessions redirect the user back to the login page
+- Audit and fix the backend Motoko actor's update functions for media contacts (WhatsApp number, Instagram URL) and blob assets (logo, cover image, artist portrait, project images) to ensure correct argument types, stable storage persistence, and proper success/error return variants.
+- Audit and fix the frontend React Query mutation hooks in `useQueries.ts` for updating contacts and uploading images — ensuring correct argument serialization, File/Blob to Nat8 array conversion, and query invalidation on success.
+- Fix the Contacts tab "Save Changes" flow so it correctly calls the backend mutation, shows a success toast on completion, and displays a descriptive error message on failure.
+- Fix image upload flows in Site Media and Projects tabs so uploads succeed, the updated images are reflected on the portfolio page, and appropriate success/error notifications are shown.
 
-**User-visible outcome:** After entering the correct username and password on the AdminLogin page, the admin is redirected to the AdminPanel and can upload artwork, edit content, and save contacts without encountering any "Unauthorized" errors.
+**User-visible outcome:** Admin Panel users can successfully update WhatsApp number and Instagram URL from the Contacts tab, and upload/replace logo, cover image, artist portrait, and project images without errors. Success and error feedback is shown for all operations.
