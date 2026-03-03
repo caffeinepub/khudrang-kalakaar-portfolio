@@ -99,15 +99,36 @@ export default function HeroSection() {
         {/* Stats */}
         <div className="flex items-center justify-center gap-8 sm:gap-12 mb-10">
           {[
-            { value: "10+", label: "Years Experience" },
-            { value: "200+", label: "Projects Done" },
-            { value: "50+", label: "Happy Clients" },
+            {
+              value: siteContent.heroStat1Value || "5+",
+              label: siteContent.heroStat1Label || "Years Experience",
+              valueColor: siteContent.heroStat1ValueColor,
+              labelColor: siteContent.heroStat1LabelColor,
+            },
+            {
+              value: siteContent.heroStat2Value || "150+",
+              label: siteContent.heroStat2Label || "Projects Done",
+              valueColor: siteContent.heroStat2ValueColor,
+              labelColor: siteContent.heroStat2LabelColor,
+            },
+            {
+              value: siteContent.heroStat3Value || "12+",
+              label: siteContent.heroStat3Label || "Happy Clients",
+              valueColor: siteContent.heroStat3ValueColor,
+              labelColor: siteContent.heroStat3LabelColor,
+            },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="font-display text-3xl sm:text-4xl font-bold text-gold drop-shadow-md">
+              <div
+                className="font-display text-3xl sm:text-4xl font-bold text-gold drop-shadow-md"
+                style={stat.valueColor ? { color: stat.valueColor } : undefined}
+              >
                 {stat.value}
               </div>
-              <div className="text-cream/80 text-xs sm:text-sm mt-1 font-medium tracking-wide">
+              <div
+                className="text-cream/80 text-xs sm:text-sm mt-1 font-medium tracking-wide"
+                style={stat.labelColor ? { color: stat.labelColor } : undefined}
+              >
                 {stat.label}
               </div>
             </div>
@@ -124,6 +145,11 @@ export default function HeroSection() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-terracotta hover:bg-terracotta/90 text-cream font-semibold px-8 py-3 rounded-full transition-all shadow-warm hover:shadow-warm-lg"
+              style={
+                siteContent.graphicsHeroBtnColor
+                  ? { backgroundColor: siteContent.graphicsHeroBtnColor }
+                  : undefined
+              }
             >
               <MessageCircle className="w-5 h-5" />
               Get in Touch

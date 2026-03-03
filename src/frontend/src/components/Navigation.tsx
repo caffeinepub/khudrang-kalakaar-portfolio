@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useGetLogo } from "../hooks/useQueries";
+import { useSiteContent } from "../hooks/useSiteContent";
 
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
@@ -20,6 +21,7 @@ export default function Navigation() {
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: logoData } = useGetLogo();
+  const { content: siteContent } = useSiteContent();
   const logoUrl = logoData
     ? logoData.getDirectURL()
     : "/assets/generated/logo-k.dim_200x200.png";
@@ -72,11 +74,17 @@ export default function Navigation() {
     setMobileOpen(false);
   };
 
+  const navStyle =
+    scrolled && siteContent.graphicsNavBgColor
+      ? { backgroundColor: siteContent.graphicsNavBgColor }
+      : undefined;
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled ? "bg-white shadow-warm-md" : "bg-transparent"
       }`}
+      style={navStyle}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">

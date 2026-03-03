@@ -1,4 +1,5 @@
 import { MapPin } from "lucide-react";
+import { useSiteContent } from "../hooks/useSiteContent";
 
 interface ProjectSectionProps {
   title: string;
@@ -17,11 +18,21 @@ export default function ProjectSection({
   reversed = false,
   index = 0,
 }: ProjectSectionProps) {
+  const { content: siteContent } = useSiteContent();
+
   return (
     <div
       className={`flex flex-col ${
         reversed ? "lg:flex-row-reverse" : "lg:flex-row"
       } min-h-[420px] overflow-hidden rounded-2xl shadow-warm-lg`}
+      style={
+        siteContent.graphicsCardBorderColor
+          ? {
+              outline: `2px solid ${siteContent.graphicsCardBorderColor}`,
+              outlineOffset: "0px",
+            }
+          : undefined
+      }
     >
       {/* Image Panel */}
       <div className="lg:w-[65%] relative overflow-hidden">

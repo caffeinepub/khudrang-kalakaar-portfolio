@@ -4,10 +4,12 @@ import { ImageOff, ZoomIn } from "lucide-react";
 import React, { useState } from "react";
 import type { GalleryImage } from "../backend";
 import { useGetGalleryImages } from "../hooks/useQueries";
+import { useSiteContent } from "../hooks/useSiteContent";
 
 export default function GallerySection() {
   const { data: images = [], isLoading } = useGetGalleryImages();
   const [selected, setSelected] = useState<GalleryImage | null>(null);
+  const { content: siteContent } = useSiteContent();
 
   return (
     <section id="gallery" className="section-padding bg-cream">
@@ -54,6 +56,11 @@ export default function GallerySection() {
                   key={String(image.id)}
                   onClick={() => setSelected(image)}
                   className="group relative aspect-square rounded-2xl overflow-hidden bg-cream-dark border border-cream-dark hover:border-terracotta/40 hover:shadow-warm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                  style={
+                    siteContent.graphicsCardBorderColor
+                      ? { borderColor: siteContent.graphicsCardBorderColor }
+                      : undefined
+                  }
                 >
                   <img
                     src={url}

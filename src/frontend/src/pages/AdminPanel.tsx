@@ -155,10 +155,17 @@ function AdminStatusBanner() {
   const [code, setCode] = useState("");
   const [justClaimed, setJustClaimed] = useState(false);
   const [codeError, setCodeError] = useState("");
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const isBackendDown = (msg: string) =>
+    msg.includes("stopped") ||
+    msg.includes("IC0508") ||
+    msg.includes("canister") ||
+    msg.includes("unavailable");
 
   const handleClaim = async () => {
     if (code.length !== 6) {
-      setCodeError("Please enter a 6-digit code.");
+      setCodeError("Please enter the 6-digit admin code.");
       return;
     }
     setCodeError("");
@@ -166,26 +173,37 @@ function AdminStatusBanner() {
       await claimAdminWithCode.mutateAsync(code);
       setJustClaimed(true);
       setCode("");
-      toast.success("Admin access claimed! You now have full admin rights.");
+      toast.success("Admin access granted! All features are now unlocked.");
       refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown error";
-      // If code is correct but admin already claimed, treat as success for this session
-      if (msg.includes("already claimed")) {
-        setJustClaimed(true);
-        setCode("");
-        toast.info(
-          "Admin access is already registered. You are now authenticated for this session.",
-        );
-        refetch();
-      } else {
+      if (isBackendDown(msg)) {
         setCodeError(
-          msg.includes("Invalid code")
-            ? "Wrong code. Please check and try again."
-            : msg,
+          "The backend is starting up. Please wait 10–15 seconds and try again.",
         );
-        toast.error(`Failed to claim admin: ${msg}`);
+      } else if (
+        msg.includes("Invalid code") ||
+        msg.includes("invalid") ||
+        msg.includes("Invalid")
+      ) {
+        setCodeError("Wrong code. Please check and try again.");
+        toast.error("Wrong admin code entered.");
+      } else {
+        // Any other error (network, timeout) — show it but don't block
+        setCodeError(
+          "Connection issue. Please tap 'Retry connection' and try again.",
+        );
       }
+    }
+  };
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    setCodeError("");
+    try {
+      await refetch();
+    } finally {
+      setIsRetrying(false);
     }
   };
 
@@ -253,16 +271,32 @@ function AdminStatusBanner() {
             size={20}
             className="text-amber-600 shrink-0 mt-0.5"
           />
-          <div>
+          <div className="flex-1">
             <p className="font-inter text-sm font-semibold text-amber-800">
               Enter your 6-digit admin code
             </p>
             <p className="font-inter text-xs text-amber-700 mt-0.5">
               {adminError
-                ? "Backend is restarting — enter code 131104 to re-authenticate as admin."
-                : "Enter the 6-digit admin code to unlock full admin access."}
+                ? "Backend is starting up — please wait a moment, then try entering your code again."
+                : "Enter your 6-digit admin code to unlock full access."}
             </p>
           </div>
+          {adminError && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="flex items-center gap-1.5 bg-amber-200 hover:bg-amber-300 text-amber-800 font-inter text-xs font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60 shrink-0"
+              data-ocid="admin.retry.button"
+            >
+              {isRetrying ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <ShieldCheck size={12} />
+              )}
+              {isRetrying ? "Retrying…" : "Retry connection"}
+            </button>
+          )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
@@ -279,7 +313,7 @@ function AdminStatusBanner() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && code.length === 6) handleClaim();
               }}
-              placeholder="Enter 6-digit code (131104)"
+              placeholder="Enter 6-digit admin code"
               className={`w-full border rounded-lg px-4 py-2.5 font-inter text-sm text-charcoal tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-amber-400/60 ${
                 codeError
                   ? "border-red-400 bg-red-50"
@@ -566,6 +600,14 @@ export default function AdminPanel() {
     whyChooseIntro: siteContent.whyChooseIntro,
     contactHeading: siteContent.contactHeading,
     contactSubtext: siteContent.contactSubtext,
+    // Hero stats
+    heroStat1Value: siteContent.heroStat1Value,
+    heroStat1Label: siteContent.heroStat1Label,
+    heroStat2Value: siteContent.heroStat2Value,
+    heroStat2Label: siteContent.heroStat2Label,
+    heroStat3Value: siteContent.heroStat3Value,
+    heroStat3Label: siteContent.heroStat3Label,
+    // About stats
     stat1Value: siteContent.stat1Value,
     stat1Label: siteContent.stat1Label,
     stat2Value: siteContent.stat2Value,
@@ -587,6 +629,12 @@ export default function AdminPanel() {
     whyChooseIntroColor: siteContent.whyChooseIntroColor,
     contactHeadingColor: siteContent.contactHeadingColor,
     contactSubtextColor: siteContent.contactSubtextColor,
+    heroStat1ValueColor: siteContent.heroStat1ValueColor,
+    heroStat1LabelColor: siteContent.heroStat1LabelColor,
+    heroStat2ValueColor: siteContent.heroStat2ValueColor,
+    heroStat2LabelColor: siteContent.heroStat2LabelColor,
+    heroStat3ValueColor: siteContent.heroStat3ValueColor,
+    heroStat3LabelColor: siteContent.heroStat3LabelColor,
     stat1ValueColor: siteContent.stat1ValueColor,
     stat1LabelColor: siteContent.stat1LabelColor,
     stat2ValueColor: siteContent.stat2ValueColor,
@@ -595,6 +643,12 @@ export default function AdminPanel() {
     stat3LabelColor: siteContent.stat3LabelColor,
     stat4ValueColor: siteContent.stat4ValueColor,
     stat4LabelColor: siteContent.stat4LabelColor,
+    // Graphics & UI colors
+    graphicsAccentColor: siteContent.graphicsAccentColor,
+    graphicsNavBgColor: siteContent.graphicsNavBgColor,
+    graphicsHeroBtnColor: siteContent.graphicsHeroBtnColor,
+    graphicsCardBorderColor: siteContent.graphicsCardBorderColor,
+    graphicsSectionBgColor: siteContent.graphicsSectionBgColor,
   });
 
   // Logo/Cover/Portrait file state
@@ -1493,6 +1547,328 @@ export default function AdminPanel() {
                 </div>
               </div>
 
+              {/* ── Graphics & UI Colours ── */}
+              <div className="bg-cream/60 border border-cream-dark rounded-xl p-4 space-y-4">
+                <p className="font-inter text-sm font-semibold text-charcoal flex items-center gap-2">
+                  <Paintbrush size={16} className="text-terracotta" />
+                  Graphics &amp; UI Colours
+                </p>
+                <p className="font-inter text-xs text-charcoal/50">
+                  Change the visual colours of UI elements — buttons, navigation
+                  bar, card borders, and section backgrounds. Each picker has a
+                  reset (×) button to restore the default.
+                </p>
+
+                {/* Accent / Button Colour */}
+                <div>
+                  <label
+                    htmlFor="graphics-accent"
+                    className="block font-inter text-xs font-medium text-charcoal/70 mb-1"
+                  >
+                    Accent / Button Colour{" "}
+                    <span className="font-normal text-charcoal/40">
+                      (main colour for buttons &amp; highlights)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <ColorSwatch
+                      value={contentForm.graphicsAccentColor}
+                      onChange={(c) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsAccentColor: c,
+                        })
+                      }
+                      title="Accent / Button colour"
+                    />
+                    <input
+                      id="graphics-accent"
+                      data-ocid="content.graphics-accent.input"
+                      type="color"
+                      value={contentForm.graphicsAccentColor || "#c0392b"}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsAccentColor: e.target.value,
+                        })
+                      }
+                      className="h-9 w-12 rounded-lg border border-cream-dark cursor-pointer bg-white p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={contentForm.graphicsAccentColor}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsAccentColor: e.target.value,
+                        })
+                      }
+                      placeholder="#c0392b"
+                      className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Navigation Bar Background */}
+                <div>
+                  <label
+                    htmlFor="graphics-nav-bg"
+                    className="block font-inter text-xs font-medium text-charcoal/70 mb-1"
+                  >
+                    Navigation Bar Background{" "}
+                    <span className="font-normal text-charcoal/40">
+                      (top navigation bar colour)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <ColorSwatch
+                      value={contentForm.graphicsNavBgColor}
+                      onChange={(c) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsNavBgColor: c,
+                        })
+                      }
+                      title="Navigation bar background"
+                    />
+                    <input
+                      id="graphics-nav-bg"
+                      data-ocid="content.graphics-nav-bg.input"
+                      type="color"
+                      value={contentForm.graphicsNavBgColor || "#ffffff"}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsNavBgColor: e.target.value,
+                        })
+                      }
+                      className="h-9 w-12 rounded-lg border border-cream-dark cursor-pointer bg-white p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={contentForm.graphicsNavBgColor}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsNavBgColor: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. #ffffff or leave blank for default"
+                      className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Hero CTA Button Colour */}
+                <div>
+                  <label
+                    htmlFor="graphics-hero-btn"
+                    className="block font-inter text-xs font-medium text-charcoal/70 mb-1"
+                  >
+                    Hero CTA Button Colour{" "}
+                    <span className="font-normal text-charcoal/40">
+                      ("Get in Touch" button on the cover page)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <ColorSwatch
+                      value={contentForm.graphicsHeroBtnColor}
+                      onChange={(c) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsHeroBtnColor: c,
+                        })
+                      }
+                      title="Hero CTA button colour"
+                    />
+                    <input
+                      id="graphics-hero-btn"
+                      data-ocid="content.graphics-hero-btn.input"
+                      type="color"
+                      value={contentForm.graphicsHeroBtnColor || "#c0392b"}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsHeroBtnColor: e.target.value,
+                        })
+                      }
+                      className="h-9 w-12 rounded-lg border border-cream-dark cursor-pointer bg-white p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={contentForm.graphicsHeroBtnColor}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsHeroBtnColor: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. #c0392b or leave blank for default"
+                      className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Card Border Colour */}
+                <div>
+                  <label
+                    htmlFor="graphics-card-border"
+                    className="block font-inter text-xs font-medium text-charcoal/70 mb-1"
+                  >
+                    Card Border Colour{" "}
+                    <span className="font-normal text-charcoal/40">
+                      (project and gallery card borders)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <ColorSwatch
+                      value={contentForm.graphicsCardBorderColor}
+                      onChange={(c) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsCardBorderColor: c,
+                        })
+                      }
+                      title="Card border colour"
+                    />
+                    <input
+                      id="graphics-card-border"
+                      data-ocid="content.graphics-card-border.input"
+                      type="color"
+                      value={contentForm.graphicsCardBorderColor || "#e5e0da"}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsCardBorderColor: e.target.value,
+                        })
+                      }
+                      className="h-9 w-12 rounded-lg border border-cream-dark cursor-pointer bg-white p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={contentForm.graphicsCardBorderColor}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsCardBorderColor: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. #e5e0da or leave blank for default"
+                      className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Section Background Colour */}
+                <div>
+                  <label
+                    htmlFor="graphics-section-bg"
+                    className="block font-inter text-xs font-medium text-charcoal/70 mb-1"
+                  >
+                    Section Background Colour{" "}
+                    <span className="font-normal text-charcoal/40">
+                      (About section background)
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <ColorSwatch
+                      value={contentForm.graphicsSectionBgColor}
+                      onChange={(c) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsSectionBgColor: c,
+                        })
+                      }
+                      title="Section background colour"
+                    />
+                    <input
+                      id="graphics-section-bg"
+                      data-ocid="content.graphics-section-bg.input"
+                      type="color"
+                      value={contentForm.graphicsSectionBgColor || "#ffffff"}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsSectionBgColor: e.target.value,
+                        })
+                      }
+                      className="h-9 w-12 rounded-lg border border-cream-dark cursor-pointer bg-white p-0.5"
+                    />
+                    <input
+                      type="text"
+                      value={contentForm.graphicsSectionBgColor}
+                      onChange={(e) =>
+                        setContentForm({
+                          ...contentForm,
+                          graphicsSectionBgColor: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. #ffffff or leave blank for default"
+                      className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Graphics Preview */}
+                <div className="rounded-xl p-4 border border-cream-dark bg-white space-y-2">
+                  <p className="text-xs font-inter text-charcoal/40 uppercase tracking-wide mb-2">
+                    Graphics Preview
+                  </p>
+                  <div
+                    className="flex items-center gap-3 px-4 py-2 rounded-xl"
+                    style={
+                      contentForm.graphicsNavBgColor
+                        ? {
+                            backgroundColor: contentForm.graphicsNavBgColor,
+                          }
+                        : { backgroundColor: "#ffffff" }
+                    }
+                  >
+                    <span className="font-inter text-xs text-charcoal/60">
+                      Nav bar
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 rounded-full font-inter text-xs text-white font-semibold"
+                      style={{
+                        backgroundColor:
+                          contentForm.graphicsHeroBtnColor ||
+                          contentForm.graphicsAccentColor ||
+                          "#c0392b",
+                      }}
+                    >
+                      Get in Touch
+                    </button>
+                    <div
+                      className="flex-1 h-10 rounded-xl border-2"
+                      style={
+                        contentForm.graphicsCardBorderColor
+                          ? { borderColor: contentForm.graphicsCardBorderColor }
+                          : { borderColor: "#e5e0da" }
+                      }
+                    >
+                      <div
+                        className="h-full rounded-xl flex items-center justify-center"
+                        style={
+                          contentForm.graphicsSectionBgColor
+                            ? {
+                                backgroundColor:
+                                  contentForm.graphicsSectionBgColor,
+                              }
+                            : {}
+                        }
+                      >
+                        <span className="font-inter text-xs text-charcoal/40">
+                          Section / Card
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* ── Per-Field Colour hint ── */}
               <div className="flex items-start gap-2 bg-terracotta/5 border border-terracotta/20 rounded-lg px-3 py-2">
                 <Paintbrush
@@ -1764,7 +2140,124 @@ export default function AdminPanel() {
                 />
               </FieldRow>
 
-              {/* Stats */}
+              {/* Hero Stats */}
+              <div className="pt-2">
+                <p className="font-inter text-sm font-semibold text-charcoal mb-1 border-t border-cream-dark pt-4">
+                  Cover / Hero Section Stats
+                </p>
+                <p className="font-inter text-xs text-charcoal/50 mb-3">
+                  These 3 numbers appear on the cover page of the website.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {(
+                    [
+                      {
+                        valueKey: "heroStat1Value",
+                        labelKey: "heroStat1Label",
+                        valueColorKey: "heroStat1ValueColor",
+                        labelColorKey: "heroStat1LabelColor",
+                        id: "heroStat1",
+                        ocidValue: "admin.hero_stat_1_value.input",
+                        ocidLabel: "admin.hero_stat_1_label.input",
+                        num: 1,
+                      },
+                      {
+                        valueKey: "heroStat2Value",
+                        labelKey: "heroStat2Label",
+                        valueColorKey: "heroStat2ValueColor",
+                        labelColorKey: "heroStat2LabelColor",
+                        id: "heroStat2",
+                        ocidValue: "admin.hero_stat_2_value.input",
+                        ocidLabel: "admin.hero_stat_2_label.input",
+                        num: 2,
+                      },
+                      {
+                        valueKey: "heroStat3Value",
+                        labelKey: "heroStat3Label",
+                        valueColorKey: "heroStat3ValueColor",
+                        labelColorKey: "heroStat3LabelColor",
+                        id: "heroStat3",
+                        ocidValue: "admin.hero_stat_3_value.input",
+                        ocidLabel: "admin.hero_stat_3_label.input",
+                        num: 3,
+                      },
+                    ] as const
+                  ).map((stat) => (
+                    <div
+                      key={stat.id}
+                      className="bg-cream/60 rounded-xl p-3 space-y-2 border border-cream-dark"
+                    >
+                      <p className="font-inter text-xs font-medium text-charcoal/60 uppercase tracking-wide">
+                        Hero Stat {stat.num}
+                      </p>
+                      {/* Value + colour */}
+                      <div className="flex items-center gap-2">
+                        <ColorSwatch
+                          value={contentForm[stat.valueColorKey]}
+                          onChange={(c) =>
+                            setContentForm({
+                              ...contentForm,
+                              [stat.valueColorKey]: c,
+                            })
+                          }
+                          title={`Hero Stat ${stat.num} value colour`}
+                        />
+                        <input
+                          type="text"
+                          data-ocid={stat.ocidValue}
+                          value={contentForm[stat.valueKey]}
+                          onChange={(e) =>
+                            setContentForm({
+                              ...contentForm,
+                              [stat.valueKey]: e.target.value,
+                            })
+                          }
+                          placeholder="e.g. 5+"
+                          style={
+                            contentForm[stat.valueColorKey]
+                              ? { color: contentForm[stat.valueColorKey] }
+                              : undefined
+                          }
+                          className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                        />
+                      </div>
+                      {/* Label + colour */}
+                      <div className="flex items-center gap-2">
+                        <ColorSwatch
+                          value={contentForm[stat.labelColorKey]}
+                          onChange={(c) =>
+                            setContentForm({
+                              ...contentForm,
+                              [stat.labelColorKey]: c,
+                            })
+                          }
+                          title={`Hero Stat ${stat.num} label colour`}
+                        />
+                        <input
+                          type="text"
+                          data-ocid={stat.ocidLabel}
+                          value={contentForm[stat.labelKey]}
+                          onChange={(e) =>
+                            setContentForm({
+                              ...contentForm,
+                              [stat.labelKey]: e.target.value,
+                            })
+                          }
+                          placeholder="e.g. Years Experience"
+                          style={
+                            contentForm[stat.labelColorKey]
+                              ? { color: contentForm[stat.labelColorKey] }
+                              : undefined
+                          }
+                          className="flex-1 border border-cream-dark rounded-lg px-3 py-2 font-inter text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-terracotta/40"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* About Section Stats */}
               <div className="pt-2">
                 <p className="font-inter text-sm font-semibold text-charcoal mb-3 border-t border-cream-dark pt-4">
                   About Section Stats

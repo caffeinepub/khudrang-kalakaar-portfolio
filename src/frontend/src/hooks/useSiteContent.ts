@@ -13,7 +13,14 @@ export interface SiteContent {
   whyChooseIntro: string;
   contactHeading: string;
   contactSubtext: string;
-  // Stats
+  // Hero Stats (cover/hero section)
+  heroStat1Value: string;
+  heroStat1Label: string;
+  heroStat2Value: string;
+  heroStat2Label: string;
+  heroStat3Value: string;
+  heroStat3Label: string;
+  // About Section Stats
   stat1Value: string;
   stat1Label: string;
   stat2Value: string;
@@ -36,6 +43,12 @@ export interface SiteContent {
   whyChooseIntroColor: string;
   contactHeadingColor: string;
   contactSubtextColor: string;
+  heroStat1ValueColor: string;
+  heroStat1LabelColor: string;
+  heroStat2ValueColor: string;
+  heroStat2LabelColor: string;
+  heroStat3ValueColor: string;
+  heroStat3LabelColor: string;
   stat1ValueColor: string;
   stat1LabelColor: string;
   stat2ValueColor: string;
@@ -44,6 +57,12 @@ export interface SiteContent {
   stat3LabelColor: string;
   stat4ValueColor: string;
   stat4LabelColor: string;
+  // Graphics & UI Colors
+  graphicsAccentColor: string;
+  graphicsNavBgColor: string;
+  graphicsHeroBtnColor: string;
+  graphicsCardBorderColor: string;
+  graphicsSectionBgColor: string;
 }
 
 const DEFAULTS: SiteContent = {
@@ -60,7 +79,14 @@ const DEFAULTS: SiteContent = {
   contactHeading: "Let's Transform Your Space",
   contactSubtext:
     "Available for residential and commercial projects across Rajasthan.",
-  // Correct stats matching the original portfolio
+  // Hero section stats (cover page)
+  heroStat1Value: "5+",
+  heroStat1Label: "Years Experience",
+  heroStat2Value: "150+",
+  heroStat2Label: "Projects Done",
+  heroStat3Value: "12+",
+  heroStat3Label: "Happy Clients",
+  // About section stats
   stat1Value: "5+",
   stat1Label: "Years of Experience",
   stat2Value: "150+",
@@ -83,6 +109,12 @@ const DEFAULTS: SiteContent = {
   whyChooseIntroColor: "",
   contactHeadingColor: "",
   contactSubtextColor: "",
+  heroStat1ValueColor: "",
+  heroStat1LabelColor: "",
+  heroStat2ValueColor: "",
+  heroStat2LabelColor: "",
+  heroStat3ValueColor: "",
+  heroStat3LabelColor: "",
   stat1ValueColor: "",
   stat1LabelColor: "",
   stat2ValueColor: "",
@@ -91,6 +123,12 @@ const DEFAULTS: SiteContent = {
   stat3LabelColor: "",
   stat4ValueColor: "",
   stat4LabelColor: "",
+  // Graphics & UI Colors
+  graphicsAccentColor: "#c0392b",
+  graphicsNavBgColor: "",
+  graphicsHeroBtnColor: "",
+  graphicsCardBorderColor: "",
+  graphicsSectionBgColor: "",
 };
 
 const STORAGE_KEY = "khudrang_site_content";

@@ -45,7 +45,15 @@ export default function AboutSection() {
     : "/assets/generated/artist-portrait.dim_800x900.png";
 
   return (
-    <section id="about" className="section-padding bg-white">
+    <section
+      id="about"
+      className="section-padding bg-white"
+      style={
+        siteContent.graphicsSectionBgColor
+          ? { backgroundColor: siteContent.graphicsSectionBgColor }
+          : undefined
+      }
+    >
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-14">
