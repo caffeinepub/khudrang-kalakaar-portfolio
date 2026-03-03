@@ -1,13 +1,29 @@
-# Specification
+# Khudrang Kalakaar Portfolio
 
-## Summary
-**Goal:** Add secure admin registration via a 6-digit code and a Gallery section with full admin management for the Khudrang Kalakaar Portfolio.
+## Current State
 
-**Planned changes:**
-- Add a `claimAdminWithCode(code: Text)` backend function that accepts only the hardcoded code "131104", registers the caller as permanent admin if no admin exists yet, and rejects all other attempts
-- Replace the existing "Claim Admin Access" button in the AdminPanel with a 6-digit code input form that calls the new backend function and shows success/error feedback
-- Add backend gallery functions: `addGalleryImage` (max 15MB per image, admin only), `getGalleryImages` (public), and `deleteGalleryImage` (admin only), with no limit on number of images, all persisting across upgrades
-- Add a public Gallery section to the portfolio page with a navigation anchor, responsive grid/masonry layout, lightbox/fullscreen on click, loading skeleton, and empty state
-- Add a Gallery tab in the AdminPanel for uploading (with client-side 15MB pre-validation) and deleting artwork images, with a preview grid and per-image delete buttons
+A wall painting artist portfolio website for Mudit Sharma (Khudrang Kalakaar). The site has:
+- A full portfolio with hero, about, projects, gallery, services, and contact sections
+- An Admin Panel accessible by triple-tapping the logo, with tabs for: Projects, Site Media, Contacts, Gallery, Edit Text
+- Backend in Motoko with stable storage for artworks, gallery images, logo, cover image, artist portrait, media contacts
+- Admin authentication via a 6-digit code (131104) that sets `adminPrincipal` in the backend
+- **BUG**: All protected backend functions check `AccessControl.hasPermission(accessControlState, caller, #admin)` but `AccessControl.getUserRole` calls `Runtime.trap("User is not registered")` for any caller not in the userRoles map (which is everyone after a fresh deploy or canister restart). The `AccessControl.assignRole` inside `claimAdminWithCode` also traps because the caller is not yet an admin. So even after claiming admin, every upload/save call fails with "Unauthorized".
 
-**User-visible outcome:** The owner can securely claim admin access using a private 6-digit code, then upload and manage artwork images in a dedicated Gallery tab in the admin panel, while visitors can browse the gallery in a responsive grid with fullscreen lightbox view on the public portfolio page.
+## Requested Changes (Diff)
+
+### Add
+- Nothing new to add
+
+### Modify
+- **Backend**: Replace ALL `AccessControl.hasPermission(accessControlState, caller, #admin)` checks in every protected function with `isAdminCaller(caller)` — which checks `adminPrincipal == ?caller`. This is the only auth system that works reliably because `adminPrincipal` is stable and set directly by `claimAdminWithCode`.
+- **Backend**: Remove the `AccessControl.assignRole` call from `claimAdminWithCode` since it traps.
+- **Backend**: The `isAdminCaller` helper already exists and is correct — it just needs to be used consistently.
+
+### Remove
+- The broken `AccessControl.assignRole(accessControlState, caller, caller, #admin)` call from `claimAdminWithCode`
+
+## Implementation Plan
+
+1. Regenerate backend Motoko so all protected functions use `isAdminCaller(caller)` instead of `AccessControl.hasPermission(...)`.
+2. Keep all existing data types, stable variables, and function signatures identical — only change the auth check inside each guarded function.
+3. No frontend changes needed.

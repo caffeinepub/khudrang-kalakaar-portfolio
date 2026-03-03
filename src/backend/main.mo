@@ -1,6 +1,6 @@
 import Map "mo:core/Map";
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
+import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import MixinStorage "blob-storage/Mixin";
@@ -67,8 +67,6 @@ actor {
   } {
     if (code == "131104") {
       adminPrincipal := ?caller;
-      // Also assign admin role in the access control system
-      AccessControl.assignRole(accessControlState, caller, caller, #admin);
       #ok("Admin privileges granted");
     } else {
       #err("Invalid code");
@@ -93,7 +91,7 @@ actor {
     #ok : Nat;
     #err : Text;
   } {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can add a gallery image");
     };
 
@@ -114,7 +112,7 @@ actor {
     #ok : ();
     #err : Text;
   } {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can delete gallery image");
     };
 
@@ -132,7 +130,7 @@ actor {
     imageUpload : ?Storage.ExternalBlob,
     location : ?Text,
   ) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
@@ -155,7 +153,7 @@ actor {
     imageUpload : ?Storage.ExternalBlob,
     location : ?Text,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
@@ -180,7 +178,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteArtwork(id : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     artworks.remove(id);
@@ -195,7 +193,7 @@ actor {
   };
 
   public shared ({ caller }) func uploadLogo(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     logo := ?blob;
@@ -206,7 +204,7 @@ actor {
   };
 
   public shared ({ caller }) func uploadCoverImage(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     coverImage := ?blob;
@@ -217,7 +215,7 @@ actor {
   };
 
   public shared ({ caller }) func uploadArtistPortrait(blob : Storage.ExternalBlob) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     artistPortrait := ?blob;
@@ -232,7 +230,7 @@ actor {
     instagramProfile : Text,
     email : ?Text,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not isAdminCaller(caller)) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
     mediaContacts := ?{
